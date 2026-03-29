@@ -1,0 +1,61 @@
+@use "./fonts" as *;
+
+$font-primary: "Jura", "Manrope", "Segoe UI", sans-serif;
+
+$bg-canvas: #dbdae2;
+$bg-primary: #7066cc;
+
+$bg-error: #fff5f5;
+$bg-alert: #f7eccd;
+$bg-success: #5aab3a33;
+
+$default-border: #7066cc;
+
+$text-primary: #7066cc;
+$text-secondary: #00000080;
+
+$success: #439f6e;
+$danger: #e5484d;
+$alert: #fcaa06;
+
+$radius-sm: 6px;
+$radius-md: 10px;
+$radius-lg: 14px;
+
+$space-1: 4px;
+$space-2: 8px;
+$space-3: 12px;
+$space-4: 16px;
+$space-5: 20px;
+$space-6: 24px;
+
+:root {
+  --font-primary: #{$font-primary};
+
+  --bg-canvas: #{$bg-canvas};
+  --bg-primary: #{$bg-primary};
+
+  --bg-error: #{$bg-error};
+  --bg-alert: #{$bg-alert};
+  --bg-success: #{$bg-success};
+
+  --default-border: #{$default-border};
+
+  --text-primary: #{$text-primary};
+  --text-secondary: #{$text-secondary};
+
+  --success: #{$success};
+  --danger: #{$danger};
+  --alert: #{$alert};
+
+  --radius-sm: #{$radius-sm};
+  --radius-md: #{$radius-md};
+  --radius-lg: #{$radius-lg};
+
+  --space-1: #{$space-1};
+  --space-2: #{$space-2};
+  --space-3: #{$space-3};
+  --space-4: #{$space-4};
+  --space-5: #{$space-5};
+  --space-6: #{$space-6};
+}
