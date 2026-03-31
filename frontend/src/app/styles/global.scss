@@ -9,7 +9,7 @@
 html,
 #root {
   height: 100%;
-  font: 400 40px/1.45 $font-primary;
+  font: 600 40px/1.45 $font-primary;
 }
 
 body {
@@ -17,7 +17,7 @@ body {
   margin: 0;
   background: $bg-canvas;
   color: $text-primary;
-  font: 400 32px/1.45 $font-primary;
+  font: 600 32px/1.45 $font-primary;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
