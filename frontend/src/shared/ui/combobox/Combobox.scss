@@ -41,7 +41,6 @@
     }
   }
 
-  // Стили для открытого состояния
   &.combobox--open {
     .combobox-trigger {
       border-bottom-left-radius: 0;
@@ -112,13 +111,11 @@
       color: $bg-primary;
     }
 
-    // Скругление для первого элемента в dropdown
     &:first-child {
       border-top-left-radius: 0;
       border-top-right-radius: 0;
     }
 
-    // Скругление для последнего элемента в dropdown
     &:last-child {
       border-bottom-left-radius: 22px;
       border-bottom-right-radius: 22px;

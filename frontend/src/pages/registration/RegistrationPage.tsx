@@ -7,7 +7,13 @@ import { authApi } from "../../shared/api/auth";
 import { Input } from "../../shared/ui/input/Input";
 import { Combobox } from "../../shared/ui/combobox/Combobox";
 
-const languageOptions = ["Английский", "Немецкий", "Французский", "Испанский"];
+const languageOptions = [
+  "Русский",
+  "Английский",
+  "Немецкий",
+  "Французский",
+  "Испанский",
+];
 const levelOptions = ["A1", "A2", "B1", "B2", "C1", "C2", "Не знаю"];
 
 export const RegistrationPage = () => {
@@ -16,12 +22,14 @@ export const RegistrationPage = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [passwordRepeat, setPasswordRepeat] = useState<string>("");
-  const [knownLanguage, setKnownLanguage] = useState<string>("");
   const [targetLanguage, setTargetLanguage] = useState<string>("");
   const [languageLevel, setLanguageLevel] = useState("Не знаю");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+
+  const isPasswordMismatch =
+    passwordRepeat.length > 0 && password !== passwordRepeat;
 
   const selectedLearningLanguageId = useMemo(() => {
     const selectedIndex = languageOptions.findIndex(
@@ -31,6 +39,7 @@ export const RegistrationPage = () => {
   }, [targetLanguage]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    // change later
     event.preventDefault();
     setError("");
     setSuccess("");
@@ -54,7 +63,7 @@ export const RegistrationPage = () => {
       const message =
         submitError instanceof Error
           ? submitError.message
-          : "Не удалось завершить регистрацию";
+          : "Ошибка при регистрации";
       setError(message);
     } finally {
       setIsLoading(false);
@@ -109,15 +118,7 @@ export const RegistrationPage = () => {
             autoComplete="new-password"
             required
             disabled={isLoading}
-          />
-
-          <Combobox
-            title="Какие языки вы уже знаете?"
-            name="knownLanguage"
-            options={languageOptions}
-            value={knownLanguage}
-            onChange={setKnownLanguage}
-            disabled={isLoading}
+            error={isPasswordMismatch}
           />
 
           <Combobox

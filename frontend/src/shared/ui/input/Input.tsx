@@ -11,6 +11,7 @@ interface FormProps {
   required?: boolean;
   disabled?: boolean;
   defaultValue?: string | number | readonly string[] | undefined;
+  error?: boolean;
 }
 
 export const Input = ({
@@ -24,9 +25,10 @@ export const Input = ({
   required,
   disabled,
   defaultValue,
+  error = false,
 }: FormProps) => {
   return (
-    <label className="input">
+    <label className={`input ${error ? "error" : ""}`}>
       <span>{title}</span>
       <input
         type={inputType}
