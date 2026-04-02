@@ -7,13 +7,7 @@ import { authApi } from "../../shared/api/auth";
 import { Input } from "../../shared/ui/input/Input";
 import { Combobox } from "../../shared/ui/combobox/Combobox";
 
-const languageOptions = [
-  "",
-  "Английский",
-  "Немецкий",
-  "Французский",
-  "Испанский",
-];
+const languageOptions = ["Английский", "Немецкий", "Французский", "Испанский"];
 const levelOptions = ["A1", "A2", "B1", "B2", "C1", "C2", "Не знаю"];
 
 export const RegistrationPage = () => {

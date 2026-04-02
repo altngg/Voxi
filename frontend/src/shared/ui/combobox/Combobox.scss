@@ -1,27 +1,171 @@
 @use "../../../app/styles/variables" as *;
 
 .combobox {
+  display: block;
+
   span {
     font: 600 32px/1.45 $font-primary;
     display: block;
     margin-bottom: 6px;
   }
 
-  select {
+  li {
+    font: 600 32px/1.45 $font-primary;
+  }
+
+  &-wrapper {
+    position: relative;
+  }
+
+  &-trigger {
     width: 100%;
     height: 45px;
-
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
     border: 3px solid $default-border;
-    border-radius: $radius-lg;
-
+    border-radius: 25px;
     background: transparent;
     color: $text-secondary;
+    font: inherit;
+    cursor: pointer;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
 
-    padding: 0 16px;
-    margin-bottom: 6px;
+    &:hover,
+    &:focus {
+      border-color: $bg-primary;
+      box-shadow: 0 0 0 3px rgba($bg-primary, 0.15);
+    }
   }
 
-  select:focus {
-    outline: none;
+  // Стили для открытого состояния
+  &.combobox--open {
+    .combobox-trigger {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      border-bottom-color: transparent;
+
+      &:hover,
+      &:focus {
+        border-bottom-color: transparent;
+      }
+    }
   }
+
+  &-icon {
+    width: 30px;
+    height: 30px;
+    color: inherit;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+
+    &.open {
+      transform: rotate(180deg);
+    }
+  }
+
+  &-value {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 8px;
+  }
+
+  &-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: $bg-canvas;
+    border: 3px solid $default-border;
+    border-top: none;
+    border-radius: 0 0 25px 25px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    z-index: 100;
+    max-height: 200px;
+    overflow-y: auto;
+    animation: dropdownFade 0.15s ease-out;
+  }
+
+  &-option {
+    padding: 10px 16px;
+    cursor: pointer;
+    color: $text-secondary;
+    transition:
+      background 0.12s,
+      color 0.12s;
+
+    &:hover {
+      background: rgba($bg-primary, 0.08);
+      color: $text-primary;
+    }
+
+    &.selected {
+      background: rgba($bg-primary, 0.12);
+      font-weight: 600;
+      color: $bg-primary;
+    }
+
+    // Скругление для первого элемента в dropdown
+    &:first-child {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
+
+    // Скругление для последнего элемента в dropdown
+    &:last-child {
+      border-bottom-left-radius: 22px;
+      border-bottom-right-radius: 22px;
+    }
+  }
+
+  &--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+
+    .combobox-input {
+      height: 45px;
+      padding: 0 16px;
+      border: 3px solid $default-border;
+      border-radius: 25px;
+      background: #f9fafb;
+      color: #9ca3af;
+      line-height: 41px;
+    }
+  }
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.combobox-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.combobox-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+  background-color: transparent;
+}
+
+.combobox-dropdown::-webkit-scrollbar-thumb {
+  background: rgba($text-secondary, 0.3);
+  border-radius: 3px;
+}
+
+.combobox-dropdown::-webkit-scrollbar-thumb:hover {
+  background: rgba($text-secondary, 0.5);
 }
