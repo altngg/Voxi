@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { authApi } from "../../shared/api/auth";
 import { Input } from "../../shared/ui/input/Input";
 import { Combobox } from "../../shared/ui/combobox/Combobox";
+import { useMutation } from "@tanstack/react-query";
 
 const languageOptions = [
   "Русский",
@@ -16,6 +17,17 @@ const languageOptions = [
 ];
 const levelOptions = ["A1", "A2", "B1", "B2", "C1", "C2", "Не знаю"];
 
+interface RegisterData {
+  login: string;
+  email: string;
+  password: string;
+  learningLanguageId?: number;
+}
+
+interface RegisterResponse {
+  message: string;
+}
+
 export const RegistrationPage = () => {
   const navigate = useNavigate();
   const [login, setLogin] = useState<string>("");
@@ -24,8 +36,7 @@ export const RegistrationPage = () => {
   const [passwordRepeat, setPasswordRepeat] = useState<string>("");
   const [targetLanguage, setTargetLanguage] = useState<string>("");
   const [languageLevel, setLanguageLevel] = useState("Не знаю");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
 
   const isPasswordMismatch =
@@ -38,36 +49,34 @@ export const RegistrationPage = () => {
     return selectedIndex > 0 ? selectedIndex : undefined;
   }, [targetLanguage]);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    // change later
-    event.preventDefault();
-    setError("");
-    setSuccess("");
-
-    if (password !== passwordRepeat) {
-      setError("Пароли не совпадают");
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const response = await authApi.register({
-        login,
-        email,
-        password,
-        learningLanguageId: selectedLearningLanguageId,
-      });
+  const {
+    mutate: register,
+    isPending,
+    error: mutationError,
+  } = useMutation<RegisterResponse, Error, RegisterData>({
+    mutationFn: (userData) => authApi.register(userData),
+    onSuccess: (response) => {
       setSuccess(response.message || "Регистрация прошла успешно");
       navigate("/login");
-    } catch (submitError) {
-      const message =
+    },
+    onError: (submitError) => {
+      setErrorMessage(
         submitError instanceof Error
           ? submitError.message
-          : "Ошибка при регистрации";
-      setError(message);
-    } finally {
-      setIsLoading(false);
-    }
+          : "Ошибка при регистрации",
+      );
+    },
+  });
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    register({
+      login,
+      email,
+      password,
+      learningLanguageId: selectedLearningLanguageId,
+    });
   };
 
   return (
@@ -84,7 +93,7 @@ export const RegistrationPage = () => {
             onChange={setLogin}
             autoComplete="username"
             required
-            disabled={isLoading}
+            disabled={isPending}
           />
 
           <Input
@@ -95,7 +104,7 @@ export const RegistrationPage = () => {
             onChange={setEmail}
             autoComplete="email"
             required
-            disabled={isLoading}
+            disabled={isPending}
           />
 
           <Input
@@ -106,7 +115,7 @@ export const RegistrationPage = () => {
             onChange={setPassword}
             autoComplete="new-password"
             required
-            disabled={isLoading}
+            disabled={isPending}
           />
 
           <Input
@@ -117,7 +126,7 @@ export const RegistrationPage = () => {
             onChange={setPasswordRepeat}
             autoComplete="new-password"
             required
-            disabled={isLoading}
+            disabled={isPending}
             error={isPasswordMismatch}
           />
 
@@ -127,7 +136,7 @@ export const RegistrationPage = () => {
             options={languageOptions}
             value={targetLanguage}
             onChange={setTargetLanguage}
-            disabled={isLoading}
+            disabled={isPending}
           />
 
           <p>Укажите ваш уровень языка</p>
@@ -140,15 +149,15 @@ export const RegistrationPage = () => {
                   value={level}
                   checked={languageLevel === level}
                   onChange={(event) => setLanguageLevel(event.target.value)}
-                  disabled={isLoading}
+                  disabled={isPending}
                 />
                 <span>{level}</span>
               </label>
             ))}
           </div>
 
-          {error ? (
-            <p className="form-message form-message--error">{error}</p>
+          {mutationError ? (
+            <p className="form-message form-message--error">{errorMessage}</p>
           ) : null}
           {success ? (
             <p className="form-message form-message--success">{success}</p>
@@ -157,10 +166,10 @@ export const RegistrationPage = () => {
           <button
             type="submit"
             className="outlined-button"
-            disabled={isLoading}
+            disabled={isPending}
           >
             <span>
-              {isLoading
+              {isPending
                 ? "Пожалуйста, подождите..."
                 : languageLevel === "Не знаю"
                   ? "Завершить регистрацию и пройти тест"
