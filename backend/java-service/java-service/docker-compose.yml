@@ -1,0 +1,67 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: voxi-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-voxi_db}
+      POSTGRES_USER: ${DB_USER:-voxi_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-voxi_password}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-voxi_user} -d ${DB_NAME:-voxi_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - voxi-network
+
+  voxi-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: voxi-backend
+    restart: unless-stopped
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-voxi_db}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-voxi_user}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-voxi_password}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${JPA_DDL_AUTO:-update}
+      SPRING_JPA_SHOW_SQL: ${JPA_SHOW_SQL:-true}
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+
+      SPRING_LIQUIBASE_ENABLED: ${LIQUIBASE_ENABLED:-false}
+
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESS_TOKEN_EXPIRATION: ${JWT_ACCESS_TOKEN_EXPIRATION:-900000}
+      JWT_REFRESH_TOKEN_EXPIRATION: ${JWT_REFRESH_TOKEN_EXPIRATION:-604800000}
+
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      COOKIE_HTTP_ONLY: ${COOKIE_HTTP_ONLY:-true}
+
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
+
+      SERVER_PORT: 8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - voxi-network
+    # volumes:
+    #   - ./logs:/app/logs
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  voxi-network:
+    driver: bridge

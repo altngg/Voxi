@@ -1,0 +1,51 @@
+@use "./variables" as *;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+#root {
+  height: 100%;
+  font: 600 40px/1.45 $font-primary;
+}
+
+body {
+  height: 100%;
+  margin: 0;
+  background: $bg-canvas;
+  color: $text-primary;
+  font: 600 32px/1.45 $font-primary;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.text-secondary {
+  color: $text-secondary;
+}
