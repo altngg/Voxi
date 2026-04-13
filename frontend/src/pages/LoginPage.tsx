@@ -2,9 +2,9 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { authApi } from "../../shared/api/auth";
-import { Input } from "../../shared/ui/input/Input";
-import { Button } from "../../shared/ui/button/Button";
+import { authApi } from "../shared/api/auth";
+import { Input } from "../shared/ui/Input";
+import { Button } from "../shared/ui/Button";
 
 export const LoginPage = () => {
   const navigate = useNavigate();

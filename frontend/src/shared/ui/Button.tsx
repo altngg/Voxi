@@ -2,6 +2,7 @@ interface FormProps {
   buttonName?: string;
   buttonType?: "submit" | "reset" | "button" | undefined;
   isPending?: boolean;
+  onClick?: () => void;
   children?: React.ReactNode;
 }
 
@@ -11,6 +12,7 @@ export const Button = ({
   buttonName,
   buttonType = "button",
   isPending = false,
+  onClick,
   children,
 }: FormProps) => {
   return (
@@ -18,6 +20,7 @@ export const Button = ({
       type={buttonType}
       className="inline-flex h-[46px] cursor-pointer items-center justify-between gap-[50px] rounded-[50px] border-[3px] border-(--default-border) bg-(--bg-primary) px-[14px] text-(--bg-canvas) transition-colors hover:bg-transparent hover:text-(--text-primary) disabled:cursor-not-allowed disabled:opacity-65"
       disabled={isPending}
+      onClick={onClick}
     >
       <span>{isPending ? "Пожалуйста, подождите..." : buttonName}</span>
       {children}
