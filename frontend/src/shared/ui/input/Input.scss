@@ -25,4 +25,13 @@
   input:focus {
     outline: none;
   }
+
+  &.error input {
+    border-color: $danger;
+  }
+
+  &.error input:focus,
+  &.error input:hover {
+    border-color: $danger;
+  }
 }
