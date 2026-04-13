@@ -1,5 +1,3 @@
-import "./Input.scss";
-
 interface FormProps {
   title: string;
   inputType: string;
@@ -28,8 +26,8 @@ export const Input = ({
   error = false,
 }: FormProps) => {
   return (
-    <label className={`input ${error ? "error" : ""}`}>
-      <span>{title}</span>
+    <label className="block">
+      <span className="mb-[6px] block">{title}</span>
       <input
         type={inputType}
         name={inputName}
@@ -40,6 +38,11 @@ export const Input = ({
         required={required}
         disabled={disabled}
         defaultValue={defaultValue}
+        className={`mb-[6px] h-[45px] w-full rounded-[50px] border-[3px] bg-transparent px-4 text-(--text-secondary) outline-none ${
+          error
+            ? "border-(--danger) hover:border-(--danger) focus:border-(--danger)"
+            : "border-(--default-border)"
+        }`}
       />
     </label>
   );

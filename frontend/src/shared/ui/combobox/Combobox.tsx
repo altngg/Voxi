@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
-import "./Combobox.scss";
 
 interface ComboboxProps {
   title: string;
@@ -44,39 +43,58 @@ export const Combobox = ({
 
   if (disabled) {
     return (
-      <label className="combobox combobox--disabled">
-        <span>{title}</span>
-        <div className="combobox-input">{displayValue || "не выбрано"}</div>
+      <label className="pointer-events-none block opacity-50">
+        <span className="mb-[6px] block">{title}</span>
+        <div className="h-[45px] rounded-[25px] border-[3px] border-(--default-border) bg-[#f9fafb] px-4 leading-[41px] text-[#9ca3af]">
+          {displayValue || "не выбрано"}
+        </div>
       </label>
     );
   }
 
   return (
     <label
-      className={`combobox ${isOpen ? "combobox--open" : ""}`}
+      className="block"
       ref={containerRef}
     >
-      <span>{title}</span>
-      <div className="combobox-wrapper">
+      <span className="mb-[6px] block">{title}</span>
+      <div className="relative">
         <button
           type="button"
-          className="combobox-trigger"
+          className={`flex h-[45px] w-full cursor-pointer items-center justify-between border-[3px] bg-transparent px-4 text-(--text-secondary) transition-[border-color,box-shadow] duration-200 hover:border-(--bg-primary) hover:shadow-[0_0_0_3px_rgba(112,102,204,0.15)] focus:border-(--bg-primary) focus:shadow-[0_0_0_3px_rgba(112,102,204,0.15)] ${
+            isOpen
+              ? "rounded-t-[25px] rounded-b-none border-(--default-border) border-b-transparent"
+              : "rounded-[25px] border-(--default-border)"
+          }`}
           onClick={() => setIsOpen(!isOpen)}
           aria-haspopup="listbox"
           aria-expanded={isOpen}
         >
-          <span className="combobox-value">{displayValue}</span>
-          <ChevronDown className={`combobox-icon ${isOpen ? "open" : ""}`} />
+          <span className="mr-2 overflow-hidden text-ellipsis whitespace-nowrap">
+            {displayValue}
+          </span>
+          <ChevronDown
+            className={`h-[30px] w-[30px] shrink-0 transition-transform duration-200 ${
+              isOpen ? "rotate-180" : ""
+            }`}
+          />
         </button>
 
         {isOpen && (
-          <ul className="combobox-dropdown" role="listbox">
+          <ul
+            className="absolute inset-x-0 top-full z-100 max-h-[200px] list-none overflow-y-auto rounded-b-[25px] border-[3px] border-t-0 border-(--default-border) bg-(--bg-canvas) p-0 shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
+            role="listbox"
+          >
             {options.map((option) => {
               const isSelected = String(option) === String(value);
               return (
                 <li
                   key={option}
-                  className={`combobox-option ${isSelected ? "selected" : ""}`}
+                  className={`cursor-pointer px-4 py-[10px] text-(--text-secondary) transition-[background,color] duration-120 hover:bg-[rgba(112,102,204,0.08)] hover:text-(--text-primary) ${
+                    isSelected
+                      ? "bg-[rgba(112,102,204,0.12)] font-semibold text-(--bg-primary)"
+                      : ""
+                  }`}
                   role="option"
                   aria-selected={isSelected}
                   onMouseDown={(e) => {
