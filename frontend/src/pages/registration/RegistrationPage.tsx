@@ -5,17 +5,18 @@ import { useNavigate } from "react-router-dom";
 
 import { authApi } from "../../shared/api/auth";
 import { Input } from "../../shared/ui/input/Input";
-import { Combobox } from "../../shared/ui/combobox/Combobox";
+// import { Combobox } from "../../shared/ui/combobox/Combobox";
 import { useMutation } from "@tanstack/react-query";
+import { Button } from "../../shared/ui/button/Button";
 
-const languageOptions = [
-  "Русский",
-  "Английский",
-  "Немецкий",
-  "Французский",
-  "Испанский",
-];
-const levelOptions = ["A1", "A2", "B1", "B2", "C1", "C2", "Не знаю"];
+// const languageOptions = [
+//   "Русский",
+//   "Английский",
+//   "Немецкий",
+//   "Французский",
+//   "Испанский",
+// ];
+// const levelOptions = ["A1", "A2", "B1", "B2", "C1", "C2", "Не знаю"];
 
 interface RegisterData {
   login: string;
@@ -34,20 +35,20 @@ export const RegistrationPage = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [passwordRepeat, setPasswordRepeat] = useState<string>("");
-  const [targetLanguage, setTargetLanguage] = useState<string>("");
-  const [languageLevel, setLanguageLevel] = useState("Не знаю");
+  // const [targetLanguage, setTargetLanguage] = useState<string>("");
+  // const [languageLevel, setLanguageLevel] = useState("Не знаю");
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
 
   const isPasswordMismatch =
     passwordRepeat.length > 0 && password !== passwordRepeat;
 
-  const selectedLearningLanguageId = useMemo(() => {
-    const selectedIndex = languageOptions.findIndex(
-      (language) => language === targetLanguage,
-    );
-    return selectedIndex > 0 ? selectedIndex : undefined;
-  }, [targetLanguage]);
+  // const selectedLearningLanguageId = useMemo(() => {
+  //   const selectedIndex = languageOptions.findIndex(
+  //     (language) => language === targetLanguage,
+  //   );
+  //   return selectedIndex > 0 ? selectedIndex : undefined;
+  // }, [targetLanguage]);
 
   const {
     mutate: register,
@@ -75,7 +76,6 @@ export const RegistrationPage = () => {
       login,
       email,
       password,
-      learningLanguageId: selectedLearningLanguageId,
     });
   };
 
@@ -130,7 +130,7 @@ export const RegistrationPage = () => {
             error={isPasswordMismatch}
           />
 
-          <Combobox
+          {/* <Combobox
             title="Какой язык вы хотите изучать?"
             name="targetLanguage"
             options={languageOptions}
@@ -154,7 +154,7 @@ export const RegistrationPage = () => {
                 <span>{level}</span>
               </label>
             ))}
-          </div>
+          </div> */}
 
           {mutationError ? (
             <p className="form-message form-message--error">{errorMessage}</p>
@@ -163,20 +163,13 @@ export const RegistrationPage = () => {
             <p className="form-message form-message--success">{success}</p>
           ) : null}
 
-          <button
-            type="submit"
-            className="outlined-button"
-            disabled={isPending}
+          <Button
+            buttonType="submit"
+            isPending={isPending}
+            buttonName="Завершить регистрацию"
           >
-            <span>
-              {isPending
-                ? "Пожалуйста, подождите..."
-                : languageLevel === "Не знаю"
-                  ? "Завершить регистрацию и пройти тест"
-                  : "Завершить регистрацию"}
-            </span>
             <span aria-hidden>→</span>
-          </button>
+          </Button>
         </form>
       </section>
     </main>

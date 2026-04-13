@@ -1,22 +1,24 @@
 import "./Button.scss";
 
 interface FormProps {
-  title: string;
-  inputType: string;
-  inputName: string;
-  defaultValue?: string | number | readonly string[] | undefined;
+  buttonName?: string;
+  buttonType?: "submit" | "reset" | "button" | undefined;
+  isPending?: boolean;
+  children?: React.ReactNode;
 }
 
-export const Input = ({
-  title,
-  inputType,
-  inputName,
-  defaultValue,
+// TODO: расширить для других видов кнопок
+
+export const Button = ({
+  buttonName,
+  buttonType = "button",
+  isPending = false,
+  children,
 }: FormProps) => {
   return (
-    <label className="input">
-      <span>{title}</span>
-      <input type={inputType} name={inputName} defaultValue={defaultValue} />
-    </label>
+    <button type={buttonType} className="button" disabled={isPending}>
+      <span>{isPending ? "Пожалуйста, подождите..." : buttonName}</span>
+      {children}
+    </button>
   );
 };
