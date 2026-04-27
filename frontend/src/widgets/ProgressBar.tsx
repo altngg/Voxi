@@ -25,7 +25,7 @@ export const ProgressBar = ({
         Вопрос {safeCompleted} из {safeTotal}
       </p>
 
-      <div className="h-4 w-full overflow-hidden rounded-full border-2 border-(--default-border) bg-(--bg-secondary)">
+      <div className="h-4 w-full overflow-hidden rounded-full border-2 border-(--default-border)">
         <div
           className="h-full rounded-full bg-(--default-border) transition-all duration-300 ease-out"
           style={{ width: `${progressPercent}%` }}
