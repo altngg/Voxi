@@ -33,13 +33,15 @@ export const FillInTheBlanksTask = ({
   };
 
   return (
-    <section className="mt-8">
-      <h2 className="mb-[10px] text-[40px] leading-[1.1] font-bold">{title}</h2>
+    <section className="mt-4">
+      <h2 className="mb-2 text-lg font-medium text-(--text-primary)">
+        {title}
+      </h2>
 
-      <ol className="space-y-4 text-[40px] leading-relaxed text-(--text-primary)">
+      <ol className="space-y-2 text-lg font-medium text-(--text-primary)">
         {items.map((item, index) => (
           <li key={item.id} className="flex flex-wrap items-center gap-3">
-            <span className="mr-1">{index + 1}.</span>
+            <span>{index + 1}.</span>
             <span>{item.before}</span>
             <Input
               title=""

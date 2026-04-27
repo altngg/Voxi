@@ -48,7 +48,7 @@ export const Input = ({
         defaultValue={defaultValue}
         aria-label={ariaLabel}
         className={cn(
-          "mb-[6px] h-[45px] w-full rounded-[50px] border-[3px] bg-transparent px-4 text-(--text-secondary) outline-none",
+          "mb-[6px] h-[45px] w-full rounded-[50px] border-[3px] bg-transparent px-4 text-(--text-primary) outline-none",
           error
             ? "border-(--danger) hover:border-(--danger) focus:border-(--danger)"
             : "border-(--default-border)",

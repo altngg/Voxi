@@ -3,8 +3,8 @@ import { FillInTheBlanksTask } from "../widgets/FillInTheBlanksTask";
 
 export const TestPage = () => {
   return (
-    <main className="h-dvh px-4 py-4 sm:px-6">
-      <section className="mx-auto h-[calc(100dvh-2rem)] w-full max-w-6xl rounded-4xl border-4 border-(--default-border) p-4 sm:p-6 md:p-8">
+    <main className="h-dvh py-4 sm:px-6">
+      <section className="mx-auto h-[calc(100dvh-2rem)] w-full max-w-6xl rounded-3xl border-4 border-(--default-border) px-4 py-2">
         <ProgressBar totalQuestions={25} completedQuestions={5} />
         <FillInTheBlanksTask
           title="Заполните предложения"
