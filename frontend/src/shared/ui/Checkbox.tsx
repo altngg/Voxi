@@ -1,4 +1,5 @@
 import { cn } from "../lib/cn";
+import { Check } from "lucide-react";
 
 type CheckboxProps = {
   name: string;
@@ -31,19 +32,21 @@ export const Checkbox = ({
         checked={checked}
         disabled={disabled}
         onChange={(event) => onChange?.(event.target.checked)}
-        className="peer sr-only"
+        className="sr-only"
       />
-      <span className="grid h-4 w-4 place-items-center rounded-[4px] border-2 border-(--default-border) bg-transparent transition-colors peer-checked:bg-(--default-border)">
-        <svg
-          viewBox="0 0 16 16"
+      <span
+        className={cn(
+          "grid h-4 w-4 place-items-center rounded-[4px] border-2 border-(--default-border) bg-transparent transition-colors",
+          checked && "bg-(--default-border)",
+        )}
+      >
+        <Check
           aria-hidden="true"
-          className="h-3 w-3 opacity-0 transition-opacity peer-checked:opacity-100"
-        >
-          <path
-            d="M6.4 11.2 3.3 8.1l-1.1 1.1 4.2 4.2 7.4-7.4-1.1-1.1z"
-            fill="var(--bg-canvas)"
-          />
-        </svg>
+          className={cn(
+            "h-3 w-3 text-(--bg-canvas) transition-opacity",
+            checked ? "opacity-100" : "opacity-0",
+          )}
+        />
       </span>
       <span>{label}</span>
     </label>
