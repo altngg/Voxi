@@ -1,5 +1,6 @@
 import { ProgressBar } from "../widgets/ProgressBar";
 import { FillInTheBlanksTask } from "../widgets/FillInTheBlanksTask";
+import { ChooseOptionTask } from "../widgets/ChooseOptionTask";
 
 export const TestPage = () => {
   return (
@@ -26,6 +27,32 @@ export const TestPage = () => {
               before: "I'm Gleb. Nice to",
               after: "you, Clair.",
               placeholder: "m",
+            },
+          ]}
+        />
+
+        <ChooseOptionTask
+          title="Выберите подходящие варианты"
+          items={[
+            {
+              id: "fitness",
+              before: "Mathew wants to be fit so he decided to go to the",
+              after: ".",
+              options: [
+                { id: "walk", label: "walk" },
+                { id: "gym", label: "gym" },
+                { id: "school", label: "school" },
+              ],
+            },
+            {
+              id: "happier",
+              before: "Sometimes rich people aren't happier than",
+              after: "ones.",
+              options: [
+                { id: "poor", label: "poor" },
+                { id: "polite", label: "polite" },
+                { id: "nice", label: "nice" },
+              ],
             },
           ]}
         />
