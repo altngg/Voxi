@@ -1,6 +1,7 @@
 import { ProgressBar } from "../widgets/ProgressBar";
 import { FillInTheBlanksTask } from "../widgets/FillInTheBlanksTask";
 import { ChooseOptionTask } from "../widgets/ChooseOptionTask";
+import { TrueFalseTask } from "../widgets/TrueFalseTask";
 
 export const TestPage = () => {
   return (
@@ -53,6 +54,26 @@ export const TestPage = () => {
                 { id: "polite", label: "polite" },
                 { id: "nice", label: "nice" },
               ],
+            },
+          ]}
+        />
+
+        <TrueFalseTask
+          title="Укажите верны ли утверждения"
+          items={[
+            {
+              id: "stars",
+              statement:
+                "Stars themselves do not twinkle. They actually shine a steady brightness.",
+            },
+            {
+              id: "sun",
+              statement: "The Sun is a star.",
+            },
+            {
+              id: "astronauts",
+              statement:
+                "Astronauts do not float once they're in the International Space Station.",
             },
           ]}
         />
