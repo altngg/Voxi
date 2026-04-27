@@ -4,6 +4,7 @@ import { RegistrationPage } from "../pages/RegistrationPage";
 import { Route, Routes } from "react-router-dom";
 import { LessonPage } from "../pages/LessonPage";
 import { MainLayout } from "./layouts/MainLayout";
+import { TestPage } from "../pages/TestPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,6 +27,7 @@ function App() {
         <Route path="/registration" element={<RegistrationPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<MainLayout />}>
+          <Route path="/test" element={<TestPage />} />
           <Route path="/lesson" element={<LessonPage />} />
         </Route>
       </Routes>

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { cn } from "../shared/lib/cn";
 
@@ -34,9 +33,12 @@ const navItems = [
   },
 ];
 
-export const MainSidebar = () => {
-  const [isCollapsed, setCollapsed] = useState(true);
+type MainSidebarProps = {
+  isCollapsed: boolean;
+  onToggle: () => void;
+};
 
+export const MainSidebar = ({ isCollapsed, onToggle }: MainSidebarProps) => {
   return (
     <aside
       className={cn(
@@ -72,7 +74,7 @@ export const MainSidebar = () => {
       </nav>
 
       <button
-        onClick={() => setCollapsed((prev) => !prev)}
+        onClick={onToggle}
         className="m-2 flex items-center justify-center rounded-xl p-2 hover:bg-white/10"
       >
         {isCollapsed ? (
