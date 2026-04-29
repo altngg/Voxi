@@ -1,8 +1,8 @@
+import { Button } from "../shared/ui/Button";
 import { ProgressBar } from "../widgets/ProgressBar";
 import { FillInTheBlanksTask } from "../widgets/FillInTheBlanksTask";
 import { ChooseOptionTask } from "../widgets/ChooseOptionTask";
 import { TrueFalseTask } from "../widgets/TrueFalseTask";
-import { Button } from "../shared/ui/Button";
 
 export const TestPage = () => {
   return (

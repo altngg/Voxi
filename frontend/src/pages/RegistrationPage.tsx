@@ -2,31 +2,9 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { authApi } from "../shared/api/auth";
 import { Input } from "../shared/ui/Input";
-// import { Combobox } from "../../shared/ui/combobox/Combobox";
-import { useMutation } from "@tanstack/react-query";
 import { Button } from "../shared/ui/Button";
-
-// const languageOptions = [
-//   "Русский",
-//   "Английский",
-//   "Немецкий",
-//   "Французский",
-//   "Испанский",
-// ];
-// const levelOptions = ["A1", "A2", "B1", "B2", "C1", "C2", "Не знаю"];
-
-interface RegisterData {
-  login: string;
-  email: string;
-  password: string;
-  learningLanguageId?: number;
-}
-
-interface RegisterResponse {
-  message: string;
-}
+import type { RegistrationDraft } from "./registrationFlow";
 
 export const RegistrationPage = () => {
   const navigate = useNavigate();
@@ -34,47 +12,27 @@ export const RegistrationPage = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [passwordRepeat, setPasswordRepeat] = useState<string>("");
-  // const [targetLanguage, setTargetLanguage] = useState<string>("");
-  // const [languageLevel, setLanguageLevel] = useState("Не знаю");
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const [success, setSuccess] = useState<string>("");
 
   const isPasswordMismatch =
     passwordRepeat.length > 0 && password !== passwordRepeat;
 
-  // const selectedLearningLanguageId = useMemo(() => {
-  //   const selectedIndex = languageOptions.findIndex(
-  //     (language) => language === targetLanguage,
-  //   );
-  //   return selectedIndex > 0 ? selectedIndex : undefined;
-  // }, [targetLanguage]);
-
-  const {
-    mutate: register,
-    isPending,
-    error: mutationError,
-  } = useMutation<RegisterResponse, Error, RegisterData>({
-    mutationFn: (userData) => authApi.register(userData),
-    onSuccess: (response) => {
-      setSuccess(response.message || "Регистрация прошла успешно");
-      navigate("/login");
-    },
-    onError: (submitError) => {
-      setErrorMessage(
-        submitError instanceof Error
-          ? submitError.message
-          : "Ошибка при регистрации",
-      );
-    },
-  });
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    register({
+    if (isPasswordMismatch) {
+      setErrorMessage("Пароли не совпадают");
+      return;
+    }
+
+    const registrationDraft: RegistrationDraft = {
       login,
       email,
       password,
+    };
+
+    navigate("/registration/language", {
+      state: { registrationDraft },
     });
   };
 
@@ -94,7 +52,6 @@ export const RegistrationPage = () => {
             onChange={setLogin}
             autoComplete="username"
             required
-            disabled={isPending}
           />
 
           <Input
@@ -105,7 +62,6 @@ export const RegistrationPage = () => {
             onChange={setEmail}
             autoComplete="email"
             required
-            disabled={isPending}
           />
 
           <Input
@@ -116,7 +72,6 @@ export const RegistrationPage = () => {
             onChange={setPassword}
             autoComplete="new-password"
             required
-            disabled={isPending}
           />
 
           <Input
@@ -127,52 +82,15 @@ export const RegistrationPage = () => {
             onChange={setPasswordRepeat}
             autoComplete="new-password"
             required
-            disabled={isPending}
             error={isPasswordMismatch}
           />
-
-          {/* <Combobox
-            title="Какой язык вы хотите изучать?"
-            name="targetLanguage"
-            options={languageOptions}
-            value={targetLanguage}
-            onChange={setTargetLanguage}
-            disabled={isPending}
-          />
-
-          <p>Укажите ваш уровень языка</p>
-          <div className="registration-form__levels-list">
-            {levelOptions.map((level) => (
-              <label key={level} className="level-chip">
-                <input
-                  type="radio"
-                  name="languageLevel"
-                  value={level}
-                  checked={languageLevel === level}
-                  onChange={(event) => setLanguageLevel(event.target.value)}
-                  disabled={isPending}
-                />
-                <span>{level}</span>
-              </label>
-            ))}
-          </div> */}
-
-          {mutationError ? (
+          {errorMessage ? (
             <p className="my-2 mb-[10px] text-[20px] leading-[1.3] text-(--danger)">
               {errorMessage}
             </p>
           ) : null}
-          {success ? (
-            <p className="my-2 mb-[10px] text-[20px] leading-[1.3] text-(--success)">
-              {success}
-            </p>
-          ) : null}
 
-          <Button
-            buttonType="submit"
-            isPending={isPending}
-            buttonName="Завершить регистрацию"
-          >
+          <Button buttonType="submit" buttonName="Выбрать язык">
             <span aria-hidden>→</span>
           </Button>
         </form>

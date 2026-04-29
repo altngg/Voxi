@@ -53,11 +53,8 @@ export const Combobox = ({
   }
 
   return (
-    <label
-      className="block"
-      ref={containerRef}
-    >
-      <span className="mb-[6px] block">{title}</span>
+    <label className="block" ref={containerRef}>
+      <span className="mb-[20px] block">{title}</span>
       <div className="relative">
         <button
           type="button"

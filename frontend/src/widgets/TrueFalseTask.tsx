@@ -38,7 +38,9 @@ export const TrueFalseTask = ({
 
   return (
     <section className="mt-4">
-      <h2 className="mb-2 text-lg font-medium text-(--text-primary)">{title}</h2>
+      <h2 className="mb-2 text-lg font-medium text-(--text-primary)">
+        {title}
+      </h2>
 
       <ol className="space-y-3 text-lg font-medium text-(--text-primary)">
         {items.map((item, index) => (
