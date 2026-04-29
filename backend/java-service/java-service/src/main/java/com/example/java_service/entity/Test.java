@@ -1,8 +1,20 @@
 package com.example.java_service.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
 import java.util.List;
+
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "tests")
@@ -11,26 +23,16 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Test {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "language_id", nullable = false)
-    private Language language;
+    @Column(name = "language_id", nullable = false)
+    private Long languageId;
 
-    @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Task> tasks;
-
-    @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TestResult> results;
-
-    @Column(nullable = false)
-    private String name;
-
-    @Column(columnDefinition = "TEXT")
-    private String description;
-
-    @Column(nullable = false)
-    private Integer overallScore;
+    @ElementCollection
+    @CollectionTable(name = "test_tasks", joinColumns = @JoinColumn(name = "test_id"))
+    @Column(name = "task_id")
+    private List<Long> taskIds;
 }

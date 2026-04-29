@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: ${DB_USER:-voxi_user}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-voxi_password}
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "${DB_PORT:-5433}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -22,41 +22,60 @@ services:
 
   voxi-backend:
     build:
-      context: .
+      context: ./backend/java-service/java-service 
       dockerfile: Dockerfile
     container_name: voxi-backend
     restart: unless-stopped
-    ports:
-      - "${SERVER_PORT:-8080}:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-voxi_db}
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-voxi_user}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-voxi_password}
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
-
       SPRING_JPA_HIBERNATE_DDL_AUTO: ${JPA_DDL_AUTO:-update}
       SPRING_JPA_SHOW_SQL: ${JPA_SHOW_SQL:-true}
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
-
       SPRING_LIQUIBASE_ENABLED: ${LIQUIBASE_ENABLED:-false}
-
       JWT_SECRET: ${JWT_SECRET}
       JWT_ACCESS_TOKEN_EXPIRATION: ${JWT_ACCESS_TOKEN_EXPIRATION:-900000}
       JWT_REFRESH_TOKEN_EXPIRATION: ${JWT_REFRESH_TOKEN_EXPIRATION:-604800000}
-
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
       COOKIE_HTTP_ONLY: ${COOKIE_HTTP_ONLY:-true}
-
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
-
       SERVER_PORT: 8080
+      SERVER_FORWARD_HEADERS_STRATEGY: native
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - voxi-network
-    # volumes:
-    #   - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  nginx:
+    image: nginx:alpine
+    container_name: voxi-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/logs:/var/log/nginx
+      - ./frontend/dist:/usr/share/nginx/html:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    environment:
+      - BACKEND_HOST=voxi-backend
+      - BACKEND_PORT=8080
+    depends_on:
+      voxi-backend:
+        condition: service_healthy
+    networks:
+      - voxi-network
 
 volumes:
   postgres_data:

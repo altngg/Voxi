@@ -1,13 +1,30 @@
 package com.example.java_service.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "users")
@@ -15,8 +32,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 public class User implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,39 +47,32 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @ElementCollection
+    @CollectionTable(name = "user_learning_languages", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "language_id")
+    private List<Long> learningLanguages;
+
+    @ElementCollection
+    @CollectionTable(name = "user_test_results", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "test_result_id")
+    private List<Long> testResults;
+
+    @ElementCollection
+    @CollectionTable(name = "user_topics_scores", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "topic_score_id")
+    private List<Long> topicsScores;
+
+    @ElementCollection
+    @CollectionTable(name = "user_done_tasks", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "task_id")
+    private List<Long> doneTasks;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
     @Column(nullable = false)
     private boolean enabled;
-
-    @ManyToMany
-    @JoinTable(
-        name = "user_known_languages",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "language_id")
-    )
-    private List<Language> knownLanguages;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "learning_language_id")
-    private Language learningLanguage;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_level_id")
-    private Level userLevel;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TestResult> testResults;
-
-    @ManyToMany
-    @JoinTable(
-        name = "user_completed_lessons",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "lesson_id")
-    )
-    private List<Lesson> completedLessons;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -115,6 +125,4 @@ public class User implements UserDetails {
         USER,
         ADMIN
     }
-
-
 }
