@@ -1,10 +1,10 @@
-import "./LoginPage.scss";
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { authApi } from "../../shared/api/auth";
-import { Input } from "../../shared/ui/input/Input";
+import { authApi } from "../shared/api/auth";
+import { Input } from "../shared/ui/Input";
+import { Button } from "../shared/ui/Button";
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -34,11 +34,13 @@ export const LoginPage = () => {
   };
 
   return (
-    <main className="login-page">
-      <section className="login-card">
-        <h1 className="registration-card__title">Войдите в аккаунт</h1>
+    <main className="flex min-h-full items-center justify-center">
+      <section className="m-10 w-[600px] rounded-[50px] border-4 border-(--default-border) p-4">
+        <h1 className="mb-3 text-center text-[40px] leading-[1.1] font-bold">
+          Войдите в аккаунт
+        </h1>
 
-        <form className="registration-form" onSubmit={handleSubmit}>
+        <form className="flex w-full flex-col gap-4" onSubmit={handleSubmit}>
           <Input
             title="Email:"
             inputName="email"
@@ -61,12 +63,15 @@ export const LoginPage = () => {
             disabled={isLoading}
           />
 
-          {error ? <p className="form-message form-message--error">{error}</p> : null}
+          {error ? (
+            <p className="mt-3 text-[20px] leading-[1.3] text-[#b42318]">
+              {error}
+            </p>
+          ) : null}
 
-          <button type="submit" className="outlined-button" disabled={isLoading}>
-            <span>{isLoading ? "Входим..." : "Войти"}</span>
+          <Button buttonType="submit" isPending={isLoading} buttonName="Войти">
             <span aria-hidden>→</span>
-          </button>
+          </Button>
         </form>
       </section>
     </main>
