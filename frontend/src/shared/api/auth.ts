@@ -6,7 +6,7 @@ export type AuthUser = {
   login: string;
   email: string;
   role: string;
-  learningLanguageId?: number;
+  learningLanguages?: number[];
   learningLanguageName?: string;
   createdAt?: string;
 };
@@ -25,7 +25,7 @@ export type RegisterPayload = {
   login: string;
   email: string;
   password: string;
-  learningLanguageId?: number;
+  learningLanguages?: number[];
 };
 
 export const authApi = {

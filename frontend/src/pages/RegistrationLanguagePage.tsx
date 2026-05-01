@@ -64,7 +64,7 @@ export const RegistrationLanguagePage = () => {
 
     register({
       ...state.registrationDraft,
-      learningLanguageId: selectedLanguage?.id ?? languageOptions[0].id,
+      learningLanguages: [selectedLanguage?.id ?? languageOptions[0].id],
     });
   };
 
