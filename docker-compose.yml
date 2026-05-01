@@ -59,6 +59,51 @@ services:
       retries: 3
       start_period: 40s
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: voxi-ollama
+    restart: unless-stopped
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - voxi-network
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  voxi-python:
+    build:
+      context: ./backend/python-service
+      dockerfile: Dockerfile
+    container_name: voxi-python
+    restart: unless-stopped
+    environment:
+      OLLAMA_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2:3b}
+      WATCHFILES_FORCE_POLLING: "true"
+    ports:
+      - "${PYTHON_PORT:-8001}:8000"
+    volumes:
+      - ./backend/python-service:/app
+      - /app/.venv
+      - /app/__pycache__
+    depends_on:
+      ollama:
+        condition: service_started
+    networks:
+      - voxi-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/test-chat/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
   nginx:
     image: nginx:alpine
     container_name: voxi-nginx
@@ -75,6 +120,8 @@ services:
     environment:
       - BACKEND_HOST=voxi-backend
       - BACKEND_PORT=8080
+      - PYTHON_HOST=voxi-python
+      - PYTHON_PORT=8000
     depends_on:
       voxi-backend:
         condition: service_healthy
@@ -83,6 +130,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  ollama_data:
     driver: local
 
 networks:
