@@ -9,9 +9,9 @@ class OllamaClient:
         self.timeout = timeout
         self._client = httpx.AsyncClient(timeout=timeout)
 
-    async def generate(self, prompt: str, model: Optional[str] = None) -> str:
+    async def generate(self, prompt: str, model: Optional[str] = settings.ollama_model) -> str:
         payload: Dict[str, Any] = {
-            "model": model or settings.ollama_model,
+            "model": model,
             "prompt": prompt,
             "stream": False,
         }

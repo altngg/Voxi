@@ -1,6 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from schemas.test_chat import TestChatRequest, TestChatResponse
 from clients.ollama_client import OllamaClient
+import traceback
 
 router = APIRouter()
 
@@ -11,9 +12,16 @@ async def health():
 
 @router.post("/generate", response_model=TestChatResponse)
 async def generate(req: TestChatRequest):
-    response_text = await OllamaClient().generate(
-        prompt=req.prompt,
-        model=req.model,
-    )
+    try:
+        response_text = await OllamaClient().generate(
+            prompt=req.prompt,
+        )
+        return TestChatResponse(response=response_text)
+    
+    except Exception as e:
+        print(f"Error details: {type(e).__name__}: {str(e)}")
+        
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
 
-    return TestChatResponse(model=req.model, response=response_text)
+    
