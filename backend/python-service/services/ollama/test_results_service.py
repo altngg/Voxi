@@ -7,7 +7,37 @@ async def evaluate_test_results(request: TestResultsRequest) -> TestResultsRespo
     prompt = convert_test_results_to_prompt(request)
 
     try:
-        response = await OllamaClient().generate(prompt)
+        response = await OllamaClient().generate(
+            prompt,
+            format={
+                "type": "object",
+                "properties": {
+                "overall_level": {
+                    "type": "string"
+                },
+                "grammar_score": {
+                    "type": "integer"
+                },
+                "vocabulary_score": {
+                    "type": "integer"
+                },
+                "topic_scores": [{
+                    "topic": {
+                    "type": "string"
+                    },
+                    "score": {
+                    "type": "integer"
+                    }
+                }]
+                },
+            },
+            required=[
+                "overall_level",
+                "grammar_score", 
+                "vocabulary_score"
+                "topic_scores"
+            ]
+        )
     except Exception as e:
         print(f"Error details: {type(e).__name__}: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -54,13 +84,5 @@ def convert_test_results_to_prompt(request: TestResultsRequest) -> str:
             - Оценка по грамматике (grammar_score) должна быть в диапазоне от 0 до 100.
             - Оценка по словарю (vocabulary_score) должна быть в диапазоне от 0 до 100.
             - Оценка по теме (topic_scores) должна быть в диапазоне от 0 до 12, все топики должны соответствовать предложенным {topics_str}
-
-        ФОРМАТ ОТВЕТА: STRICT JSON
-            overall_level: str;
-            grammar_score: int;
-            vocabulary_score: int;
-            topic_scores: 
-                topic: str;
-                score: int;
     """
     return prompt

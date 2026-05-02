@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any
+from typing import List, Optional, Dict, Any
 from core.config import settings
 import httpx
 
@@ -9,11 +9,18 @@ class OllamaClient:
         self.timeout = timeout
         self._client = httpx.AsyncClient(timeout=timeout)
 
-    async def generate(self, prompt: str, model: Optional[str] = settings.ollama_model) -> str:
+    async def generate(
+        self,
+        prompt: str,
+        model: Optional[str] = settings.ollama_model,
+        format: Optional[str] = "json",
+        required: Optional[List[str]] = None) -> str:
         payload: Dict[str, Any] = {
             "model": model,
             "prompt": prompt,
             "stream": False,
+            "format": format,
+            "required": required,
         }
 
         url = f"{self.base_url}/api/generate"
