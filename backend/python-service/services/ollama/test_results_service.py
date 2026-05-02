@@ -28,6 +28,8 @@ async def evaluate_test_results(request: TestResultsRequest) -> TestResultsRespo
             },
             "topic_scores": {
                 "type": "array",
+                "minItems": len(request.topics),
+                "maxItems": len(request.topics),
                 "items": {
                     "type": "object",
                     "properties": {
@@ -89,34 +91,42 @@ def extract_json(text: str) -> str:
 def convert_test_results_to_prompt(request: TestResultsRequest) -> str:
     levels_str = ", ".join(request.levels)
     topics_str = ", ".join(request.topics)
+    topics_count = len(request.topics)
 
     tasks_results_str = ""
-    for task in request.tasks_results:
-        tasks_results_str += f"Задание: {task.name}\n"
-        tasks_results_str += f"Правильный ответ: {task.answer}\n"
-        tasks_results_str += f"Тема задания: {task.topic}\n"
-        tasks_results_str += f"Ответ пользователя: {task.user_answer}\n"
-        tasks_results_str += "--------------------------------\n"
+    for i, task in enumerate(request.tasks_results, 1):
+        tasks_results_str += f"\n{i}. Задание: {task.name}\n"
+        tasks_results_str += f"   Тема: {task.topic}\n"
+        tasks_results_str += f"   Правильный ответ: {task.answer}\n"
+        tasks_results_str += f"   Ответ пользователя: {task.user_answer}\n"
 
-    prompt = f"""
-        Вы профессиональный преподаватель {request.language} языка.
-        Вам нужно проверить результаты теста и оценить уровень владения языком.
+    prompt = f"""Вы — профессиональный преподаватель {request.language} языка.
+        Ваша задача — оценить результаты теста ученика и вернуть СТРОГО JSON-объект.
 
         ВХОДНЫЕ ДАННЫЕ:
-            - Язык: {request.language}
-            - Возможные уровни языка: {levels_str}
-            - Возможные темы заданий: {topics_str}
-            - Результаты прохождения заданий: {tasks_results_str}
-        
-        ПРАВИЛА ОЦЕНКИ:
-            - Если ответ пользователя совпадает с правильным ответом, то задание считается выполненным.
-            - Если ответ пользователя не совпадает с правильным ответом, но соответствует грамматическим правилам языка и подходит по смыслу, то задание считается выполненным частично.
-            - Если ответ пользователя не совпадает с правильным ответом, то задание считается не выполненным.
-            - Общий уровень владения языком (overall_level) должен быть одним из возможных уровней языка {levels_str}.
-            - Оценка по грамматике (grammar_score) должна быть в диапазоне от 0 до 100.
-            - Оценка по словарю (vocabulary_score) должна быть в диапазоне от 0 до 100.
-            - Оценка по теме (topic_scores) должна быть в диапазоне от 0 до 12, все топики должны соответствовать предложенным: {topics_str}
+        - Язык: {request.language}
+        - Возможные уровни: {levels_str}
+        - Темы для оценки ({topics_count} шт.): {topics_str}
+        - Результаты теста:{tasks_results_str}
 
-        Верните ТОЛЬКО JSON-объект с оценкой, без дополнительных пояснений.
+        ПРАВИЛА ОЦЕНКИ ЗАДАНИЙ:
+        1. Если ответ пользователя совпадает с правильным — задание выполнено полностью.
+        2. Если ответ грамматически верен и подходит по смыслу, но отличается от эталона — задание выполнено частично.
+        3. Если ответ неверен или отсутствует — задание не выполнено.
+
+        ФОРМАТ ОТВЕТА (строго JSON, без markdown и пояснений):
+        - "overall_level" — общий уровень владения языком, ОДИН из значений: {levels_str}.
+        - "grammar_score" — целое число от 0 до 100 по 100-балльной шкале
+        (0 — нет знаний грамматики, 50 — средне, 100 — идеальная грамматика).
+        - "vocabulary_score" — целое число от 0 до 100 по 100-балльной шкале
+        (0 — нет словарного запаса, 50 — средне, 100 — идеальный словарь).
+        - "topic_scores" — массив из РОВНО {topics_count} объектов вида {{"topic": <тема>, "score": <0..12>}}.
+        Каждая тема из списка [{topics_str}] должна встречаться РОВНО ОДИН раз.
+
+        ВАЖНЫЕ ТРЕБОВАНИЯ:
+        - grammar_score и vocabulary_score используют шкалу 0–100, а НЕ 0–10. Например, средний уровень — это около 50–70, а не 5–7.
+        - В topic_scores должно быть ровно {topics_count} элементов — по одному на каждую тему из списка выше.
+        - Если по теме не было заданий — оцените её на основании общего уровня владения языком.
+        - Возвращайте ТОЛЬКО JSON-объект, без обёрток ```json и без комментариев.
     """
     return prompt
