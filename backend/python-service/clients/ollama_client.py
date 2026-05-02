@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict, Any
+from typing import Optional, Dict, Any, Union
 from core.config import settings
 import httpx
 
@@ -13,15 +13,16 @@ class OllamaClient:
         self,
         prompt: str,
         model: Optional[str] = settings.ollama_model,
-        format: Optional[str] = "json",
-        required: Optional[List[str]] = None) -> str:
+        format: Optional[Union[str, Dict[str, Any]]] = None,
+    ) -> str:
         payload: Dict[str, Any] = {
             "model": model,
             "prompt": prompt,
             "stream": False,
-            "format": format,
-            "required": required,
         }
+
+        if format is not None:
+            payload["format"] = format
 
         url = f"{self.base_url}/api/generate"
 
