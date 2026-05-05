@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:15-alpine
+    image: postgres:17-alpine
     container_name: voxi-postgres
     restart: unless-stopped
     environment:
@@ -47,8 +47,11 @@ services:
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
       SERVER_PORT: 8080
       SERVER_FORWARD_HEADERS_STRATEGY: native
+      PYTHON_SERVICE_URL: http://voxi-python:8000
     depends_on:
       postgres:
+        condition: service_healthy
+      voxi-python:
         condition: service_healthy
     networks:
       - voxi-network
