@@ -1,18 +1,38 @@
 package com.example.java_service.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.java_service.dto.external.AiTestResultRequest;
 import com.example.java_service.dto.external.AiTestResultResponse;
 import com.example.java_service.dto.request.TestResultRequest;
 import com.example.java_service.dto.response.TestResultResponse;
-import com.example.java_service.entity.*;
-import com.example.java_service.repository.*;
+import com.example.java_service.entity.Language;
+import com.example.java_service.entity.Level;
+import com.example.java_service.entity.Task;
+import com.example.java_service.entity.TestResult;
+import com.example.java_service.entity.Topic;
+import com.example.java_service.entity.TopicScores;
+import com.example.java_service.entity.User;
+import com.example.java_service.repository.LanguageRepository;
+import com.example.java_service.repository.LevelRepository;
+import com.example.java_service.repository.TaskRepository;
+import com.example.java_service.repository.TestResultRepository;
+import com.example.java_service.repository.TopicRepository;
+import com.example.java_service.repository.TopicScoresRepository;
+import com.example.java_service.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +42,6 @@ public class TestResultService {
     private final TestResultRepository testResultRepository;
     private final TopicScoresRepository topicScoresRepository;
     private final UserRepository userRepository;
-    private final TestRepository testRepository;
     private final TaskRepository taskRepository;
     private final TopicRepository topicRepository;
     private final LanguageRepository languageRepository;
@@ -31,13 +50,12 @@ public class TestResultService {
 
     @Transactional
     public TestResultResponse submitTestResult(TestResultRequest request, Long userId) {
-        log.info("Processing test result for user {} test {}", userId, request.getTestId());
+        log.info("Processing test result for user {} with {} tasks", userId, request.getTaskResults().size());
 
-        Test test = testRepository.findById(request.getTestId())
-                .orElseThrow(() -> new RuntimeException("Test not found"));
-
-        Language language = languageRepository.findById(test.getLanguageId())
-                .orElseThrow(() -> new RuntimeException("Language not found: " + test.getLanguageId()));
+        Long languageId = getLanguageIdFromTasks(request.getTaskResults());
+        
+        Language language = languageRepository.findById(languageId)
+                .orElseThrow(() -> new RuntimeException("Language not found: " + languageId));
 
         List<Task> tasks = taskRepository.findAllById(
                 request.getTaskResults().stream()
@@ -45,11 +63,15 @@ public class TestResultService {
                         .collect(Collectors.toList())
         );
 
+        if (tasks.size() != request.getTaskResults().size()) {
+                throw new RuntimeException("Some tasks not found");
+        }
+
         AiTestResultRequest mlRequest = buildMlRequest(language, tasks, request.getTaskResults());
         
         AiTestResultResponse mlResponse = pythonMlService.generateTestResult(mlRequest);
 
-        TestResult testResult = saveTestResult(test, userId, mlResponse);
+        TestResult testResult = saveTestResult(language, userId, mlResponse);
         
         TopicScores topicScores = saveTopicScores(userId, mlResponse.getTopicScores());
         
@@ -68,7 +90,16 @@ public class TestResultService {
                                 AiTestResultResponse.TopicScore::getScore
                         )))
                 .build();
-    }
+        }
+
+        private Long getLanguageIdFromTasks(List<TestResultRequest.TaskResult> taskResults) {
+        if (taskResults.isEmpty()) {
+                throw new RuntimeException("No tasks in request");
+        }
+        Task firstTask = taskRepository.findById(taskResults.get(0).getTaskId())
+                .orElseThrow(() -> new RuntimeException("Task not found: " + taskResults.get(0).getTaskId()));
+        return firstTask.getLanguageId();
+        }
 
     private AiTestResultRequest buildMlRequest(Language language, List<Task> tasks, 
                                                 List<TestResultRequest.TaskResult> taskResults) {
@@ -123,29 +154,27 @@ public class TestResultService {
                 .collect(Collectors.toMap(Topic::getId, topic -> topic));
     }
 
-    private TestResult saveTestResult(Test test, Long userId, AiTestResultResponse mlResponse) {
+    private TestResult saveTestResult(Language language, Long userId, AiTestResultResponse mlResponse) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Level level = levelRepository.findByName(mlResponse.getOverallLevel())
                 .orElseThrow(() -> new RuntimeException("Level not found: " + mlResponse.getOverallLevel()));
 
-        Language language = languageRepository.findById(test.getLanguageId())
-                .orElseThrow(() -> new RuntimeException("Language not found: " + test.getLanguageId()));
-
         TestResult testResult = TestResult.builder()
-                .language(language)
+                .language(language)  
                 .user(user)
                 .overallLevel(level)
-                .grammarScore(mlResponse.getGrammarScore())   
+                .grammarScore(mlResponse.getGrammarScore())
                 .vocabularyScore(mlResponse.getVocabularyScore())
                 .build();
 
         TestResult saved = testResultRepository.save(testResult);
-        log.debug("TestResult saved with id: {}", saved.getId());
+        log.debug("TestResult saved with id: {}, grammar: {}, vocabulary: {}", 
+                saved.getId(), saved.getGrammarScore(), saved.getVocabularyScore());
         
         return saved;
-    }
+        }
 
     private TopicScores saveTopicScores(Long userId, List<AiTestResultResponse.TopicScore> topicScores) {
         Map<Long, Topic> topicMap = topicRepository.findAll().stream()

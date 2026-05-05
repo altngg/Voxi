@@ -11,6 +11,8 @@ services:
       - "${DB_PORT:-5433}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./backend/init-db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./backend/tasks-english.sql:/docker-entrypoint-initdb.d/02-tasks-english.sql:ro
     healthcheck:
       test:
         [
@@ -30,6 +32,8 @@ services:
       dockerfile: Dockerfile
     container_name: voxi-backend
     restart: unless-stopped
+    volumes:
+    - gradle_cache:/root/.gradle
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-voxi_db}
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-voxi_user}
@@ -136,6 +140,7 @@ volumes:
     driver: local
   ollama_data:
     driver: local
+  gradle_cache:
 
 networks:
   voxi-network:
