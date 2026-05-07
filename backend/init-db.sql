@@ -1,0 +1,60 @@
+CREATE TABLE IF NOT EXISTS languages (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS task_types (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS topics (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    language_id BIGINT NOT NULL REFERENCES languages(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(name, language_id)
+);
+
+CREATE TABLE IF NOT EXISTS tasks (
+    id BIGSERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    answer TEXT NOT NULL,
+    topic_id BIGINT NOT NULL REFERENCES topics(id),
+    language_id BIGINT NOT NULL REFERENCES languages(id),
+    task_type_id BIGINT NOT NULL REFERENCES task_types(id),
+    options TEXT[],
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO languages (name) VALUES 
+    ('English')
+ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO task_types (name) VALUES 
+    ('MULTIPLE_CHOICE'),
+    ('GAP_FILLING'),
+    ('TRUE_FALSE')
+ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO levels (name) VALUES 
+    ('A1'), ('A2'), ('B1'), ('B2'), ('C1'), ('C2')
+ON CONFLICT (name) DO NOTHING;
+
+
+INSERT INTO topics (name, language_id) 
+SELECT 'Grammar', id FROM languages WHERE name = 'English' ON CONFLICT DO NOTHING;
+
+INSERT INTO topics (name, language_id) 
+SELECT 'Vocabulary', id FROM languages WHERE name = 'English' ON CONFLICT DO NOTHING;
+
+INSERT INTO topics (name, language_id) 
+SELECT 'Grammar', id FROM languages WHERE name = 'English' ON CONFLICT DO NOTHING;
+INSERT INTO topics (name, language_id) 
+SELECT 'Vocabulary', id FROM languages WHERE name = 'English' ON CONFLICT DO NOTHING;
