@@ -21,7 +21,10 @@ export const FillInTheBlanksTask = ({
 }: FillInTheBlanksTaskProps) => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const onAnswersChangeRef = useRef(onAnswersChange);
-  onAnswersChangeRef.current = onAnswersChange;
+
+  useEffect(() => {
+    onAnswersChangeRef.current = onAnswersChange;
+  }, [onAnswersChange]);
 
   useEffect(() => {
     onAnswersChangeRef.current?.(answers);

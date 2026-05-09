@@ -24,7 +24,10 @@ export const TrueFalseTask = ({
 }: TrueFalseTaskProps) => {
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
   const onAnswersChangeRef = useRef(onAnswersChange);
-  onAnswersChangeRef.current = onAnswersChange;
+
+  useEffect(() => {
+    onAnswersChangeRef.current = onAnswersChange;
+  }, [onAnswersChange]);
 
   useEffect(() => {
     onAnswersChangeRef.current?.(answers);
