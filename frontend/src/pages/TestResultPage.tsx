@@ -24,20 +24,19 @@ export const TestResultPage = () => {
   const { overallLevel, grammarScore, vocabularyScore } = state;
 
   return (
-    <main className="box-border flex min-h-full w-full flex-col items-center justify-center overflow-y-auto mt-5 mb-5">
-      <section className="w-full rounded-3xl border-4 border-(--default-border) mx-5 py-8 text-(--text-primary) sm:px-8 sm:py-10">
-        <h1 className="mb-4 text-center text-xl font-bold">Результаты теста</h1>
+    <main className="flex min-h-full w-full items-center justify-center">
+      <section className="w-full max-w-2xl rounded-2xl border-4 border-(--default-border) p-5 shadow-sm sm:p-6">
+        <h1 className="text-center text-lg font-bold">Результаты теста</h1>
 
-        <div className="flex flex-col items-center gap-12">
-          <div className="flex w-full flex-col items-center text-center md:w-auto md:max-w-[min(100%,28rem)] md:flex-1 md:items-start md:text-left">
-            <p className="mb-3 text-lg font-medium md:text-xl">Общий уровень</p>
-            <p className="wrap-break-word text-6xl font-bold leading-[1.05] tracking-tight sm:text-7xl md:text-8xl lg:text-9xl">
+        <div className="flex flex-col items-center gap-6">
+          <div className="flex w-full flex-col items-center text-center md:w-auto md:max-w-[min(100%,24rem)] md:flex-1 md:items-start md:text-left">
+            <p className="wrap-break-word text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
               {overallLevel}
             </p>
           </div>
 
           <div
-            className="flex shrink-0 flex-row flex-wrap items-start justify-center gap-10 sm:gap-14 md:justify-end"
+            className="flex shrink-0 flex-row flex-wrap items-start justify-center gap-6 sm:gap-8 md:justify-end"
             role="group"
             aria-label="Баллы по разделам"
           >

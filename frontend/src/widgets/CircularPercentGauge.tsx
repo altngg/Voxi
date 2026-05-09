@@ -11,8 +11,8 @@ export const CircularPercentGauge = ({
   value,
 }: CircularPercentGaugeProps) => {
   const percent = clampPercent(value);
-  const size = 220;
-  const stroke = 30;
+  const size = 200;
+  const stroke = 20;
   const r = (size - stroke) / 2;
   const cx = size / 2;
   const cy = size / 2;
