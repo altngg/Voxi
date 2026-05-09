@@ -35,7 +35,7 @@ export const FillInTheBlanksTask = ({
   };
 
   return (
-    <section className="mt-4">
+    <section>
       <h2 className="mb-2 text-lg font-medium text-(--text-primary)">
         {title}
       </h2>
@@ -43,7 +43,6 @@ export const FillInTheBlanksTask = ({
       <ol className="space-y-2 text-lg font-medium text-(--text-primary)">
         {items.map((item, index) => (
           <li key={item.id} className="flex flex-wrap items-center gap-3">
-            <span>{index + 1}.</span>
             <span>{item.before}</span>
             <Input
               title=""

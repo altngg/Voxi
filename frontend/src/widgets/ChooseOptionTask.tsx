@@ -54,7 +54,7 @@ export const ChooseOptionTask = ({
   };
 
   return (
-    <section className="mt-4">
+    <section>
       <h2 className="mb-2 text-lg font-medium text-(--text-primary)">
         {title}
       </h2>
@@ -63,7 +63,6 @@ export const ChooseOptionTask = ({
         {items.map((item, index) => (
           <li key={item.id}>
             <p className="mb-2 flex flex-wrap items-center gap-3">
-              <span>{index + 1}.</span>
               <span>{item.before}</span>
               <span
                 aria-label={`Выбранный ответ для вопроса ${index + 1}`}

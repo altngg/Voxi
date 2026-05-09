@@ -38,21 +38,18 @@ export const TrueFalseTask = ({
   };
 
   return (
-    <section className="mt-4">
+    <section>
       <h2 className="mb-2 text-lg font-medium text-(--text-primary)">
         {title}
       </h2>
 
       <ol className="space-y-3 text-lg font-medium text-(--text-primary)">
-        {items.map((item, index) => (
+        {items.map((item) => (
           <li
             key={item.id}
             className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between"
           >
-            <p className="md:pr-4">
-              <span>{index + 1}. </span>
-              {item.statement}
-            </p>
+            <p className="md:pr-4">{item.statement}</p>
 
             <div className="flex shrink-0 items-center gap-2 pl-7 md:pl-0">
               <Button

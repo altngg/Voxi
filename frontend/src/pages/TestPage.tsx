@@ -4,9 +4,15 @@ import {
   ChooseOptionTask,
   type ChooseOptionItem,
 } from "../widgets/ChooseOptionTask";
-import { FillInTheBlanksTask, type FillInTheBlanksItem } from "../widgets/FillInTheBlanksTask";
+import {
+  FillInTheBlanksTask,
+  type FillInTheBlanksItem,
+} from "../widgets/FillInTheBlanksTask";
 import { ProgressBar } from "../widgets/ProgressBar";
-import { TrueFalseTask, type TrueFalseTaskItem } from "../widgets/TrueFalseTask";
+import {
+  TrueFalseTask,
+  type TrueFalseTaskItem,
+} from "../widgets/TrueFalseTask";
 import { useTestTasksQuery, type TestTask } from "./test";
 
 const BLANK_MARKER = "___";
@@ -73,7 +79,7 @@ const TaskByType = ({
     case TASK_TYPE_ID.MULTIPLE_CHOICE:
       return (
         <ChooseOptionTask
-          title={task.topic}
+          title="Выберите правильный ответ"
           items={[toChooseOptionItem(task)]}
           onAnswersChange={(answers) => {
             onAnsweredChange?.(taskId, Boolean(answers[taskId]?.trim()));
@@ -83,7 +89,7 @@ const TaskByType = ({
     case TASK_TYPE_ID.GAP_FILLING:
       return (
         <FillInTheBlanksTask
-          title={task.topic}
+          title="Заполните пропуски"
           items={[toFillInTheBlanksItem(task)]}
           onAnswersChange={(answers) => {
             onAnsweredChange?.(taskId, Boolean(answers[taskId]?.trim()));
@@ -93,7 +99,7 @@ const TaskByType = ({
     case TASK_TYPE_ID.TRUE_FALSE:
       return (
         <TrueFalseTask
-          title={task.topic}
+          title="Выберите правильный ответ"
           items={[toTrueFalseItem(task)]}
           onAnswersChange={(answers) => {
             onAnsweredChange?.(taskId, Object.hasOwn(answers, taskId));
@@ -142,13 +148,16 @@ export const TestPage = () => {
   const totalQuestions = tasks.length || 5;
 
   return (
-    <main className="min-h-dvh overflow-y-auto py-4 sm:px-6">
+    <main className="box-border h-full min-h-0 overflow-y-auto pb-4 pt-0 sm:px-6">
+      <div className="h-4 shrink-0" aria-hidden />
       <section className="mx-auto min-h-[calc(100dvh-2rem)] w-full max-w-6xl rounded-3xl border-4 border-(--default-border) px-4 py-2">
-        <ProgressBar
-          totalQuestions={totalQuestions}
-          completedQuestions={answeredTaskIds.size}
-        />
-        <section className="mt-4 text-(--text-primary)">
+        <div className="sticky top-0 z-30 -mx-4 mb-4 bg-(--bg-canvas) px-4 pb-4 pt-0 rounded-t-3xl">
+          <ProgressBar
+            totalQuestions={totalQuestions}
+            completedQuestions={answeredTaskIds.size}
+          />
+        </div>
+        <section className="text-(--text-primary)">
           <h2 className="mb-2 text-lg font-medium">Задания теста</h2>
           {isPending ? <p>Загружаем задания...</p> : null}
           {error ? (
@@ -160,15 +169,11 @@ export const TestPage = () => {
           ) : null}
           {!isPending && !error ? (
             <ol className="space-y-3 text-lg">
-              {tasks.map((task, index) => (
+              {tasks.map((task) => (
                 <li
                   key={task.id}
                   className="rounded-[20px] border-2 border-(--default-border) p-4"
                 >
-                  <p className="mb-1 font-semibold text-(--text-primary)">
-                    <span>{index + 1}. </span>
-                    <span className="font-normal opacity-80">{task.topic}</span>
-                  </p>
                   <TaskByType
                     task={task}
                     onAnsweredChange={handleAnsweredChange}
