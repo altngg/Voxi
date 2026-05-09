@@ -26,27 +26,33 @@ export const Checkbox = ({
         labelClassName,
       )}
     >
-      <input
-        type="checkbox"
-        name={name}
-        checked={checked}
-        disabled={disabled}
-        onChange={(event) => onChange?.(event.target.checked)}
-        className="sr-only"
-      />
-      <span
-        className={cn(
-          "grid h-4 w-4 place-items-center rounded-[4px] border-2 border-(--default-border) bg-transparent transition-colors",
-          checked && "bg-(--default-border)",
-        )}
-      >
-        <Check
-          aria-hidden="true"
+      <span className="relative inline-grid h-4 w-4 shrink-0 place-items-center">
+        <input
+          type="checkbox"
+          name={name}
+          checked={checked}
+          disabled={disabled}
+          onChange={(event) => onChange?.(event.target.checked)}
           className={cn(
-            "h-3 w-3 text-(--bg-canvas) transition-opacity",
-            checked ? "opacity-100" : "opacity-0",
+            "peer absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0",
+            disabled && "cursor-not-allowed",
           )}
         />
+        <span
+          className={cn(
+            "pointer-events-none grid h-4 w-4 place-items-center rounded-[4px] border-2 border-(--default-border) bg-transparent transition-colors",
+            "peer-focus-visible:ring-2 peer-focus-visible:ring-(--default-border) peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-(--bg-canvas)",
+            checked && "bg-(--default-border)",
+          )}
+        >
+          <Check
+            aria-hidden="true"
+            className={cn(
+              "h-3 w-3 text-(--bg-canvas) transition-opacity",
+              checked ? "opacity-100" : "opacity-0",
+            )}
+          />
+        </span>
       </span>
       <span>{label}</span>
     </label>

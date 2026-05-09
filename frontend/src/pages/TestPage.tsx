@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../shared/ui/Button";
 import {
   ChooseOptionTask,
@@ -13,7 +14,11 @@ import {
   TrueFalseTask,
   type TrueFalseTaskItem,
 } from "../widgets/TrueFalseTask";
-import { useTestTasksQuery, type TestTask } from "./test";
+import {
+  useSubmitTestResultMutation,
+  useTestTasksQuery,
+  type TestTask,
+} from "./test";
 
 const BLANK_MARKER = "___";
 
@@ -22,6 +27,22 @@ const TASK_TYPE_ID = {
   GAP_FILLING: "2",
   TRUE_FALSE: "3",
 } as const;
+
+const isTaskAnswered = (task: TestTask, answer: string | undefined) => {
+  if (answer === undefined) {
+    return false;
+  }
+  switch (task.taskType) {
+    case TASK_TYPE_ID.MULTIPLE_CHOICE:
+      return Boolean(answer);
+    case TASK_TYPE_ID.GAP_FILLING:
+      return Boolean(answer.trim());
+    case TASK_TYPE_ID.TRUE_FALSE:
+      return answer === "true" || answer === "false";
+    default:
+      return false;
+  }
+};
 
 const splitAtBlank = (text: string): { before: string; after: string } => {
   const i = text.indexOf(BLANK_MARKER);
@@ -68,31 +89,37 @@ const toTrueFalseItem = (task: TestTask): TrueFalseTaskItem => ({
 
 const TaskByType = ({
   task,
-  onAnsweredChange,
+  onAnswerValueChange,
 }: {
   task: TestTask;
-  onAnsweredChange?: (taskId: string, answered: boolean) => void;
+  onAnswerValueChange?: (taskId: string, value: string) => void;
 }) => {
   const taskId = String(task.id);
 
   switch (task.taskType) {
-    case TASK_TYPE_ID.MULTIPLE_CHOICE:
+    case TASK_TYPE_ID.MULTIPLE_CHOICE: {
+      const chooseItem = toChooseOptionItem(task);
       return (
         <ChooseOptionTask
           title="Выберите правильный ответ"
-          items={[toChooseOptionItem(task)]}
+          items={[chooseItem]}
           onAnswersChange={(answers) => {
-            onAnsweredChange?.(taskId, Boolean(answers[taskId]?.trim()));
+            const optionId = answers[taskId] ?? "";
+            const label =
+              chooseItem.options.find((o) => o.id === optionId)?.label ?? "";
+            onAnswerValueChange?.(taskId, label);
           }}
         />
       );
+    }
     case TASK_TYPE_ID.GAP_FILLING:
       return (
         <FillInTheBlanksTask
           title="Заполните пропуски"
           items={[toFillInTheBlanksItem(task)]}
           onAnswersChange={(answers) => {
-            onAnsweredChange?.(taskId, Boolean(answers[taskId]?.trim()));
+            const text = answers[taskId] ?? "";
+            onAnswerValueChange?.(taskId, text);
           }}
         />
       );
@@ -102,7 +129,12 @@ const TaskByType = ({
           title="Выберите правильный ответ"
           items={[toTrueFalseItem(task)]}
           onAnswersChange={(answers) => {
-            onAnsweredChange?.(taskId, Object.hasOwn(answers, taskId));
+            if (!Object.hasOwn(answers, taskId)) {
+              onAnswerValueChange?.(taskId, "");
+              return;
+            }
+            const bool = answers[taskId];
+            onAnswerValueChange?.(taskId, bool ? "true" : "false");
           }}
         />
       );
@@ -116,34 +148,69 @@ const TaskByType = ({
 };
 
 export const TestPage = () => {
+  const navigate = useNavigate();
+
   const { data, isPending, error } = useTestTasksQuery({
     languageId: 1,
     count: 5,
   });
 
-  const tasks = data?.tasks ?? [];
-  const [answeredTaskIds, setAnsweredTaskIds] = useState<Set<string>>(
-    () => new Set(),
-  );
+  const {
+    mutate: submitTestResults,
+    isPending: isSubmitPending,
+    isError: isSubmitError,
+    error: submitError,
+  } = useSubmitTestResultMutation();
 
-  const handleAnsweredChange = useCallback(
-    (taskId: string, answered: boolean) => {
-      setAnsweredTaskIds((prev) => {
-        const has = prev.has(taskId);
-        if (answered === has) {
+  const tasks = data?.tasks ?? [];
+  const [answersByTaskId, setAnswersByTaskId] = useState<
+    Record<string, string>
+  >({});
+
+  const handleAnswerValueChange = useCallback(
+    (taskId: string, value: string) => {
+      setAnswersByTaskId((prev) => {
+        if (prev[taskId] === value) {
           return prev;
         }
-        const next = new Set(prev);
-        if (answered) {
-          next.add(taskId);
-        } else {
-          next.delete(taskId);
-        }
-        return next;
+        return { ...prev, [taskId]: value };
       });
     },
     [],
   );
+
+  const completedQuestions = tasks.filter((task) =>
+    isTaskAnswered(task, answersByTaskId[String(task.id)]),
+  ).length;
+
+  const handleSubmitResults = () => {
+    const testId = data?.testId;
+    const taskList = data?.tasks ?? [];
+    if (testId === undefined || taskList.length === 0) {
+      return;
+    }
+    submitTestResults(
+      {
+        testId,
+        taskResults: taskList.map((task) => ({
+          taskId: task.id,
+          userAnswer: answersByTaskId[String(task.id)] ?? "",
+        })),
+      },
+      {
+        onSuccess: (response) => {
+          navigate("/test/result", {
+            replace: true,
+            state: {
+              overallLevel: response.overallLevel,
+              grammarScore: response.grammarScore,
+              vocabularyScore: response.vocabularyScore,
+            },
+          });
+        },
+      },
+    );
+  };
 
   const totalQuestions = tasks.length || 5;
 
@@ -154,7 +221,7 @@ export const TestPage = () => {
         <div className="sticky top-0 z-30 -mx-4 mb-4 bg-(--bg-canvas) px-4 pb-4 pt-0 rounded-t-3xl">
           <ProgressBar
             totalQuestions={totalQuestions}
-            completedQuestions={answeredTaskIds.size}
+            completedQuestions={completedQuestions}
           />
         </div>
         <section className="text-(--text-primary)">
@@ -176,17 +243,27 @@ export const TestPage = () => {
                 >
                   <TaskByType
                     task={task}
-                    onAnsweredChange={handleAnsweredChange}
+                    onAnswerValueChange={handleAnswerValueChange}
                   />
                 </li>
               ))}
             </ol>
           ) : null}
         </section>
-        <div className="mt-4 mb-2 flex justify-end">
+        <div className="mt-4 mb-2 flex flex-col items-end gap-2">
+          {isSubmitError ? (
+            <p className="max-w-full text-right text-sm text-(--danger)">
+              {submitError instanceof Error
+                ? submitError.message
+                : "Не удалось отправить результаты"}
+            </p>
+          ) : null}
           <Button
-            buttonType="submit"
+            buttonType="button"
             buttonName="Далее"
+            isPending={isSubmitPending}
+            onClick={handleSubmitResults}
+            disabled={isPending || Boolean(error) || tasks.length === 0}
             className="bg-transparent text-(--text-primary) hover:bg-(--bg-primary) hover:text-(--bg-canvas)"
           >
             <svg
