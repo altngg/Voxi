@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../shared/ui/Button";
 
 export type TrueFalseTaskItem = {
@@ -23,17 +23,18 @@ export const TrueFalseTask = ({
   onAnswersChange,
 }: TrueFalseTaskProps) => {
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
+  const onAnswersChangeRef = useRef(onAnswersChange);
+  onAnswersChangeRef.current = onAnswersChange;
+
+  useEffect(() => {
+    onAnswersChangeRef.current?.(answers);
+  }, [answers]);
 
   const handleAnswerChange = (itemId: string, value: boolean) => {
-    setAnswers((prev) => {
-      const next = {
-        ...prev,
-        [itemId]: value,
-      };
-
-      onAnswersChange?.(next);
-      return next;
-    });
+    setAnswers((prev) => ({
+      ...prev,
+      [itemId]: value,
+    }));
   };
 
   return (

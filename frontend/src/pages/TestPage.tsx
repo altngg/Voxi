@@ -1,3 +1,4 @@
+import { useCallback, useState } from "react";
 import { Button } from "../shared/ui/Button";
 import {
   ChooseOptionTask,
@@ -59,13 +60,24 @@ const toTrueFalseItem = (task: TestTask): TrueFalseTaskItem => ({
   statement: task.name,
 });
 
-const TaskByType = ({ task }: { task: TestTask }) => {
+const TaskByType = ({
+  task,
+  onAnsweredChange,
+}: {
+  task: TestTask;
+  onAnsweredChange?: (taskId: string, answered: boolean) => void;
+}) => {
+  const taskId = String(task.id);
+
   switch (task.taskType) {
     case TASK_TYPE_ID.MULTIPLE_CHOICE:
       return (
         <ChooseOptionTask
           title={task.topic}
           items={[toChooseOptionItem(task)]}
+          onAnswersChange={(answers) => {
+            onAnsweredChange?.(taskId, Boolean(answers[taskId]?.trim()));
+          }}
         />
       );
     case TASK_TYPE_ID.GAP_FILLING:
@@ -73,6 +85,9 @@ const TaskByType = ({ task }: { task: TestTask }) => {
         <FillInTheBlanksTask
           title={task.topic}
           items={[toFillInTheBlanksItem(task)]}
+          onAnswersChange={(answers) => {
+            onAnsweredChange?.(taskId, Boolean(answers[taskId]?.trim()));
+          }}
         />
       );
     case TASK_TYPE_ID.TRUE_FALSE:
@@ -80,6 +95,9 @@ const TaskByType = ({ task }: { task: TestTask }) => {
         <TrueFalseTask
           title={task.topic}
           items={[toTrueFalseItem(task)]}
+          onAnswersChange={(answers) => {
+            onAnsweredChange?.(taskId, Object.hasOwn(answers, taskId));
+          }}
         />
       );
     default:
@@ -98,11 +116,38 @@ export const TestPage = () => {
   });
 
   const tasks = data?.tasks ?? [];
+  const [answeredTaskIds, setAnsweredTaskIds] = useState<Set<string>>(
+    () => new Set(),
+  );
+
+  const handleAnsweredChange = useCallback(
+    (taskId: string, answered: boolean) => {
+      setAnsweredTaskIds((prev) => {
+        const has = prev.has(taskId);
+        if (answered === has) {
+          return prev;
+        }
+        const next = new Set(prev);
+        if (answered) {
+          next.add(taskId);
+        } else {
+          next.delete(taskId);
+        }
+        return next;
+      });
+    },
+    [],
+  );
+
+  const totalQuestions = tasks.length || 5;
 
   return (
     <main className="min-h-dvh overflow-y-auto py-4 sm:px-6">
       <section className="mx-auto min-h-[calc(100dvh-2rem)] w-full max-w-6xl rounded-3xl border-4 border-(--default-border) px-4 py-2">
-        <ProgressBar totalQuestions={tasks.length || 5} completedQuestions={0} />
+        <ProgressBar
+          totalQuestions={totalQuestions}
+          completedQuestions={answeredTaskIds.size}
+        />
         <section className="mt-4 text-(--text-primary)">
           <h2 className="mb-2 text-lg font-medium">Задания теста</h2>
           {isPending ? <p>Загружаем задания...</p> : null}
@@ -124,7 +169,10 @@ export const TestPage = () => {
                     <span>{index + 1}. </span>
                     <span className="font-normal opacity-80">{task.topic}</span>
                   </p>
-                  <TaskByType task={task} />
+                  <TaskByType
+                    task={task}
+                    onAnsweredChange={handleAnsweredChange}
+                  />
                 </li>
               ))}
             </ol>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "../shared/ui/Input";
 
 export type FillInTheBlanksItem = {
@@ -20,16 +20,18 @@ export const FillInTheBlanksTask = ({
   onAnswersChange,
 }: FillInTheBlanksTaskProps) => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const onAnswersChangeRef = useRef(onAnswersChange);
+  onAnswersChangeRef.current = onAnswersChange;
+
+  useEffect(() => {
+    onAnswersChangeRef.current?.(answers);
+  }, [answers]);
 
   const handleAnswerChange = (id: string, value: string) => {
-    setAnswers((prev) => {
-      const next = {
-        ...prev,
-        [id]: value,
-      };
-      onAnswersChange?.(next);
-      return next;
-    });
+    setAnswers((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
   };
 
   return (

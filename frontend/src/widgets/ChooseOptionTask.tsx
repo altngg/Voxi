@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Checkbox } from "../shared/ui/Checkbox";
 
 type ChooseOption = {
@@ -31,6 +31,12 @@ export const ChooseOptionTask = ({
   onAnswersChange,
 }: ChooseOptionTaskProps) => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const onAnswersChangeRef = useRef(onAnswersChange);
+  onAnswersChangeRef.current = onAnswersChange;
+
+  useEffect(() => {
+    onAnswersChangeRef.current?.(answers);
+  }, [answers]);
 
   const handleOptionToggle = (
     itemId: string,
@@ -40,13 +46,10 @@ export const ChooseOptionTask = ({
     setAnswers((prev) => {
       const nextAnswerForItem = isChecked ? optionId : "";
 
-      const next = {
+      return {
         ...prev,
         [itemId]: nextAnswerForItem,
       };
-
-      onAnswersChange?.(next);
-      return next;
     });
   };
 
