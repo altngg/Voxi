@@ -1,3 +1,1 @@
-export const LessonPage = () => {
-  return <></>;
-};
+export { HomePagePlaceholder as LessonPage } from "./HomePagePlaceholder";
