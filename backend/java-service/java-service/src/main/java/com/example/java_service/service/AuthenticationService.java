@@ -92,6 +92,14 @@ public class AuthenticationService {
                 .build();
     }
 
+    public AuthResponse refreshTokens(String refreshToken, HttpServletResponse response) {
+        log.debug("Refreshing tokens");
+        tokenManager.refreshTokens(refreshToken, response);
+        return AuthResponse.builder()
+                .message("Tokens refreshed successfully")
+                .build();
+    }
+
     public AuthResponse logout(HttpServletResponse response) {
         tokenManager.revokeTokens(response);
         return AuthResponse.builder()

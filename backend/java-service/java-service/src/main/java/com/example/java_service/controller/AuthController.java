@@ -1,6 +1,7 @@
 package com.example.java_service.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,6 +45,25 @@ public class AuthController {
         log.info("Login request for email: {}", request.getEmail());
         AuthResponse authResponse = authenticationService.login(request, response);
         return ResponseEntity.ok(authResponse);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refreshTokens(
+            @CookieValue(value = "refresh_token", required = false) String refreshToken,
+            HttpServletResponse response
+    ) {
+        log.debug("Refresh token request");
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            log.warn("Refresh token not found");
+            return ResponseEntity.status(401).build();
+        }
+        try {
+            AuthResponse authResponse = authenticationService.refreshTokens(refreshToken, response);
+            return ResponseEntity.ok(authResponse);
+        } catch (Exception e) {
+            log.warn("Token refresh failed: {}", e.getMessage());
+            return ResponseEntity.status(401).build();
+        }
     }
 
     @PostMapping("/logout")
