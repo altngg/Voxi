@@ -1,15 +1,17 @@
 package com.example.java_service.service;
 
-import com.example.java_service.entity.User;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+
+import com.example.java_service.entity.User;
+
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
 public class TokenManager {
+
     private final JwtService jwtService;
     private final CookieService cookieService;
 
@@ -18,6 +20,11 @@ public class TokenManager {
         String refreshToken = jwtService.generateRefreshToken(user);
         cookieService.addAccessTokenCookie(response, accessToken);
         cookieService.addRefreshTokenCookie(response, refreshToken);
+    }
+
+    public void refreshTokens(String refreshToken, HttpServletResponse response) {
+        String newAccessToken = jwtService.refreshAccessToken(refreshToken);
+        cookieService.addAccessTokenCookie(response, newAccessToken);
     }
 
     public void revokeTokens(HttpServletResponse response) {
@@ -37,7 +44,7 @@ public class TokenManager {
         return jwtService.isTokenValid(token, userDetails);
     }
 
-     public String extractUsername(String token) {
+    public String extractUsername(String token) {
         return jwtService.extractUsername(token);
     }
 }
