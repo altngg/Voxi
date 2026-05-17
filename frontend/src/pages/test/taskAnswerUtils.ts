@@ -8,10 +8,7 @@ export const TASK_TYPE_ID = {
   TRUE_FALSE: "3",
 } as const;
 
-export const isTaskAnswered = (
-  task: TestTask,
-  answer: string | undefined,
-) => {
+export const isTaskAnswered = (task: TestTask, answer: string | undefined) => {
   if (answer === undefined) {
     return false;
   }

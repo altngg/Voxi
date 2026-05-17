@@ -8,15 +8,15 @@ import {
   buildMockTheoryByTaskId,
   useSubmitLessonResultsMutation,
 } from "./lesson";
-import { useTestTasksQuery } from "./test";
 import { isTaskAnswered } from "./test/taskAnswerUtils";
+import { useLessonTasksQuery } from "./lesson/api/lesson-tasks";
 
 const RESULT_TRANSITION_MS = 2500;
 
 export const LessonPage = () => {
   const navigate = useNavigate();
 
-  const { data, isPending, error } = useTestTasksQuery({
+  const { data, isPending, error } = useLessonTasksQuery({
     languageId: 1,
     count: 5,
   });
@@ -170,7 +170,7 @@ export const LessonPage = () => {
             >
               <svg
                 aria-hidden
-                className="h-[15px] w-[135px]"
+                className="h-3.75 w-33.75"
                 viewBox="0 0 135 15"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"

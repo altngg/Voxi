@@ -48,7 +48,7 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalConfig = error.config as RetriableRequestConfig | undefined;
 
-    if (!originalConfig || error.response?.status !== 401) {
+    if (!originalConfig || error.response?.status !== 403) {
       return Promise.reject(error);
     }
 
