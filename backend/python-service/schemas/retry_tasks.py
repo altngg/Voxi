@@ -6,6 +6,7 @@ from .test_results import TopicScore
 class IncorrectTaskInfo(BaseModel):
     name: str
     topic: str
+    task_type: str
 
 class NewCorrectTask(BaseModel):
     name: str
