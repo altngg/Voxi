@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { LessonResultsResponse } from "../shared/api/lesson-result";
 import { Button } from "../shared/ui/Button";
@@ -11,7 +11,6 @@ import {
 import { isTaskAnswered } from "./test/taskAnswerUtils";
 import { useLessonTasksQuery } from "./lesson/api/lesson-tasks";
 
-const RESULT_TRANSITION_MS = 2500;
 const LESSON_LANGUAGE_ID = 1;
 
 export const LessonPage = () => {
@@ -47,23 +46,19 @@ export const LessonPage = () => {
     [pendingResult],
   );
 
-  useEffect(() => {
+  const handleGoToResults = useCallback(() => {
     if (!pendingResult) {
       return;
     }
-    const timer = window.setTimeout(() => {
-      navigate("/lesson/result", {
-        replace: true,
-        state: {
-          correctTasks: pendingResult.correctTasks,
-          totalTasks: tasks.length,
-          newTasks: pendingResult.newTasks,
-          languageId: LESSON_LANGUAGE_ID,
-        },
-      });
-    }, RESULT_TRANSITION_MS);
-
-    return () => window.clearTimeout(timer);
+    navigate("/lesson/result", {
+      replace: true,
+      state: {
+        correctTasks: pendingResult.correctTasks,
+        totalTasks: tasks.length,
+        newTasks: pendingResult.newTasks,
+        languageId: LESSON_LANGUAGE_ID,
+      },
+    });
   }, [pendingResult, navigate, tasks.length]);
 
   const handleAnswerValueChange = useCallback(
@@ -151,12 +146,25 @@ export const LessonPage = () => {
             </p>
           ) : null}
           {pendingResult ? (
-            <p
-              className="max-w-full text-right text-base font-medium text-(--text-primary)"
-              role="status"
+            <Button
+              buttonType="button"
+              buttonName="К результатам"
+              onClick={handleGoToResults}
+              className="bg-transparent text-(--text-primary) hover:bg-(--bg-primary) hover:text-(--bg-canvas)"
             >
-              Переходим к результатам...
-            </p>
+              <svg
+                aria-hidden
+                className="h-3.75 w-33.75"
+                viewBox="0 0 135 15"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M134.707 8.07112C135.098 7.6806 135.098 7.04743 134.707 6.65691L128.343 0.292946C127.953 -0.0975785 127.319 -0.0975785 126.929 0.292946C126.538 0.68347 126.538 1.31664 126.929 1.70716L132.586 7.36401L126.929 13.0209C126.538 13.4114 126.538 14.0446 126.929 14.4351C127.319 14.8256 127.953 14.8256 128.343 14.4351L134.707 8.07112ZM0 7.36401V8.36401H134V7.36401V6.36401H0V7.36401Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </Button>
           ) : (
             <Button
               buttonType="button"
