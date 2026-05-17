@@ -7,6 +7,7 @@ import { MainLayout } from "./layouts/MainLayout";
 import { TestPage } from "../pages/TestPage";
 import { TestResultPage } from "../pages/TestResultPage";
 import { LessonPage } from "../pages/LessonPage";
+import { LessonResultsPage } from "../pages/LessonResultsPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,6 +37,7 @@ function App() {
           <Route path="/test" element={<TestPage />} />
           <Route path="/test/result" element={<TestResultPage />} />
           <Route path="/lesson" element={<LessonPage />} />
+          <Route path="/lesson/result" element={<LessonResultsPage />} />
         </Route>
       </Routes>
     </QueryClientProvider>

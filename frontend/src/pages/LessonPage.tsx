@@ -1,44 +1,18 @@
 import { useCallback, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../shared/ui/Button";
+import { LessonTaskRow } from "../widgets/LessonTaskRow";
 import { ProgressBar } from "../widgets/ProgressBar";
+import {
+  buildMockTheoryByTaskId,
+  useSubmitLessonResultsMutation,
+} from "./lesson";
 import { useTestTasksQuery } from "./test";
-import { TaskByType } from "./test/TaskByType";
 import { isTaskAnswered } from "./test/taskAnswerUtils";
-import type { TestTask } from "./test/api/test-queries";
-
-const MOCK_THEORY_TEXTS = [
-  "В Present Simple для he/she/it к глаголу добавляется -s: He works, she studies.",
-  "Вопрос в Present Simple строится через do/does: Do you like music? Does she read books?",
-  "Past Simple обычно выражает завершенное действие в прошлом: I visited London last year.",
-  "После модального глагола используется базовая форма: can speak, must go, should learn.",
-  "В конструкции there is/there are we describe наличие: There is a book on the table.",
-  "Comparatives: короткие прилагательные получают -er, а длинные идут с more.",
-  "Present Continuous: am/is/are + V-ing, когда действие происходит прямо сейчас.",
-  "Артикль a/an используется с исчисляемым существительным в ед. числе, когда говорим впервые.",
-];
-
-type LessonTaskRowProps = {
-  task: TestTask;
-  theory?: string;
-  onAnswerValueChange?: (taskId: string, value: string) => void;
-};
-
-const LessonTaskRow = ({
-  task,
-  theory,
-  onAnswerValueChange,
-}: LessonTaskRowProps) => {
-  return (
-    <li className="rounded-[20px] border-2 border-(--default-border) p-4">
-      {theory ? (
-        <div className="mb-4 rounded-2xl border px-4 py-3">{theory}</div>
-      ) : null}
-      <TaskByType task={task} onAnswerValueChange={onAnswerValueChange} />
-    </li>
-  );
-};
 
 export const LessonPage = () => {
+  const navigate = useNavigate();
+
   const { data, isPending, error } = useTestTasksQuery({
     languageId: 1,
     count: 5,
@@ -50,15 +24,17 @@ export const LessonPage = () => {
     Record<string, string>
   >({});
 
-  const randomTheoryByTaskId = useMemo(() => {
-    const theoryMap: Partial<Record<number, string>> = {};
-    tasks.forEach((task, index) => {
-      const theoryIndex =
-        (task.id * 31 + index * 17 + theorySeed) % MOCK_THEORY_TEXTS.length;
-      theoryMap[task.id] = MOCK_THEORY_TEXTS[theoryIndex];
-    });
-    return theoryMap;
-  }, [tasks, theorySeed]);
+  const {
+    mutate: submitLessonResults,
+    isPending: isSubmitPending,
+    isError: isSubmitError,
+    error: submitError,
+  } = useSubmitLessonResultsMutation();
+
+  const theoryByTaskId = useMemo(
+    () => buildMockTheoryByTaskId(tasks, theorySeed),
+    [tasks, theorySeed],
+  );
 
   const handleAnswerValueChange = useCallback(
     (taskId: string, value: string) => {
@@ -83,13 +59,30 @@ export const LessonPage = () => {
       isTaskAnswered(task, answersByTaskId[String(task.id)]),
     );
 
-  const [lessonDone, setLessonDone] = useState(false);
-
   const handleFinishLesson = () => {
     if (!allAnswered) {
       return;
     }
-    setLessonDone(true);
+    submitLessonResults(
+      {
+        taskResults: tasks.map((task) => ({
+          taskId: task.id,
+          userAnswer: answersByTaskId[String(task.id)] ?? "",
+        })),
+      },
+      {
+        onSuccess: (response) => {
+          navigate("/lesson/result", {
+            replace: true,
+            state: {
+              correctTasks: response.correctTasks,
+              totalTasks: tasks.length,
+              newTasks: response.newTasks,
+            },
+          });
+        },
+      },
+    );
   };
 
   return (
@@ -103,14 +96,6 @@ export const LessonPage = () => {
           />
         </div>
         <section className="text-(--text-primary)">
-          {lessonDone ? (
-            <p
-              className="mb-3 rounded-2xl border border-(--accent-primary) bg-(--bg-primary) px-4 py-3 text-base text-(--text-primary)"
-              role="status"
-            >
-              Урок завершён. Можете перейти к другим разделам в меню.
-            </p>
-          ) : null}
           {isPending ? <p>Загружаем задания...</p> : null}
           {error ? (
             <p className="text-(--danger)">
@@ -125,7 +110,7 @@ export const LessonPage = () => {
                 <LessonTaskRow
                   key={task.id}
                   task={task}
-                  theory={randomTheoryByTaskId[task.id]}
+                  theory={theoryByTaskId[task.id]}
                   onAnswerValueChange={handleAnswerValueChange}
                 />
               ))}
@@ -133,12 +118,19 @@ export const LessonPage = () => {
           ) : null}
         </section>
         <div className="mt-4 mb-2 flex flex-col items-end gap-2">
+          {isSubmitError ? (
+            <p className="max-w-full text-right text-sm text-(--danger)">
+              {submitError instanceof Error
+                ? submitError.message
+                : "Не удалось отправить результаты"}
+            </p>
+          ) : null}
           <Button
             buttonType="button"
             buttonName="Завершить урок"
+            isPending={isSubmitPending}
             onClick={handleFinishLesson}
             disabled={
-              lessonDone ||
               !allAnswered ||
               isPending ||
               Boolean(error) ||
@@ -159,7 +151,7 @@ export const LessonPage = () => {
               />
             </svg>
           </Button>
-          {!lessonDone && !allAnswered && tasks.length > 0 ? (
+          {!allAnswered && tasks.length > 0 ? (
             <p className="max-w-full text-right text-sm opacity-70">
               Ответьте на все задания, чтобы завершить урок.
             </p>
