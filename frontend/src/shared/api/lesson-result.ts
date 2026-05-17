@@ -30,7 +30,7 @@ type LessonResultsApiResponse = {
 };
 
 // TODO: убрать, когда заработает реальный /api/lesson-results
-const USE_MOCK_LESSON_RESULTS = true;
+const USE_MOCK_LESSON_RESULTS = false;
 
 const MOCK_NEW_TASKS_POOL: TestTask[] = [
   {
@@ -77,7 +77,7 @@ const MOCK_NEW_TASKS_POOL: TestTask[] = [
   },
 ];
 
-const shuffled = <T,>(items: T[]): T[] => {
+const shuffled = <T>(items: T[]): T[] => {
   const copy = [...items];
   for (let i = copy.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
