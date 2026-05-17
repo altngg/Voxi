@@ -82,15 +82,27 @@ def convert_retry_task_to_prompt(task_name: str, task_topic: str, task_type: str
             """
         case "TRUE_FALSE":
             prompt += f"""
-                - Создайте утверждение, которое однозначно TRUE или однозначно FALSE.
+                - Создайте КОНКРЕТНОЕ утверждение, которое однозначно true или однозначно false.
+                - Утверждение должно быть ОДНОЗНАЧНО истинным (true) или ложным (false).
                 - В поле "answer" напишите строго "true" или "false" (строчными буквами).
                 - Пример: {{"name": "Water boils at 100 degrees Celsius.", "answer": "true", ...}}
             """
         case "GAP_FILLING":
             prompt += f"""
-                - Создайте предложение с одним пропуском, обозначенным "_".
-                - В поле "answer" напишите ОДНО слово, которое идеально подходит в пропуск.
-                - Пример: {{"name": "She ___ to the store yesterday.", "answer": "went", ...}}
+                - Создайте предложение с ОДНИМ пропуском, обозначенным ОДНИМ символом подчеркивания "_".
+                - Пропуск должен быть на месте ОДНОГО пропущенного слова.
+                - В поле "answer" напишите ОДНО слово, которое идеально подходит для заполнения пропуска.
+                - ВАЖНО: Предложение ДОЛЖНО быть грамматически правильным и осмысленным БЕЗ вставленного слова, с пропуском на месте нужного слова.
+                - Пример ПРАВИЛЬНОГО формата:
+                {{
+                    "name": "She _ to school every day.",
+                    "answer": "goes",
+                    "topic": "Present Simple",
+                    "task_type": "GAP_FILLING"
+                }}
+                - Пример НЕПРАВИЛЬНОГО формата:
+                {{"name": "They __ always eat breakfast."}}  ← НЕВЕРНО (два подчеркивания, неясное место пропуска)
+                {{"name": "_ you like coffee?", "answer": "do"}}  ← Верно, но убедитесь, что ответ - одно слово
             """
     
     prompt += f"""
@@ -113,42 +125,45 @@ async def generate_retry_task(task: IncorrectTaskInfo, language: str, topics: Li
 
     prompt = convert_retry_task_to_prompt(task.name, task.topic, task.task_type, language, topics_str)
 
+    task_properties = {
+        "name": {"type": "string", "minLength": 5},
+        "answer": {"type": "string", "minLength": 1},
+        "topic": {"type": "string", "enum": topics_names},
+        "task_type": {"type": "string", "enum": ["MULTIPLE_CHOICE", "GAP_FILLING", "TRUE_FALSE"]},
+    }
+
+    if task.task_type == "MULTIPLE_CHOICE":
+        task_properties["options"] = {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 4,
+            "maxItems": 4,
+            "description": "Exactly 4 options for multiple choice question"
+        }
+        task_required = ["name", "answer", "topic", "task_type", "options"]
+    else:
+        task_properties["options"] = {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Only required for MULTIPLE_CHOICE tasks"
+        }
+        task_required = ["name", "answer", "topic", "task_type"]
+    
     json_schema = {
         "type": "object",
         "properties": {
             "task": {
                 "type": "object",
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "minLength": 5,
-                    },
-                    "answer": {
-                        "type": "string",
-                        "minLength": 1,
-                    },
-                    "options": {
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                        },
-                        "minItems": 4 if task.task_type == "MULTIPLE_CHOICE" else 0,
-                        "maxItems": 4 if task.task_type == "MULTIPLE_CHOICE" else 0,
-                    },
-                    "topic": {
-                        "type": "string",
-                        "enum": topics_names,
-                    },
-                    "task_type": {
-                        "type": "string",
-                        "enum": ["MULTIPLE_CHOICE", "GAP_FILLING", "TRUE_FALSE"],
-                    },
-                },
-                "required": ["name", "answer", "topic", "task_type"],
+                "properties": task_properties,
+                "required": task_required,
+                "additionalProperties": False,
             },
         },
         "required": ["task"],
+        "additionalProperties": False,
     }
+
+    print(f"Using schema for task type {task.task_type}: {json_schema}")
 
     try:
         async with OllamaClient() as client:
