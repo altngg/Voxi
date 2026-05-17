@@ -1,5 +1,6 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import type { LessonResultsResponse } from "../shared/api/lesson-result";
 import { Button } from "../shared/ui/Button";
 import { CircularPercentGauge } from "../widgets/CircularPercentGauge";
 import { LessonTaskRow } from "../widgets/LessonTaskRow";
@@ -9,6 +10,8 @@ import {
 } from "./lesson";
 import type { TestTask } from "./test/api/test-queries";
 import { isTaskAnswered } from "./test/taskAnswerUtils";
+
+const RESULT_TRANSITION_MS = 2500;
 
 type LessonResultsState = {
   correctTasks: number;
@@ -55,6 +58,8 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
   const [answersByTaskId, setAnswersByTaskId] = useState<
     Record<string, string>
   >({});
+  const [pendingResult, setPendingResult] =
+    useState<LessonResultsResponse | null>(null);
 
   const {
     mutate: submitLessonResults,
@@ -67,6 +72,29 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
     () => buildMockTheoryByTaskId(newTasks, theorySeed),
     [newTasks, theorySeed],
   );
+
+  const incorrectTaskIds = useMemo(
+    () => new Set(pendingResult?.incorrectTasks ?? []),
+    [pendingResult],
+  );
+
+  useEffect(() => {
+    if (!pendingResult) {
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      navigate("/lesson/result", {
+        replace: true,
+        state: {
+          correctTasks: pendingResult.correctTasks,
+          totalTasks: newTasks.length,
+          newTasks: pendingResult.newTasks,
+        },
+      });
+    }, RESULT_TRANSITION_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [pendingResult, navigate, newTasks.length]);
 
   const handleAnswerValueChange = useCallback(
     (taskId: string, value: string) => {
@@ -91,7 +119,7 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
     );
 
   const handleRetrySubmit = () => {
-    if (!allRetryAnswered) {
+    if (!allRetryAnswered || pendingResult) {
       return;
     }
     submitLessonResults(
@@ -103,15 +131,7 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
       },
       {
         onSuccess: (response) => {
-          navigate("/lesson/result", {
-            replace: true,
-            state: {
-              correctTasks: response.correctTasks,
-              totalTasks: newTasks.length,
-              newTasks: response.newTasks,
-            },
-          });
-          setAnswersByTaskId({});
+          setPendingResult(response);
         },
       },
     );
@@ -146,6 +166,7 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
                   key={task.id}
                   task={task}
                   theory={theoryByTaskId[task.id]}
+                  isIncorrect={incorrectTaskIds.has(task.id)}
                   onAnswerValueChange={handleAnswerValueChange}
                 />
               ))}
@@ -158,17 +179,26 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
                     : "Не удалось отправить результаты"}
                 </p>
               ) : null}
-              <Button
-                buttonType="button"
-                buttonName="Завершить повтор"
-                isPending={isSubmitPending}
-                onClick={handleRetrySubmit}
-                disabled={!allRetryAnswered}
-                className="bg-transparent text-(--text-primary) hover:bg-(--bg-primary) hover:text-(--bg-canvas) disabled:opacity-50"
-              >
-                <ArrowIcon />
-              </Button>
-              {!allRetryAnswered ? (
+              {pendingResult ? (
+                <p
+                  className="max-w-full text-right text-base font-medium text-(--text-primary)"
+                  role="status"
+                >
+                  Переходим к результатам...
+                </p>
+              ) : (
+                <Button
+                  buttonType="button"
+                  buttonName="Завершить повтор"
+                  isPending={isSubmitPending}
+                  onClick={handleRetrySubmit}
+                  disabled={!allRetryAnswered}
+                  className="bg-transparent text-(--text-primary) hover:bg-(--bg-primary) hover:text-(--bg-canvas) disabled:opacity-50"
+                >
+                  <ArrowIcon />
+                </Button>
+              )}
+              {!pendingResult && !allRetryAnswered ? (
                 <p className="max-w-full text-right text-sm opacity-70">
                   Ответьте на все задания, чтобы завершить повтор.
                 </p>

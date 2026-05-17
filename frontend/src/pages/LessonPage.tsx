@@ -1,5 +1,6 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import type { LessonResultsResponse } from "../shared/api/lesson-result";
 import { Button } from "../shared/ui/Button";
 import { LessonTaskRow } from "../widgets/LessonTaskRow";
 import { ProgressBar } from "../widgets/ProgressBar";
@@ -9,6 +10,8 @@ import {
 } from "./lesson";
 import { useTestTasksQuery } from "./test";
 import { isTaskAnswered } from "./test/taskAnswerUtils";
+
+const RESULT_TRANSITION_MS = 2500;
 
 export const LessonPage = () => {
   const navigate = useNavigate();
@@ -23,6 +26,8 @@ export const LessonPage = () => {
   const [answersByTaskId, setAnswersByTaskId] = useState<
     Record<string, string>
   >({});
+  const [pendingResult, setPendingResult] =
+    useState<LessonResultsResponse | null>(null);
 
   const {
     mutate: submitLessonResults,
@@ -35,6 +40,29 @@ export const LessonPage = () => {
     () => buildMockTheoryByTaskId(tasks, theorySeed),
     [tasks, theorySeed],
   );
+
+  const incorrectTaskIds = useMemo(
+    () => new Set(pendingResult?.incorrectTasks ?? []),
+    [pendingResult],
+  );
+
+  useEffect(() => {
+    if (!pendingResult) {
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      navigate("/lesson/result", {
+        replace: true,
+        state: {
+          correctTasks: pendingResult.correctTasks,
+          totalTasks: tasks.length,
+          newTasks: pendingResult.newTasks,
+        },
+      });
+    }, RESULT_TRANSITION_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [pendingResult, navigate, tasks.length]);
 
   const handleAnswerValueChange = useCallback(
     (taskId: string, value: string) => {
@@ -60,7 +88,7 @@ export const LessonPage = () => {
     );
 
   const handleFinishLesson = () => {
-    if (!allAnswered) {
+    if (!allAnswered || pendingResult) {
       return;
     }
     submitLessonResults(
@@ -72,14 +100,7 @@ export const LessonPage = () => {
       },
       {
         onSuccess: (response) => {
-          navigate("/lesson/result", {
-            replace: true,
-            state: {
-              correctTasks: response.correctTasks,
-              totalTasks: tasks.length,
-              newTasks: response.newTasks,
-            },
-          });
+          setPendingResult(response);
         },
       },
     );
@@ -111,6 +132,7 @@ export const LessonPage = () => {
                   key={task.id}
                   task={task}
                   theory={theoryByTaskId[task.id]}
+                  isIncorrect={incorrectTaskIds.has(task.id)}
                   onAnswerValueChange={handleAnswerValueChange}
                 />
               ))}
@@ -125,33 +147,42 @@ export const LessonPage = () => {
                 : "Не удалось отправить результаты"}
             </p>
           ) : null}
-          <Button
-            buttonType="button"
-            buttonName="Завершить урок"
-            isPending={isSubmitPending}
-            onClick={handleFinishLesson}
-            disabled={
-              !allAnswered ||
-              isPending ||
-              Boolean(error) ||
-              tasks.length === 0
-            }
-            className="bg-transparent text-(--text-primary) hover:bg-(--bg-primary) hover:text-(--bg-canvas) disabled:opacity-50"
-          >
-            <svg
-              aria-hidden
-              className="h-[15px] w-[135px]"
-              viewBox="0 0 135 15"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+          {pendingResult ? (
+            <p
+              className="max-w-full text-right text-base font-medium text-(--text-primary)"
+              role="status"
             >
-              <path
-                d="M134.707 8.07112C135.098 7.6806 135.098 7.04743 134.707 6.65691L128.343 0.292946C127.953 -0.0975785 127.319 -0.0975785 126.929 0.292946C126.538 0.68347 126.538 1.31664 126.929 1.70716L132.586 7.36401L126.929 13.0209C126.538 13.4114 126.538 14.0446 126.929 14.4351C127.319 14.8256 127.953 14.8256 128.343 14.4351L134.707 8.07112ZM0 7.36401V8.36401H134V7.36401V6.36401H0V7.36401Z"
-                fill="currentColor"
-              />
-            </svg>
-          </Button>
-          {!allAnswered && tasks.length > 0 ? (
+              Переходим к результатам...
+            </p>
+          ) : (
+            <Button
+              buttonType="button"
+              buttonName="Завершить урок"
+              isPending={isSubmitPending}
+              onClick={handleFinishLesson}
+              disabled={
+                !allAnswered ||
+                isPending ||
+                Boolean(error) ||
+                tasks.length === 0
+              }
+              className="bg-transparent text-(--text-primary) hover:bg-(--bg-primary) hover:text-(--bg-canvas) disabled:opacity-50"
+            >
+              <svg
+                aria-hidden
+                className="h-[15px] w-[135px]"
+                viewBox="0 0 135 15"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M134.707 8.07112C135.098 7.6806 135.098 7.04743 134.707 6.65691L128.343 0.292946C127.953 -0.0975785 127.319 -0.0975785 126.929 0.292946C126.538 0.68347 126.538 1.31664 126.929 1.70716L132.586 7.36401L126.929 13.0209C126.538 13.4114 126.538 14.0446 126.929 14.4351C127.319 14.8256 127.953 14.8256 128.343 14.4351L134.707 8.07112ZM0 7.36401V8.36401H134V7.36401V6.36401H0V7.36401Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </Button>
+          )}
+          {!pendingResult && !allAnswered && tasks.length > 0 ? (
             <p className="max-w-full text-right text-sm opacity-70">
               Ответьте на все задания, чтобы завершить урок.
             </p>
