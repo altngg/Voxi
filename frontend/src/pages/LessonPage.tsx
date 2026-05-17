@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Button } from "../shared/ui/Button";
 import { ProgressBar } from "../widgets/ProgressBar";
 import { useTestTasksQuery } from "./test";
@@ -6,10 +6,16 @@ import { TaskByType } from "./test/TaskByType";
 import { isTaskAnswered } from "./test/taskAnswerUtils";
 import type { TestTask } from "./test/api/test-queries";
 
-/**
- * Тексты теории по id задания. Когда появится поле в API, подставьте его сюда или уберите карту.
- */
-const THEORY_BY_TASK_ID: Partial<Record<number, string>> = {};
+const MOCK_THEORY_TEXTS = [
+  "В Present Simple для he/she/it к глаголу добавляется -s: He works, she studies.",
+  "Вопрос в Present Simple строится через do/does: Do you like music? Does she read books?",
+  "Past Simple обычно выражает завершенное действие в прошлом: I visited London last year.",
+  "После модального глагола используется базовая форма: can speak, must go, should learn.",
+  "В конструкции there is/there are we describe наличие: There is a book on the table.",
+  "Comparatives: короткие прилагательные получают -er, а длинные идут с more.",
+  "Present Continuous: am/is/are + V-ing, когда действие происходит прямо сейчас.",
+  "Артикль a/an используется с исчисляемым существительным в ед. числе, когда говорим впервые.",
+];
 
 type LessonTaskRowProps = {
   task: TestTask;
@@ -25,20 +31,7 @@ const LessonTaskRow = ({
   return (
     <li className="rounded-[20px] border-2 border-(--default-border) p-4">
       {theory ? (
-        <details className="mb-4 rounded-2xl border border-(--default-border) bg-(--bg-primary) px-4 py-3 open:pb-4">
-          <summary className="cursor-pointer list-none text-base font-medium text-(--text-primary) [&::-webkit-details-marker]:hidden">
-            <span className="inline-flex items-center gap-2">
-              <span
-                className="inline-block h-2 w-2 rounded-full bg-(--accent-primary)"
-                aria-hidden
-              />
-              Теория к заданию
-            </span>
-          </summary>
-          <div className="mt-3 whitespace-pre-wrap border-t border-(--default-border) pt-3 text-base leading-relaxed text-(--text-primary)">
-            {theory}
-          </div>
-        </details>
+        <div className="mb-4 rounded-2xl border px-4 py-3">{theory}</div>
       ) : null}
       <TaskByType task={task} onAnswerValueChange={onAnswerValueChange} />
     </li>
@@ -52,9 +45,20 @@ export const LessonPage = () => {
   });
 
   const tasks = data?.tasks ?? [];
+  const [theorySeed] = useState(() => Math.floor(Math.random() * 10_000));
   const [answersByTaskId, setAnswersByTaskId] = useState<
     Record<string, string>
   >({});
+
+  const randomTheoryByTaskId = useMemo(() => {
+    const theoryMap: Partial<Record<number, string>> = {};
+    tasks.forEach((task, index) => {
+      const theoryIndex =
+        (task.id * 31 + index * 17 + theorySeed) % MOCK_THEORY_TEXTS.length;
+      theoryMap[task.id] = MOCK_THEORY_TEXTS[theoryIndex];
+    });
+    return theoryMap;
+  }, [tasks, theorySeed]);
 
   const handleAnswerValueChange = useCallback(
     (taskId: string, value: string) => {
@@ -99,10 +103,6 @@ export const LessonPage = () => {
           />
         </div>
         <section className="text-(--text-primary)">
-          <h2 className="mb-1 text-lg font-medium">Урок</h2>
-          <p className="mb-3 text-base text-(--text-primary) opacity-80">
-            Пройдите задания. Перед вопросом может отображаться блок с теорией.
-          </p>
           {lessonDone ? (
             <p
               className="mb-3 rounded-2xl border border-(--accent-primary) bg-(--bg-primary) px-4 py-3 text-base text-(--text-primary)"
@@ -125,7 +125,7 @@ export const LessonPage = () => {
                 <LessonTaskRow
                   key={task.id}
                   task={task}
-                  theory={THEORY_BY_TASK_ID[task.id]}
+                  theory={randomTheoryByTaskId[task.id]}
                   onAnswerValueChange={handleAnswerValueChange}
                 />
               ))}
