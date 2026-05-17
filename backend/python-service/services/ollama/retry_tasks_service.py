@@ -11,26 +11,31 @@ from schemas.test_results import TopicScore
 
 
 async def generate_retry_tasks(request: RetryTasksRequest) -> RetryTasksResponse:
-    raw_response_list = []
+    tasks = []
+    
     for task in request.incorrect_tasks:
         raw_response = await generate_retry_task(task, request.language, request.topics_scores)
-        raw_response_list.append(raw_response)
-
-    json_str = extract_json(raw_response)
-
+        json_str = extract_json(raw_response)
+        
+        try:
+            task_data = json.loads(json_str)
+            if "task" in task_data:
+                tasks.append(task_data["task"])
+            else:
+                tasks.append(task_data)
+        except json.JSONDecodeError as e:
+            print(f"JSON decode error for task {task.name}: {e}\nRaw response: {raw_response}")
+            raise HTTPException(
+                status_code=500, detail=f"Invalid JSON in response for task {task.name}: {str(e)}"
+            )
+    
     try:
-        return RetryTasksResponse.model_validate_json(json_str)
+        return RetryTasksResponse(tasks=tasks)
     except pydantic.ValidationError as e:
-        print(f"Validation error: {e}\nRaw response: {raw_response}")
+        print(f"Validation error: {e}")
         raise HTTPException(
             status_code=500, detail=f"Invalid response format: {str(e)}"
         )
-    except json.JSONDecodeError as e:
-        print(f"JSON decode error: {e}\nRaw response: {raw_response}")
-        raise HTTPException(
-            status_code=500, detail=f"Invalid JSON in response: {str(e)}"
-        )
-
 
 def extract_json(text: str) -> str:
     json_match = re.search(r"\{.*\}", text, re.DOTALL)
@@ -92,37 +97,32 @@ async def generate_retry_task(task: IncorrectTaskInfo, language: str, topics: Li
         "properties": {
             "task": {
                 "type": "object",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "name": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                    },
+                    "answer": {
+                        "type": "string",
+                    },
+                    "options": {
+                        "type": "array",
+                        "items": {
                             "type": "string",
-                        },
-                        "answer": {
-                            "type": "string",
-                        },
-                        "options": {
-                            "type": "array",
-                            "items": {
-                                "type": "string",
-                            },
-                        },
-                        "topic": {
-                            "type": "string",
-                            "enum": topics_names,
-                        },
-                        "task_type": {
-                            "type": "string",
-                            "enum": ["MULTIPLE_CHOICE", "GAP_FILLING", "TRUE_FALSE"],
                         },
                     },
-                    "required": ["name", "answer", "topic", "task_type"],
+                    "topic": {
+                        "type": "string",
+                        "enum": topics_names,
+                    },
+                    "task_type": {
+                        "type": "string",
+                        "enum": ["MULTIPLE_CHOICE", "GAP_FILLING", "TRUE_FALSE"],
+                    },
                 },
+                "required": ["name", "answer", "topic", "task_type"],
             },
         },
-        "required": [
-            "task",
-        ],
+        "required": ["task"],
     }
 
     try:
