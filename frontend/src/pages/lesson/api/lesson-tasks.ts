@@ -17,17 +17,17 @@ export type LessonTasksResponse = {
 
 type FetchLessonTasksParams = {
   languageId: number;
-  count: number;
+  maxTasks: number;
 };
 
-const fetchLessonTasks = ({ languageId, count }: FetchLessonTasksParams) =>
-  requestGet<LessonTasksResponse>("/lesson", { languageId, count });
+const fetchLessonTasks = ({ languageId, maxTasks }: FetchLessonTasksParams) =>
+  requestGet<LessonTasksResponse>("/lesson/tasks", { languageId, maxTasks });
 
 export const useLessonTasksQuery = ({
   languageId,
-  count,
+  maxTasks,
 }: FetchLessonTasksParams) =>
   useQuery({
-    queryKey: ["lesson", "tasks", languageId, count],
-    queryFn: () => fetchLessonTasks({ languageId, count }),
+    queryKey: ["lesson", "tasks", languageId, maxTasks],
+    queryFn: () => fetchLessonTasks({ languageId, maxTasks }),
   });

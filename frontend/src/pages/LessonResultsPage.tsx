@@ -154,9 +154,7 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
 
         {hasRetryTasks ? (
           <section className="text-(--text-primary)">
-            <h2 className="mb-1 text-lg font-medium">
-              Поработаем над сложным
-            </h2>
+            <h2 className="mb-1 text-lg font-medium">Поработаем над сложным</h2>
             <p className="mb-3 text-base opacity-80">
               Пройдите ещё несколько заданий, чтобы закрепить материал.
             </p>

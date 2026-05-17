@@ -16,17 +16,18 @@ export type LessonResultsResponse = {
   newTasks: TestTask[];
 };
 
-type LessonResultsApiRequest = {
-  task_results: {
-    task_id: number;
-    user_answer: string;
-  }[];
-};
-
 type LessonResultsApiResponse = {
-  correct_tasks: number;
-  incorrect_tasks: number[];
-  new_tasks: TestTask[];
+  correctTasks: number;
+  incorrectTaskIds: number[];
+  totalTasks: number;
+  progressPercent: number;
+  updatedTopicScores: Record<string, number>;
+  newTasks: {
+    name: string;
+    options: string | null;
+    topic: string;
+    taskType: string;
+  }[];
 };
 
 // TODO: убрать, когда заработает реальный /api/lesson-results
@@ -121,20 +122,20 @@ export const lessonResultsApi = {
       return mockSubmit(payload);
     }
 
-    const body: LessonResultsApiRequest = {
-      task_results: payload.taskResults.map(({ taskId, userAnswer }) => ({
-        task_id: taskId,
-        user_answer: userAnswer,
-      })),
-    };
     const data = await request<LessonResultsApiResponse>(
-      "/lesson-results",
-      body,
+      "/lesson/results",
+      payload,
     );
     return {
-      correctTasks: data.correct_tasks,
-      incorrectTasks: data.incorrect_tasks ?? [],
-      newTasks: data.new_tasks ?? [],
+      correctTasks: data.correctTasks,
+      incorrectTasks: data.incorrectTaskIds ?? [],
+      newTasks: (data.newTasks ?? []).map((task, index) => ({
+        id: -(index + 1),
+        name: task.name,
+        topic: task.topic,
+        taskType: task.taskType,
+        options: task.options,
+      })),
     };
   },
 };

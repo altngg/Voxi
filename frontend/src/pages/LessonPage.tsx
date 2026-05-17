@@ -18,7 +18,7 @@ export const LessonPage = () => {
 
   const { data, isPending, error } = useLessonTasksQuery({
     languageId: 1,
-    count: 5,
+    maxTasks: 10,
   });
 
   const tasks = data?.tasks ?? [];
