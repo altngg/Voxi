@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:15-alpine
+    image: postgres:17-alpine
     container_name: voxi-postgres
     restart: unless-stopped
     environment:
@@ -105,7 +105,11 @@ services:
     networks:
       - voxi-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/test-chat/health"]
+      test:
+        [
+          "CMD-SHELL",
+          'python -c "import urllib.request; urllib.request.urlopen(''http://localhost:8000/test-chat/health'', timeout=5)"',
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
