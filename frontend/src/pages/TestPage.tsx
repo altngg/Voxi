@@ -1,87 +1,131 @@
+import { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../shared/ui/Button";
 import { ProgressBar } from "../widgets/ProgressBar";
-import { FillInTheBlanksTask } from "../widgets/FillInTheBlanksTask";
-import { ChooseOptionTask } from "../widgets/ChooseOptionTask";
-import { TrueFalseTask } from "../widgets/TrueFalseTask";
+import {
+  useSubmitTestResultMutation,
+  useTestTasksQuery,
+} from "./test";
+import { TaskByType } from "./test/TaskByType";
+import { isTaskAnswered } from "./test/taskAnswerUtils";
 
 export const TestPage = () => {
+  const navigate = useNavigate();
+
+  const { data, isPending, error } = useTestTasksQuery({
+    languageId: 1,
+    count: 5,
+  });
+
+  const {
+    mutate: submitTestResults,
+    isPending: isSubmitPending,
+    isError: isSubmitError,
+    error: submitError,
+  } = useSubmitTestResultMutation();
+
+  const tasks = data?.tasks ?? [];
+  const [answersByTaskId, setAnswersByTaskId] = useState<
+    Record<string, string>
+  >({});
+
+  const handleAnswerValueChange = useCallback(
+    (taskId: string, value: string) => {
+      setAnswersByTaskId((prev) => {
+        if (prev[taskId] === value) {
+          return prev;
+        }
+        return { ...prev, [taskId]: value };
+      });
+    },
+    [],
+  );
+
+  const completedQuestions = tasks.filter((task) =>
+    isTaskAnswered(task, answersByTaskId[String(task.id)]),
+  ).length;
+
+  const handleSubmitResults = () => {
+    const testId = data?.testId;
+    const taskList = data?.tasks ?? [];
+    if (testId === undefined || taskList.length === 0) {
+      return;
+    }
+    submitTestResults(
+      {
+        testId,
+        taskResults: taskList.map((task) => ({
+          taskId: task.id,
+          userAnswer: answersByTaskId[String(task.id)] ?? "",
+        })),
+      },
+      {
+        onSuccess: (response) => {
+          navigate("/test/result", {
+            replace: true,
+            state: {
+              overallLevel: response.overallLevel,
+              grammarScore: response.grammarScore,
+              vocabularyScore: response.vocabularyScore,
+            },
+          });
+        },
+      },
+    );
+  };
+
+  const totalQuestions = tasks.length || 5;
+
   return (
-    <main className="min-h-dvh overflow-y-auto py-4 sm:px-6">
+    <main className="box-border h-full min-h-0 overflow-y-auto pb-4 pt-0 sm:px-6">
+      <div className="h-4 shrink-0" aria-hidden />
       <section className="mx-auto min-h-[calc(100dvh-2rem)] w-full max-w-6xl rounded-3xl border-4 border-(--default-border) px-4 py-2">
-        <ProgressBar totalQuestions={25} completedQuestions={5} />
-        <FillInTheBlanksTask
-          title="Заполните предложения"
-          items={[
-            {
-              id: "first",
-              before: "I usually have",
-              after: "at 2 p.m.",
-              placeholder: "l",
-            },
-            {
-              id: "second",
-              before: "My father can't read",
-              after: "his glasses.",
-              placeholder: "w",
-            },
-            {
-              id: "third",
-              before: "I'm Gleb. Nice to",
-              after: "you, Clair.",
-              placeholder: "m",
-            },
-          ]}
-        />
-
-        <ChooseOptionTask
-          title="Выберите подходящие варианты"
-          items={[
-            {
-              id: "fitness",
-              before: "Mathew wants to be fit so he decided to go to the",
-              after: ".",
-              options: [
-                { id: "walk", label: "walk" },
-                { id: "gym", label: "gym" },
-                { id: "school", label: "school" },
-              ],
-            },
-            {
-              id: "happier",
-              before: "Sometimes rich people aren't happier than",
-              after: "ones.",
-              options: [
-                { id: "poor", label: "poor" },
-                { id: "polite", label: "polite" },
-                { id: "nice", label: "nice" },
-              ],
-            },
-          ]}
-        />
-
-        <TrueFalseTask
-          title="Укажите верны ли утверждения"
-          items={[
-            {
-              id: "stars",
-              statement:
-                "Stars themselves do not twinkle. They actually shine a steady brightness.",
-            },
-            {
-              id: "sun",
-              statement: "The Sun is a star.",
-            },
-            {
-              id: "astronauts",
-              statement:
-                "Astronauts do not float once they're in the International Space Station.",
-            },
-          ]}
-        />
-        <div className="mt-4 mb-2 flex justify-end">
+        <div className="sticky top-0 z-30 -mx-4 mb-4 bg-(--bg-canvas) px-4 pb-4 pt-0 rounded-t-3xl">
+          <ProgressBar
+            totalQuestions={totalQuestions}
+            completedQuestions={completedQuestions}
+          />
+        </div>
+        <section className="text-(--text-primary)">
+          <h2 className="mb-2 text-lg font-medium">Задания теста</h2>
+          {isPending ? <p>Загружаем задания...</p> : null}
+          {error ? (
+            <p className="text-(--danger)">
+              {error instanceof Error
+                ? error.message
+                : "Не удалось загрузить задания"}
+            </p>
+          ) : null}
+          {!isPending && !error ? (
+            <ol className="space-y-3 text-lg">
+              {tasks.map((task) => (
+                <li
+                  key={task.id}
+                  className="rounded-[20px] border-2 border-(--default-border) p-4"
+                >
+                  <TaskByType
+                    task={task}
+                    onAnswerValueChange={handleAnswerValueChange}
+                  />
+                </li>
+              ))}
+            </ol>
+          ) : null}
+        </section>
+        <div className="mt-4 mb-2 flex flex-col items-end gap-2">
+          {isSubmitError ? (
+            <p className="max-w-full text-right text-sm text-(--danger)">
+              {submitError instanceof Error
+                ? submitError.message
+                : "Не удалось отправить результаты"}
+            </p>
+          ) : null}
           <Button
-            buttonType="submit"
+            buttonType="button"
             buttonName="Далее"
+            isPending={isSubmitPending}
+            onClick={handleSubmitResults}
+            disabled={isPending || Boolean(error) || tasks.length === 0}
             className="bg-transparent text-(--text-primary) hover:bg-(--bg-primary) hover:text-(--bg-canvas)"
           >
             <svg

@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:17-alpine
+    image: postgres:15-alpine
     container_name: voxi-postgres
     restart: unless-stopped
     environment:
@@ -28,12 +28,12 @@ services:
 
   voxi-backend:
     build:
-      context: ./backend/java-service/java-service 
+      context: ./backend/java-service/java-service
       dockerfile: Dockerfile
     container_name: voxi-backend
     restart: unless-stopped
     volumes:
-    - gradle_cache:/root/.gradle
+      - gradle_cache:/root/.gradle
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-voxi_db}
       SPRING_DATASOURCE_USERNAME: ${DB_USER:-voxi_user}

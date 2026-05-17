@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Checkbox } from "../shared/ui/Checkbox";
 
 type ChooseOption = {
@@ -31,6 +31,15 @@ export const ChooseOptionTask = ({
   onAnswersChange,
 }: ChooseOptionTaskProps) => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const onAnswersChangeRef = useRef(onAnswersChange);
+
+  useEffect(() => {
+    onAnswersChangeRef.current = onAnswersChange;
+  }, [onAnswersChange]);
+
+  useEffect(() => {
+    onAnswersChangeRef.current?.(answers);
+  }, [answers]);
 
   const handleOptionToggle = (
     itemId: string,
@@ -40,18 +49,15 @@ export const ChooseOptionTask = ({
     setAnswers((prev) => {
       const nextAnswerForItem = isChecked ? optionId : "";
 
-      const next = {
+      return {
         ...prev,
         [itemId]: nextAnswerForItem,
       };
-
-      onAnswersChange?.(next);
-      return next;
     });
   };
 
   return (
-    <section className="mt-4">
+    <section>
       <h2 className="mb-2 text-lg font-medium text-(--text-primary)">
         {title}
       </h2>
@@ -60,7 +66,6 @@ export const ChooseOptionTask = ({
         {items.map((item, index) => (
           <li key={item.id}>
             <p className="mb-2 flex flex-wrap items-center gap-3">
-              <span>{index + 1}.</span>
               <span>{item.before}</span>
               <span
                 aria-label={`Выбранный ответ для вопроса ${index + 1}`}
