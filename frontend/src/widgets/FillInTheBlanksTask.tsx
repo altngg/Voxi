@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "../shared/ui/Input";
 
 export type FillInTheBlanksItem = {
@@ -20,20 +20,25 @@ export const FillInTheBlanksTask = ({
   onAnswersChange,
 }: FillInTheBlanksTaskProps) => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const onAnswersChangeRef = useRef(onAnswersChange);
+
+  useEffect(() => {
+    onAnswersChangeRef.current = onAnswersChange;
+  }, [onAnswersChange]);
+
+  useEffect(() => {
+    onAnswersChangeRef.current?.(answers);
+  }, [answers]);
 
   const handleAnswerChange = (id: string, value: string) => {
-    setAnswers((prev) => {
-      const next = {
-        ...prev,
-        [id]: value,
-      };
-      onAnswersChange?.(next);
-      return next;
-    });
+    setAnswers((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
   };
 
   return (
-    <section className="mt-4">
+    <section>
       <h2 className="mb-2 text-lg font-medium text-(--text-primary)">
         {title}
       </h2>
@@ -41,7 +46,6 @@ export const FillInTheBlanksTask = ({
       <ol className="space-y-2 text-lg font-medium text-(--text-primary)">
         {items.map((item, index) => (
           <li key={item.id} className="flex flex-wrap items-center gap-3">
-            <span>{index + 1}.</span>
             <span>{item.before}</span>
             <Input
               title=""
