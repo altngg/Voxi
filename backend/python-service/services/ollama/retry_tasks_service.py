@@ -57,10 +57,14 @@ def convert_retry_task_to_prompt(task_name: str, task_topic: str, task_type: str
 
         КРИТИЧЕСКИЕ ТРЕБОВАНИЯ:
         1. Заполните ВСЕ поля без исключения. Ни одно поле не может быть пустым.
-        2. Поле "name" - это КОНКРЕТНОЕ задание (например, "She ___ to school every day"), а не описание или тема.
+        2. Поле "name" - это КОНКРЕТНОЕ задание (например, "She _ to school every day"), а не описание или тема.
         3. Поле "answer" - это ПРАВИЛЬНЫЙ ответ на ваше задание (одно слово, фраза или true/false).
-        4. Контекст задания должен ПОЛНОСТЬЮ отличаться от исходного.
-        5. Задание должно быть темы "{task_topic}" и типа "{task_type}".
+        4. Поле "options" должно присутствовать ВСЕГДА:
+           - Для MULTIPLE_CHOICE: массив из 4 строк с вариантами ответов
+           - Для TRUE_FALSE: пустой массив []
+           - Для GAP_FILLING: пустой массив []
+        5. Контекст задания должен ПОЛНОСТЬЮ отличаться от исходного.
+        6. Задание должно быть темы "{task_topic}" и типа "{task_type}".
         
         ПРАВИЛА ДЛЯ КАЖДОГО ТИПА:
     """
@@ -71,12 +75,13 @@ def convert_retry_task_to_prompt(task_name: str, task_topic: str, task_type: str
                 - Создайте вопрос с 4 вариантами ответа в поле "options".
                 - Только 1 вариант правильный, остальные 3 - однозначно неправильные.
                 - Правильный вариант продублируйте в поле "answer".
+                - Ответ обязательно должен содержать options с 4 элементами
                 - Пример правильного формата:
                   {{
                     "name": "What is the opposite of 'tiny'?",
                     "answer": "huge",
                     "options": ["small", "tiny", "huge", "miniature"],
-                    "topic": "Vocabulary",
+                    "topic": "{task_topic}",
                     "task_type": "MULTIPLE_CHOICE"
                   }}
             """
@@ -85,24 +90,32 @@ def convert_retry_task_to_prompt(task_name: str, task_topic: str, task_type: str
                 - Создайте КОНКРЕТНОЕ утверждение, которое однозначно true или однозначно false.
                 - Утверждение должно быть ОДНОЗНАЧНО истинным (true) или ложным (false).
                 - В поле "answer" напишите строго "true" или "false" (строчными буквами).
-                - Пример: {{"name": "Water boils at 100 degrees Celsius.", "answer": "true", ...}}
+                - В поле "options" укажите ПУСТОЙ МАССИВ: []
+                - Пример: 
+                  {{
+                    "name": "Water boils at 100 degrees Celsius.", 
+                    "answer": "true", 
+                    "options": [],
+                    "topic": "{task_topic}",
+                    "task_type": "TRUE_FALSE"
+                  }}
             """
         case "GAP_FILLING":
             prompt += f"""
                 - Создайте предложение с ОДНИМ пропуском, обозначенным ОДНИМ символом подчеркивания "_".
+                - НЕ НУЖНО ИСПОЛЬЗОВАТЬ БОЛЕЕ ОДНОГО ПОДЧЕРКИВАНИЯ ИЛИ ДРУГИХ СИМВОЛОВ ДЛЯ ОБОЗНАЧЕНИЯ ПРОПУСКА.
                 - Пропуск должен быть на месте ОДНОГО пропущенного слова.
                 - В поле "answer" напишите ОДНО слово, которое идеально подходит для заполнения пропуска.
+                - В поле "options" укажите ПУСТОЙ МАССИВ: []
                 - ВАЖНО: Предложение ДОЛЖНО быть грамматически правильным и осмысленным БЕЗ вставленного слова, с пропуском на месте нужного слова.
                 - Пример ПРАВИЛЬНОГО формата:
                 {{
                     "name": "She _ to school every day.",
                     "answer": "goes",
-                    "topic": "Present Simple",
+                    "options": [],
+                    "topic": "{task_topic}",
                     "task_type": "GAP_FILLING"
                 }}
-                - Пример НЕПРАВИЛЬНОГО формата:
-                {{"name": "They __ always eat breakfast."}}  ← НЕВЕРНО (два подчеркивания, неясное место пропуска)
-                {{"name": "_ you like coffee?", "answer": "do"}}  ← Верно, но убедитесь, что ответ - одно слово
             """
     
     prompt += f"""
@@ -111,6 +124,7 @@ def convert_retry_task_to_prompt(task_name: str, task_topic: str, task_type: str
 
         ВЫВЕДИТЕ ТОЛЬКО JSON-ОБЪЕКТ без пояснений.
         УБЕДИТЕСЬ, ЧТО ВСЕ ПОЛЯ ЗАПОЛНЕНЫ ОСМЫСЛЕННЫМИ ДАННЫМИ.
+        ВСЕГДА ВКЛЮЧАЙТЕ ПОЛЕ "options", ДАЖЕ ЕСЛИ ОНО ПУСТОЕ.
     """
     
     return prompt
@@ -130,24 +144,14 @@ async def generate_retry_task(task: IncorrectTaskInfo, language: str, topics: Li
         "answer": {"type": "string", "minLength": 1},
         "topic": {"type": "string", "enum": topics_names},
         "task_type": {"type": "string", "enum": ["MULTIPLE_CHOICE", "GAP_FILLING", "TRUE_FALSE"]},
+        "options": {"type": "array", "items": {"type": "string"}}  # Always include options
     }
 
     if task.task_type == "MULTIPLE_CHOICE":
-        task_properties["options"] = {
-            "type": "array",
-            "items": {"type": "string"},
-            "minItems": 4,
-            "maxItems": 4,
-            "description": "Exactly 4 options for multiple choice question"
-        }
-        task_required = ["name", "answer", "topic", "task_type", "options"]
-    else:
-        task_properties["options"] = {
-            "type": "array",
-            "items": {"type": "string"},
-            "description": "Only required for MULTIPLE_CHOICE tasks"
-        }
-        task_required = ["name", "answer", "topic", "task_type"]
+        task_properties["options"]["minItems"] = 4
+        task_properties["options"]["maxItems"] = 4
+    
+    task_required = ["name", "answer", "topic", "task_type", "options"]
     
     json_schema = {
         "type": "object",

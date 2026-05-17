@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 from .test_results import TopicScore
 
@@ -12,6 +12,7 @@ class NewCorrectTask(BaseModel):
     name: str
     answer: str
     topic: str
+    options: Optional[List[str]]
     task_type: str
 
 class RetryTasksRequest(BaseModel):
