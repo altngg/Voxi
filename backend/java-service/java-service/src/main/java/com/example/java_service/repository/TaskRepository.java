@@ -15,4 +15,11 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     @Query(value = "SELECT * FROM tasks WHERE language_id = :languageId ORDER BY RANDOM() LIMIT :limit", 
            nativeQuery = true)
     List<Task> findRandomByLanguageId(@Param("languageId") Long languageId, @Param("limit") Integer limit);
+
+    @Query(value = "SELECT * FROM tasks WHERE language_id = :languageId AND topic_id = :topicId AND id NOT IN :excludeIds ORDER BY RANDOM()", 
+           nativeQuery = true)
+    List<Task> findByLanguageIdAndTopicIdAndIdNotIn(
+            @Param("languageId") Long languageId,
+            @Param("topicId") Long topicId,
+            @Param("excludeIds") List<Long> excludeIds);
 }
