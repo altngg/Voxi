@@ -37,6 +37,10 @@ export const authApi = {
     return request<AuthResponse>("/auth/register", payload);
   },
 
+  refresh() {
+    return request<{ message: string }>("/auth/refresh", {});
+  },
+
   logout() {
     return request<{ message: string }>("/auth/logout", {});
   },

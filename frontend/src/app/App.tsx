@@ -3,11 +3,11 @@ import { LoginPage } from "../pages/LoginPage";
 import { RegistrationPage } from "../pages/RegistrationPage";
 import { RegistrationLanguagePage } from "../pages/RegistrationLanguagePage";
 import { Route, Routes } from "react-router-dom";
-import { LessonPage } from "../pages/LessonPage";
 import { MainLayout } from "./layouts/MainLayout";
 import { TestPage } from "../pages/TestPage";
 import { TestResultPage } from "../pages/TestResultPage";
-import { HomePagePlaceholder } from "../pages/HomePagePlaceholder";
+import { LessonPage } from "../pages/LessonPage";
+import { LessonResultsPage } from "../pages/LessonResultsPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,10 +34,10 @@ function App() {
         />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<MainLayout />}>
-          <Route index element={<HomePagePlaceholder />} />
           <Route path="/test" element={<TestPage />} />
           <Route path="/test/result" element={<TestResultPage />} />
           <Route path="/lesson" element={<LessonPage />} />
+          <Route path="/lesson/result" element={<LessonResultsPage />} />
         </Route>
       </Routes>
     </QueryClientProvider>

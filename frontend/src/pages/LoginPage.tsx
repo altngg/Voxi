@@ -21,7 +21,7 @@ export const LoginPage = () => {
       setIsLoading(true);
       const response = await authApi.login({ email, password });
       localStorage.setItem("authUser", JSON.stringify(response.user));
-      navigate("/registration");
+      navigate("/lesson");
     } catch (submitError) {
       const message =
         submitError instanceof Error
