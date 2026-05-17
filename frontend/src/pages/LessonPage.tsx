@@ -12,13 +12,14 @@ import { isTaskAnswered } from "./test/taskAnswerUtils";
 import { useLessonTasksQuery } from "./lesson/api/lesson-tasks";
 
 const RESULT_TRANSITION_MS = 2500;
+const LESSON_LANGUAGE_ID = 1;
 
 export const LessonPage = () => {
   const navigate = useNavigate();
 
   const { data, isPending, error } = useLessonTasksQuery({
-    languageId: 1,
-    maxTasks: 10,
+    languageId: LESSON_LANGUAGE_ID,
+    maxTasks: 3,
   });
 
   const tasks = data?.tasks ?? [];
@@ -57,6 +58,7 @@ export const LessonPage = () => {
           correctTasks: pendingResult.correctTasks,
           totalTasks: tasks.length,
           newTasks: pendingResult.newTasks,
+          languageId: LESSON_LANGUAGE_ID,
         },
       });
     }, RESULT_TRANSITION_MS);
@@ -93,6 +95,7 @@ export const LessonPage = () => {
     }
     submitLessonResults(
       {
+        languageId: LESSON_LANGUAGE_ID,
         taskResults: tasks.map((task) => ({
           taskId: task.id,
           userAnswer: answersByTaskId[String(task.id)] ?? "",

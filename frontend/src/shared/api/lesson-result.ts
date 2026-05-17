@@ -7,6 +7,7 @@ export type LessonResultTaskPayload = {
 };
 
 export type SubmitLessonResultsPayload = {
+  languageId: number;
   taskResults: LessonResultTaskPayload[];
 };
 
@@ -114,11 +115,14 @@ const mockSubmit = async (
   return { correctTasks, incorrectTasks, newTasks };
 };
 
+const hasClientOnlyTaskIds = (payload: SubmitLessonResultsPayload) =>
+  payload.taskResults.some(({ taskId }) => taskId < 0);
+
 export const lessonResultsApi = {
   async submit(
     payload: SubmitLessonResultsPayload,
   ): Promise<LessonResultsResponse> {
-    if (USE_MOCK_LESSON_RESULTS) {
+    if (USE_MOCK_LESSON_RESULTS || hasClientOnlyTaskIds(payload)) {
       return mockSubmit(payload);
     }
 

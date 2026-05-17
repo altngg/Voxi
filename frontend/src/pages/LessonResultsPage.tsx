@@ -17,6 +17,7 @@ type LessonResultsState = {
   correctTasks: number;
   totalTasks: number;
   newTasks: TestTask[];
+  languageId: number;
 };
 
 const isLessonResultsState = (value: unknown): value is LessonResultsState => {
@@ -27,7 +28,8 @@ const isLessonResultsState = (value: unknown): value is LessonResultsState => {
   return (
     typeof o.correctTasks === "number" &&
     typeof o.totalTasks === "number" &&
-    Array.isArray(o.newTasks)
+    Array.isArray(o.newTasks) &&
+    typeof o.languageId === "number"
   );
 };
 
@@ -52,7 +54,7 @@ type LessonResultsContentProps = {
 
 const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
   const navigate = useNavigate();
-  const { correctTasks, totalTasks, newTasks } = data;
+  const { correctTasks, totalTasks, newTasks, languageId } = data;
 
   const [theorySeed] = useState(() => Math.floor(Math.random() * 10_000));
   const [answersByTaskId, setAnswersByTaskId] = useState<
@@ -89,6 +91,7 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
           correctTasks: pendingResult.correctTasks,
           totalTasks: newTasks.length,
           newTasks: pendingResult.newTasks,
+          languageId,
         },
       });
     }, RESULT_TRANSITION_MS);
@@ -124,6 +127,7 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
     }
     submitLessonResults(
       {
+        languageId,
         taskResults: newTasks.map((task) => ({
           taskId: task.id,
           userAnswer: answersByTaskId[String(task.id)] ?? "",
