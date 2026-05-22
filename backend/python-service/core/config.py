@@ -6,5 +6,7 @@ class Settings(BaseSettings):
     ollama_url: str
     ollama_model: str
     ollama_num_ctx: int = 1024
+    ollama_num_predict: int = 300
+    ollama_keep_alive: str = "30m"
 
 settings = Settings()

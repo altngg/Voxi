@@ -19,8 +19,10 @@ class OllamaClient:
             "model": model,
             "prompt": prompt,
             "stream": False,
+            "keep_alive": settings.ollama_keep_alive,
             "options": {
                 "num_ctx": settings.ollama_num_ctx,
+                "num_predict": settings.ollama_num_predict,
             },
         }
 
