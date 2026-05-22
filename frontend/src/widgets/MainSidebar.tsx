@@ -45,7 +45,7 @@ export const MainSidebar = ({ isCollapsed, onToggle }: MainSidebarProps) => {
         "fixed inset-y-4 left-4 z-10 flex flex-col rounded-2xl bg-(--bg-secondary) shadow-(--shadow-card) transition-all duration-300",
         isCollapsed
           ? "w-[clamp(2.75rem,8vw,3.25rem)] min-w-11"
-          : "w-[clamp(10rem,40vw,14rem)] max-w-[calc(100vw-2rem)]",
+          : "w-[clamp(8.5rem,32vw,12rem)] max-w-[calc(100vw-2rem)]",
       )}
     >
       <nav className="flex flex-1 flex-col gap-2 p-2">
