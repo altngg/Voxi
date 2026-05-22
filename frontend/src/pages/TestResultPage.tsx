@@ -28,8 +28,8 @@ export const TestResultPage = () => {
       <section className="ui-card w-full max-w-2xl p-6 sm:p-8">
         <h1 className="ui-page-title mb-6 text-center">Результаты теста</h1>
 
-        <div className="flex flex-col items-center gap-8">
-          <p className="wrap-break-word text-center text-5xl font-bold tracking-tight sm:text-6xl">
+        <div className="flex flex-col items-center">
+          <p className="wrap-break-word text-center text-5xl font-bold tracking-tight mb-3">
             {overallLevel}
           </p>
 
