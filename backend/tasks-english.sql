@@ -1,34 +1,53 @@
-INSERT INTO tasks (name, answer, topic_id, language_id, task_type_id, options) VALUES
-('She ___ to school yesterday.', 'went', 1, 1, 1, ARRAY['go', 'went', 'gone', 'going']),
-('They ___ football last weekend.', 'played', 1, 1, 1, ARRAY['play', 'played', 'plays', 'playing']),
-('He ___ not like coffee.', 'does', 1, 1, 1, ARRAY['do', 'does', 'did', 'doing']),
-('We ___ at home now.', 'are', 1, 1, 1, ARRAY['is', 'am', 'are', 'be']),
-('I ___ a book every week.', 'read', 1, 1, 1, ARRAY['reads', 'read', 'reading', 'readed']),
-('She ___ TV right now.', 'is watching', 1, 1, 1, ARRAY['watch', 'watches', 'is watching', 'watched']),
-('They ___ dinner at the moment.', 'are cooking', 1, 1, 1, ARRAY['cook', 'cooks', 'are cooking', 'cooked']),
-('He ___ to music now.', 'is listening', 1, 1, 1, ARRAY['listen', 'listens', 'is listening', 'listened']),
-('I saw ___ elephant at the zoo.', 'an', 1, 1, 1, ARRAY['a', 'an', 'the', '-']),
-('___ sun is very bright today.', 'The', 1, 1, 1, ARRAY['A', 'An', 'The', '-']),
-('She wants to be ___ teacher.', 'a', 1, 1, 1, ARRAY['a', 'an', 'the', '-']),
-('The cat is ___ the table.', 'on', 1, 1, 1, ARRAY['in', 'on', 'at', 'under']),
-('We meet ___ Monday.', 'on', 1, 1, 1, ARRAY['in', 'on', 'at', 'by']),
-('She was born ___ 1995.', 'in', 1, 1, 1, ARRAY['in', 'on', 'at', 'by']),
-('Choose the synonym for ''happy'':', 'joyful', 2, 1, 1, ARRAY['sad', 'joyful', 'angry', 'tired']),
-('Choose the synonym for ''big'':', 'large', 2, 1, 1, ARRAY['small', 'large', 'tiny', 'short']),
-('Choose the synonym for ''fast'':', 'quick', 2, 1, 1, ARRAY['slow', 'quick', 'late', 'early']),
-('Choose the antonym for ''hot'':', 'cold', 2, 1, 1, ARRAY['cold', 'warm', 'heat', 'fire']),
-('Choose the antonym for ''up'':', 'down', 2, 1, 1, ARRAY['up', 'down', 'left', 'right']),
-('Choose the antonym for ''start'':', 'finish', 2, 1, 1, ARRAY['start', 'begin', 'finish', 'continue']),
-('What does ''ubiquitous'' mean?', 'present everywhere', 2, 1, 1, ARRAY['rare', 'present everywhere', 'expensive', 'ancient']),
-('What does ''benevolent'' mean?', 'kind', 2, 1, 1, ARRAY['evil', 'kind', 'angry', 'sad']),
-('What does ''ephemeral'' mean?', 'short-lived', 2, 1, 1, ARRAY['permanent', 'short-lived', 'beautiful', 'dangerous']),
-('The past tense of ''go'' is ''went''.', 'true', 1, 1, 3, null),
-('The article ''an'' is used before consonant sounds.', 'false', 1, 1, 3, null),
-('''Happy'' and ''sad'' are synonyms.', 'false', 2, 1, 3, null),
-('The plural of ''child'' is ''childs''.', 'false', 1, 1, 3, null),
-('''Quickly'' is an adverb.', 'true', 1, 1, 3, null),
-('Complete: To be or ___ to be.', 'not', 1, 1, 2, null),
-('Complete: All that glitters is ___ gold.', 'not', 2, 1, 2, null),
-('Complete: The early bird catches the ___.', 'worm', 2, 1, 2, null),
-('Complete: When in Rome, do ___ the Romans do.', 'as', 1, 1, 2, null),
-('Complete: Actions speak ___ than words.', 'louder', 2, 1, 2, null);
+INSERT INTO tasks (name, answer, topic_id, language_id, task_type_id, options)
+SELECT
+    v.name,
+    v.answer,
+    tp.id,
+    lang.id,
+    tt.id,
+    v.options
+FROM (
+    VALUES
+        ('She ___ to school yesterday.', 'went', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['go', 'went', 'gone', 'going']::TEXT[]),
+        ('They ___ football last weekend.', 'played', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['play', 'played', 'plays', 'playing']::TEXT[]),
+        ('He ___ not like coffee.', 'does', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['do', 'does', 'did', 'doing']::TEXT[]),
+        ('We ___ at home now.', 'are', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['is', 'am', 'are', 'be']::TEXT[]),
+        ('I ___ a book every week.', 'read', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['reads', 'read', 'reading', 'readed']::TEXT[]),
+        ('She ___ TV right now.', 'is watching', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['watch', 'watches', 'is watching', 'watched']::TEXT[]),
+        ('They ___ dinner at the moment.', 'are cooking', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['cook', 'cooks', 'are cooking', 'cooked']::TEXT[]),
+        ('He ___ to music now.', 'is listening', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['listen', 'listens', 'is listening', 'listened']::TEXT[]),
+        ('I saw ___ elephant at the zoo.', 'an', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['a', 'an', 'the', '-']::TEXT[]),
+        ('___ sun is very bright today.', 'The', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['A', 'An', 'The', '-']::TEXT[]),
+        ('She wants to be ___ teacher.', 'a', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['a', 'an', 'the', '-']::TEXT[]),
+        ('The cat is ___ the table.', 'on', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['in', 'on', 'at', 'under']::TEXT[]),
+        ('We meet ___ Monday.', 'on', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['in', 'on', 'at', 'by']::TEXT[]),
+        ('She was born ___ 1995.', 'in', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['in', 'on', 'at', 'by']::TEXT[]),
+        ('Choose the synonym for ''happy'':', 'joyful', 'Vocabulary', 'MULTIPLE_CHOICE', ARRAY['sad', 'joyful', 'angry', 'tired']::TEXT[]),
+        ('Choose the synonym for ''big'':', 'large', 'Vocabulary', 'MULTIPLE_CHOICE', ARRAY['small', 'large', 'tiny', 'short']::TEXT[]),
+        ('Choose the synonym for ''fast'':', 'quick', 'Vocabulary', 'MULTIPLE_CHOICE', ARRAY['slow', 'quick', 'late', 'early']::TEXT[]),
+        ('Choose the antonym for ''hot'':', 'cold', 'Vocabulary', 'MULTIPLE_CHOICE', ARRAY['cold', 'warm', 'heat', 'fire']::TEXT[]),
+        ('Choose the antonym for ''up'':', 'down', 'Vocabulary', 'MULTIPLE_CHOICE', ARRAY['up', 'down', 'left', 'right']::TEXT[]),
+        ('Choose the antonym for ''start'':', 'finish', 'Vocabulary', 'MULTIPLE_CHOICE', ARRAY['start', 'begin', 'finish', 'continue']::TEXT[]),
+        ('What does ''ubiquitous'' mean?', 'present everywhere', 'Vocabulary', 'MULTIPLE_CHOICE', ARRAY['rare', 'present everywhere', 'expensive', 'ancient']::TEXT[]),
+        ('What does ''benevolent'' mean?', 'kind', 'Vocabulary', 'MULTIPLE_CHOICE', ARRAY['evil', 'kind', 'angry', 'sad']::TEXT[]),
+        ('What does ''ephemeral'' mean?', 'short-lived', 'Vocabulary', 'MULTIPLE_CHOICE', ARRAY['permanent', 'short-lived', 'beautiful', 'dangerous']::TEXT[]),
+        ('The past tense of ''go'' is ''went''.', 'true', 'Grammar', 'TRUE_FALSE', NULL::TEXT[]),
+        ('The article ''an'' is used before consonant sounds.', 'false', 'Grammar', 'TRUE_FALSE', NULL::TEXT[]),
+        ('''Happy'' and ''sad'' are synonyms.', 'false', 'Vocabulary', 'TRUE_FALSE', NULL::TEXT[]),
+        ('The plural of ''child'' is ''childs''.', 'false', 'Grammar', 'TRUE_FALSE', NULL::TEXT[]),
+        ('''Quickly'' is an adverb.', 'true', 'Grammar', 'TRUE_FALSE', NULL::TEXT[]),
+        ('Complete: To be or ___ to be.', 'not', 'Grammar', 'GAP_FILLING', NULL::TEXT[]),
+        ('Complete: All that glitters is ___ gold.', 'not', 'Vocabulary', 'GAP_FILLING', NULL::TEXT[]),
+        ('Complete: The early bird catches the ___.', 'worm', 'Vocabulary', 'GAP_FILLING', NULL::TEXT[]),
+        ('Complete: When in Rome, do ___ the Romans do.', 'as', 'Grammar', 'GAP_FILLING', NULL::TEXT[]),
+        ('Complete: Actions speak ___ than words.', 'louder', 'Vocabulary', 'GAP_FILLING', NULL::TEXT[])
+) AS v(name, answer, topic_name, task_type_name, options)
+JOIN languages lang ON lang.name = 'English'
+JOIN topics tp ON tp.name = v.topic_name AND tp.language_id = lang.id
+JOIN task_types tt ON tt.name = v.task_type_name
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM tasks t
+    WHERE t.name = v.name
+      AND t.language_id = lang.id
+);

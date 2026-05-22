@@ -16,9 +16,11 @@ import com.example.java_service.dto.request.LessonResultRequest;
 import com.example.java_service.dto.response.LessonResultResponse;
 import com.example.java_service.entity.Language;
 import com.example.java_service.entity.Task;
+import com.example.java_service.entity.TaskType;
 import com.example.java_service.entity.Topic;
 import com.example.java_service.repository.LanguageRepository;
 import com.example.java_service.repository.TaskRepository;
+import com.example.java_service.repository.TaskTypeRepository;
 import com.example.java_service.repository.TopicRepository;
 import com.example.java_service.repository.UserRepository;
 
@@ -31,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 public class LessonResultService {
 
     private final TaskRepository taskRepository;
+    private final TaskTypeRepository taskTypeRepository;
     private final TopicRepository topicRepository;
     private final UserRepository userRepository;
     private final LanguageRepository languageRepository;
@@ -45,6 +48,9 @@ public class LessonResultService {
                         .map(LessonResultRequest.TaskAnswer::getTaskId)
                         .collect(Collectors.toList())
         ).stream().collect(Collectors.toMap(Task::getId, t -> t));
+
+        Map<Long, String> taskTypeNames = taskTypeRepository.findAll().stream()
+                .collect(Collectors.toMap(TaskType::getId, TaskType::getName));
 
         int correctCount = 0;
         List<Long> incorrectTaskIds = new ArrayList<>(); 
@@ -72,7 +78,7 @@ public class LessonResultService {
                 incorrectTasks.add(PythonRetryRequest.IncorrectTask.builder()
                         .name(task.getName())
                         .topic(topicName)
-                        .taskType(task.getTaskTypeId().toString())
+                        .taskType(resolveTaskTypeName(task.getTaskTypeId(), taskTypeNames))
                         .build());
             }
         }
@@ -108,6 +114,14 @@ public class LessonResultService {
                 .updatedTopicScores(topicScoreChanges)
                 .newTasks(newTasks)
                 .build();
+    }
+
+    private String resolveTaskTypeName(Long taskTypeId, Map<Long, String> taskTypeNames) {
+        String name = taskTypeNames.get(taskTypeId);
+        if (name == null) {
+            throw new IllegalStateException("Unknown task type id: " + taskTypeId);
+        }
+        return name;
     }
 
     private PythonRetryRequest buildRetryRequest(Long userId, List<PythonRetryRequest.IncorrectTask> incorrectTasks, Long languageId) {

@@ -12,6 +12,13 @@ CREATE TABLE IF NOT EXISTS task_types (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS levels (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS topics (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -51,10 +58,5 @@ ON CONFLICT (name) DO NOTHING;
 INSERT INTO topics (name, language_id) 
 SELECT 'Grammar', id FROM languages WHERE name = 'English' ON CONFLICT DO NOTHING;
 
-INSERT INTO topics (name, language_id) 
-SELECT 'Vocabulary', id FROM languages WHERE name = 'English' ON CONFLICT DO NOTHING;
-
-INSERT INTO topics (name, language_id) 
-SELECT 'Grammar', id FROM languages WHERE name = 'English' ON CONFLICT DO NOTHING;
 INSERT INTO topics (name, language_id) 
 SELECT 'Vocabulary', id FROM languages WHERE name = 'English' ON CONFLICT DO NOTHING;
