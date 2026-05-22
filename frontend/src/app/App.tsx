@@ -8,6 +8,7 @@ import { TestPage } from "../pages/TestPage";
 import { TestResultPage } from "../pages/TestResultPage";
 import { LessonPage } from "../pages/LessonPage";
 import { LessonResultsPage } from "../pages/LessonResultsPage";
+import { ProfilePage } from "../pages/ProfilePage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +39,7 @@ function App() {
           <Route path="/test/result" element={<TestResultPage />} />
           <Route path="/lesson" element={<LessonPage />} />
           <Route path="/lesson/result" element={<LessonResultsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Routes>
     </QueryClientProvider>
