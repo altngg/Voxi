@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import type { LessonResultsResponse } from "../shared/api/lesson-result";
 import { Button } from "../shared/ui/Button";
+import { ArrowRightLine } from "../shared/ui/icons/ArrowRightLine";
 import { CircularPercentGauge } from "../widgets/CircularPercentGauge";
 import { LessonTaskRow } from "../widgets/LessonTaskRow";
 import {
@@ -32,21 +33,6 @@ const isLessonResultsState = (value: unknown): value is LessonResultsState => {
     typeof o.languageId === "number"
   );
 };
-
-const ArrowIcon = () => (
-  <svg
-    aria-hidden
-    className="h-[15px] w-[135px]"
-    viewBox="0 0 135 15"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M134.707 8.07112C135.098 7.6806 135.098 7.04743 134.707 6.65691L128.343 0.292946C127.953 -0.0975785 127.319 -0.0975785 126.929 0.292946C126.538 0.68347 126.538 1.31664 126.929 1.70716L132.586 7.36401L126.929 13.0209C126.538 13.4114 126.538 14.0446 126.929 14.4351C127.319 14.8256 127.953 14.8256 128.343 14.4351L134.707 8.07112ZM0 7.36401V8.36401H134V7.36401V6.36401H0V7.36401Z"
-      fill="currentColor"
-    />
-  </svg>
-);
 
 type LessonResultsContentProps = {
   data: LessonResultsState;
@@ -97,7 +83,7 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
     }, RESULT_TRANSITION_MS);
 
     return () => window.clearTimeout(timer);
-  }, [pendingResult, navigate, newTasks.length]);
+  }, [pendingResult, navigate, newTasks.length, languageId, newTasks]);
 
   const handleAnswerValueChange = useCallback(
     (taskId: string, value: string) => {
@@ -142,12 +128,11 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
   };
 
   return (
-    <main className="box-border h-full min-h-0 overflow-y-auto pb-4 pt-0 sm:px-6">
-      <div className="h-4 shrink-0" aria-hidden />
-      <section className="mx-auto min-h-[calc(100dvh-2rem)] w-full max-w-6xl rounded-3xl border-4 border-(--default-border) px-4 py-6">
+    <main className="ui-page">
+      <section className="ui-card ui-page-section min-h-[calc(100dvh-2rem)] max-w-6xl px-4 py-6">
         <header className="mb-6 flex flex-col items-center gap-1 text-center text-(--text-primary)">
-          <h1 className="text-2xl font-bold">Результаты урока</h1>
-          <p className="text-base opacity-80">
+          <h1 className="ui-page-title">Результаты урока</h1>
+          <p className="text-base text-(--text-secondary)">
             Правильно: {correctTasks} из {totalTasks}
           </p>
         </header>
@@ -158,8 +143,8 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
 
         {hasRetryTasks ? (
           <section className="text-(--text-primary)">
-            <h2 className="mb-1 text-lg font-medium">Поработаем над сложным</h2>
-            <p className="mb-3 text-base opacity-80">
+            <h2 className="ui-section-title mb-1">Поработаем над сложным</h2>
+            <p className="mb-3 text-base text-(--text-secondary)">
               Пройдите ещё несколько заданий, чтобы закрепить материал.
             </p>
             <ol className="space-y-3 text-lg">
@@ -192,12 +177,12 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
                 <Button
                   buttonType="button"
                   buttonName="Завершить повтор"
+                  variant="ghost"
                   isPending={isSubmitPending}
                   onClick={handleRetrySubmit}
                   disabled={!allRetryAnswered}
-                  className="bg-transparent text-(--text-primary) hover:bg-(--bg-primary) hover:text-(--bg-canvas) disabled:opacity-50"
                 >
-                  <ArrowIcon />
+                  <ArrowRightLine />
                 </Button>
               )}
               {!pendingResult && !allRetryAnswered ? (
@@ -209,19 +194,19 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
           </section>
         ) : (
           <section className="flex flex-col items-center gap-5 text-center text-(--text-primary)">
-            <h2 className="text-xl font-semibold">
+            <h2 className="ui-section-title">
               Поздравляем! Урок успешно завершён.
             </h2>
-            <p className="max-w-md text-base opacity-80">
+            <p className="max-w-md text-base text-(--text-secondary)">
               Вы справились со всеми заданиями. Так держать!
             </p>
             <Button
               buttonType="button"
               buttonName="Перейти на новый урок"
+              variant="ghost"
               onClick={() => navigate("/lesson", { replace: true })}
-              className="bg-transparent text-(--text-primary) hover:bg-(--bg-primary) hover:text-(--bg-canvas)"
             >
-              <ArrowIcon />
+              <ArrowRightLine />
             </Button>
           </section>
         )}

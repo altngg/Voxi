@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 
+import { cn } from "../lib/cn";
+
 interface ComboboxProps {
   title: string;
   name: string;
@@ -44,8 +46,8 @@ export const Combobox = ({
   if (disabled) {
     return (
       <label className="pointer-events-none block opacity-50">
-        <span className="mb-[6px] block">{title}</span>
-        <div className="h-[45px] rounded-[25px] border-[3px] border-(--default-border) bg-[#f9fafb] px-4 leading-[41px] text-[#9ca3af]">
+        <span className="mb-[6px] block text-base">{title}</span>
+        <div className="flex h-[45px] items-center rounded-[25px] border-[3px] border-(--default-border) bg-(--bg-muted) px-4 text-(--text-secondary)">
           {displayValue || "не выбрано"}
         </div>
       </label>
@@ -54,15 +56,18 @@ export const Combobox = ({
 
   return (
     <label className="block" ref={containerRef}>
-      <span className="mb-[20px] block">{title}</span>
+      <span className="mb-[6px] block text-base">{title}</span>
       <div className="relative">
         <button
           type="button"
-          className={`flex h-[45px] w-full cursor-pointer items-center justify-between border-[3px] bg-transparent px-4 text-(--text-secondary) transition-[border-color,box-shadow] duration-200 hover:border-(--bg-primary) hover:shadow-[0_0_0_3px_rgba(112,102,204,0.15)] focus:border-(--bg-primary) focus:shadow-[0_0_0_3px_rgba(112,102,204,0.15)] ${
+          className={cn(
+            "flex h-[45px] w-full cursor-pointer items-center justify-between border-[3px] bg-transparent px-4 text-(--text-secondary) transition-[border-color,box-shadow] duration-200",
+            "hover:border-(--bg-primary) hover:shadow-(--shadow-focus)",
+            "focus:border-(--bg-primary) focus:shadow-(--shadow-focus)",
             isOpen
               ? "rounded-t-[25px] rounded-b-none border-(--default-border) border-b-transparent"
-              : "rounded-[25px] border-(--default-border)"
-          }`}
+              : "rounded-[25px] border-(--default-border)",
+          )}
           onClick={() => setIsOpen(!isOpen)}
           aria-haspopup="listbox"
           aria-expanded={isOpen}
@@ -71,15 +76,16 @@ export const Combobox = ({
             {displayValue}
           </span>
           <ChevronDown
-            className={`h-[30px] w-[30px] shrink-0 transition-transform duration-200 ${
-              isOpen ? "rotate-180" : ""
-            }`}
+            className={cn(
+              "h-[30px] w-[30px] shrink-0 transition-transform duration-200",
+              isOpen && "rotate-180",
+            )}
           />
         </button>
 
         {isOpen && (
           <ul
-            className="absolute inset-x-0 top-full z-100 max-h-[200px] list-none overflow-y-auto rounded-b-[25px] border-[3px] border-t-0 border-(--default-border) bg-(--bg-canvas) p-0 shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
+            className="absolute inset-x-0 top-full z-100 max-h-[200px] list-none overflow-y-auto rounded-b-[25px] border-[3px] border-t-0 border-(--default-border) bg-(--bg-canvas) p-0 shadow-(--shadow-overlay)"
             role="listbox"
           >
             {options.map((option) => {
@@ -87,11 +93,12 @@ export const Combobox = ({
               return (
                 <li
                   key={option}
-                  className={`cursor-pointer px-4 py-[10px] text-(--text-secondary) transition-[background,color] duration-120 hover:bg-[rgba(112,102,204,0.08)] hover:text-(--text-primary) ${
-                    isSelected
-                      ? "bg-[rgba(112,102,204,0.12)] font-semibold text-(--bg-primary)"
-                      : ""
-                  }`}
+                  className={cn(
+                    "cursor-pointer px-4 py-[10px] text-(--text-secondary) transition-[background,color] duration-120",
+                    "hover:bg-(--tint-primary-soft) hover:text-(--text-primary)",
+                    isSelected &&
+                      "bg-(--tint-primary-medium) font-semibold text-(--bg-primary)",
+                  )}
                   role="option"
                   aria-selected={isSelected}
                   onMouseDown={(e) => {

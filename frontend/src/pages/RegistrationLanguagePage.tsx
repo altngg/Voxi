@@ -21,10 +21,8 @@ const languageOptions = [
 
 const levelOptions = ["A1", "A2", "B1", "B2", "C1", "C2", "Не знаю"];
 
-const getLevelButtonClassName = (isActive: boolean) =>
-  isActive
-    ? "min-w-[128px] justify-center gap-0 px-5 text-lg font-medium hover:bg-(--bg-primary) hover:text-(--bg-canvas)"
-    : "min-w-[128px] justify-center gap-0 bg-transparent px-5 text-lg font-medium text-(--text-primary) hover:bg-(--bg-primary) hover:text-(--bg-canvas)";
+const LEVEL_BUTTON_CLASS =
+  "min-w-[128px] justify-center gap-0 px-5 text-base font-medium";
 
 export const RegistrationLanguagePage = () => {
   const navigate = useNavigate();
@@ -69,11 +67,9 @@ export const RegistrationLanguagePage = () => {
   };
 
   return (
-    <main className="flex min-h-full items-center justify-center">
-      <section className="w-[600px] rounded-[50px] border-4 border-(--default-border) p-4">
-        <h1 className="mb-[10px] text-center text-[40px] font-bold">
-          Выбор языка
-        </h1>
+    <main className="ui-form-page">
+      <section className="ui-card-form w-full max-w-[600px]">
+        <h1 className="ui-form-title mb-4">Выбор языка</h1>
 
         <form className="flex w-full flex-col gap-4" onSubmit={handleSubmit}>
           <Combobox
@@ -86,21 +82,22 @@ export const RegistrationLanguagePage = () => {
           />
 
           <div>
-            <p>Укажите ваш уровень языка</p>
-            <div className="mt-2 flex flex-wrap gap-2" role="radiogroup">
+            <p className="mb-2 text-base">Укажите ваш уровень языка</p>
+            <div className="flex flex-wrap gap-2" role="radiogroup">
               {levelOptions.map((level) => (
                 <Button
                   key={level}
                   buttonName={level}
+                  variant={languageLevel === level ? "primary" : "ghost"}
                   onClick={() => setLanguageLevel(level)}
-                  className={getLevelButtonClassName(languageLevel === level)}
+                  className={LEVEL_BUTTON_CLASS}
                 />
               ))}
             </div>
           </div>
 
           {error ? (
-            <p className="my-2 mb-[10px] text-[20px] leading-[1.3] text-(--danger)">
+            <p className="mt-2 text-base leading-snug text-(--danger)">
               {error}
             </p>
           ) : null}

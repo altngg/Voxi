@@ -34,11 +34,9 @@ export const LoginPage = () => {
   };
 
   return (
-    <main className="flex min-h-full items-center justify-center">
-      <section className="m-10 w-[600px] rounded-[50px] border-4 border-(--default-border) p-4">
-        <h1 className="mb-3 text-center text-[40px] leading-[1.1] font-bold">
-          Войдите в аккаунт
-        </h1>
+    <main className="ui-form-page">
+      <section className="ui-card-form w-full max-w-[600px]">
+        <h1 className="ui-form-title mb-4">Войдите в аккаунт</h1>
 
         <form className="flex w-full flex-col gap-4" onSubmit={handleSubmit}>
           <Input
@@ -64,7 +62,7 @@ export const LoginPage = () => {
           />
 
           {error ? (
-            <p className="mt-3 text-[20px] leading-[1.3] text-[#b42318]">
+            <p className="mt-2 text-base leading-snug text-(--danger)">
               {error}
             </p>
           ) : null}

@@ -18,10 +18,8 @@ export const LessonTaskRow = ({
   return (
     <li
       className={cn(
-        "rounded-[20px] border-2 p-4 transition-colors",
-        isIncorrect
-          ? "border-(--danger) bg-(--bg-error)"
-          : "border-(--default-border)",
+        "ui-card-inset p-4",
+        isIncorrect && "border-(--danger) bg-(--bg-error)",
       )}
     >
       {isIncorrect ? (
@@ -34,7 +32,9 @@ export const LessonTaskRow = ({
         </p>
       ) : null}
       {theory ? (
-        <div className="mb-4 rounded-2xl border px-4 py-3">{theory}</div>
+        <div className="mb-4 rounded-2xl border-2 border-(--soft-border) px-4 py-3 text-base text-(--text-primary)">
+          {theory}
+        </div>
       ) : null}
       <TaskByType task={task} onAnswerValueChange={onAnswerValueChange} />
     </li>

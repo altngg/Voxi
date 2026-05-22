@@ -12,10 +12,8 @@ type TrueFalseTaskProps = {
   onAnswersChange?: (answers: Record<string, boolean>) => void;
 };
 
-const getAnswerButtonClassName = (isActive: boolean) =>
-  isActive
-    ? "min-w-[128px] justify-center gap-0 px-5 text-lg font-medium hover:bg-(--bg-primary) hover:text-(--bg-canvas)"
-    : "min-w-[128px] justify-center gap-0 bg-transparent px-5 text-lg font-medium text-(--text-primary) hover:bg-(--bg-primary) hover:text-(--bg-canvas)";
+const ANSWER_BUTTON_CLASS =
+  "min-w-[128px] justify-center gap-0 px-5 text-base font-medium";
 
 export const TrueFalseTask = ({
   title,
@@ -42,9 +40,7 @@ export const TrueFalseTask = ({
 
   return (
     <section>
-      <h2 className="mb-2 text-lg font-medium text-(--text-primary)">
-        {title}
-      </h2>
+      <h2 className="ui-section-title mb-2">{title}</h2>
 
       <ol className="space-y-3 text-lg font-medium text-(--text-primary)">
         {items.map((item) => (
@@ -57,13 +53,15 @@ export const TrueFalseTask = ({
             <div className="flex shrink-0 items-center gap-2 pl-7 md:pl-0">
               <Button
                 buttonName="True"
+                variant={answers[item.id] === true ? "primary" : "ghost"}
                 onClick={() => handleAnswerChange(item.id, true)}
-                className={getAnswerButtonClassName(answers[item.id] === true)}
+                className={ANSWER_BUTTON_CLASS}
               />
               <Button
                 buttonName="False"
+                variant={answers[item.id] === false ? "primary" : "ghost"}
                 onClick={() => handleAnswerChange(item.id, false)}
-                className={getAnswerButtonClassName(answers[item.id] === false)}
+                className={ANSWER_BUTTON_CLASS}
               />
             </div>
           </li>

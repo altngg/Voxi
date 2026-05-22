@@ -8,9 +8,8 @@ interface FormProps {
   onClick?: () => void;
   children?: React.ReactNode;
   className?: string;
+  variant?: "primary" | "ghost";
 }
-
-// TODO: расширить для других видов кнопок
 
 export const Button = ({
   buttonName,
@@ -20,12 +19,14 @@ export const Button = ({
   onClick,
   children,
   className,
+  variant = "primary",
 }: FormProps) => {
   return (
     <button
       type={buttonType}
       className={cn(
-        "inline-flex h-[46px] cursor-pointer items-center justify-between gap-[50px] rounded-[50px] border-[3px] border-(--default-border) bg-(--bg-primary) px-[14px] text-(--bg-canvas) transition-colors hover:bg-transparent hover:text-(--text-primary) disabled:cursor-not-allowed disabled:opacity-65",
+        "ui-button",
+        variant === "ghost" && "ui-button--ghost",
         className,
       )}
       disabled={isPending || disabled}

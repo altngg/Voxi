@@ -39,9 +39,7 @@ export const FillInTheBlanksTask = ({
 
   return (
     <section>
-      <h2 className="mb-2 text-lg font-medium text-(--text-primary)">
-        {title}
-      </h2>
+      <h2 className="ui-section-title mb-2">{title}</h2>
 
       <ol className="space-y-2 text-lg font-medium text-(--text-primary)">
         {items.map((item, index) => (
@@ -56,7 +54,7 @@ export const FillInTheBlanksTask = ({
               placeholder={item.placeholder}
               ariaLabel={`Ответ для предложения ${index + 1}`}
               labelClassName="inline-block"
-              inputClassName="mb-0 w-40 border-(--default-border)"
+              inputClassName="w-40"
             />
             <span>{item.after}</span>
           </li>

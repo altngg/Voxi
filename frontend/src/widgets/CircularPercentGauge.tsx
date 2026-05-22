@@ -52,10 +52,10 @@ export const CircularPercentGauge = ({
           className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center leading-none text-(--text-primary)"
           aria-hidden
         >
-          <span className="text-[28px] font-semibold tabular-nums sm:text-3xl">
+          <span className="text-3xl font-semibold tabular-nums">
             {percent}
           </span>
-          <span className="mt-0.5 text-xs font-medium text-(--text-secondary)">
+          <span className="mt-1 text-xs font-medium text-(--text-secondary)">
             /100
           </span>
         </div>
