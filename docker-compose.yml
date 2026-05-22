@@ -99,6 +99,7 @@ services:
     environment:
       OLLAMA_URL: http://ollama:11434
       OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:1.7b}
+      OLLAMA_NUM_CTX: ${OLLAMA_NUM_CTX:-1024}
       WATCHFILES_FORCE_POLLING: "true"
     ports:
       - "${PYTHON_PORT:-8001}:8000"

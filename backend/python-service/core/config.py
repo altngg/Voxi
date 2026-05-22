@@ -5,5 +5,6 @@ class Settings(BaseSettings):
 
     ollama_url: str
     ollama_model: str
+    ollama_num_ctx: int = 1024
 
 settings = Settings()
