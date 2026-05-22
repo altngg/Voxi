@@ -5,7 +5,6 @@ import {
   ClipboardList,
   Languages as LanguagesIcon,
   LogOut,
-  Mail,
   CalendarDays,
 } from "lucide-react";
 
@@ -69,22 +68,6 @@ const StatCard = ({ label, value, icon }: StatCardProps) => (
   </div>
 );
 
-type InfoRowProps = {
-  label: string;
-  value: string;
-  icon: React.ReactNode;
-};
-
-const InfoRow = ({ label, value, icon }: InfoRowProps) => (
-  <div className="flex items-center gap-3">
-    <span className="ui-icon-tile ui-icon-tile--sm">{icon}</span>
-    <div className="flex min-w-0 flex-col">
-      <span className="text-sm text-(--text-secondary)">{label}</span>
-      <span className="truncate text-base font-medium">{value}</span>
-    </div>
-  </div>
-);
-
 type ProfileContentProps = {
   user: UserProfile;
 };
@@ -112,7 +95,10 @@ const ProfileContent = ({ user }: ProfileContentProps) => {
     <main className="ui-page">
       <section className="ui-card ui-page-section max-w-4xl px-4 py-6 sm:px-6">
         <header className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:text-left">
-          <span aria-hidden className="ui-icon-tile ui-icon-tile--circle text-2xl font-bold">
+          <span
+            aria-hidden
+            className="ui-icon-tile ui-icon-tile--circle text-2xl font-bold"
+          >
             {getInitials(user.login)}
           </span>
           <div className="flex min-w-0 flex-col">
@@ -125,25 +111,14 @@ const ProfileContent = ({ user }: ProfileContentProps) => {
 
         <hr className="ui-divider" />
 
-        <section
-          aria-label="Данные аккаунта"
-          className="grid grid-cols-1 gap-4 sm:grid-cols-2"
-        >
-          <InfoRow
-            label="Почта"
-            value={user.email}
-            icon={<Mail className="h-5 w-5" />}
-          />
-          <InfoRow
-            label="В Voxi с"
-            value={formatJoinDate(user.createdAt)}
-            icon={<CalendarDays className="h-5 w-5" />}
-          />
-        </section>
-
-        <section aria-label="Статистика" className="mt-8">
+        <section aria-label="Статистика">
           <h2 className="ui-section-title mb-3">Статистика</h2>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <StatCard
+              label="В Voxi с"
+              value={formatJoinDate(user.createdAt)}
+              icon={<CalendarDays className="h-5 w-5" />}
+            />
             <StatCard
               label="Пройдено тестов"
               value={testResults.length}
