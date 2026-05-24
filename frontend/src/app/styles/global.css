@@ -395,6 +395,11 @@
     opacity: 0.65;
   }
 
+  .ui-button--pending {
+    justify-content: center;
+    gap: 0;
+  }
+
   .ui-button--ghost {
     background: transparent;
     color: var(--text-primary);

@@ -30,13 +30,14 @@ export const Button = ({
       className={cn(
         "ui-button",
         variant === "ghost" && "ui-button--ghost",
+        isPending && "ui-button--pending",
         className,
       )}
       disabled={isPending || disabled}
       onClick={onClick}
     >
-      {label ? <span>{label}</span> : null}
-      {children}
+      {label ? <span className={cn(isPending && "whitespace-nowrap")}>{label}</span> : null}
+      {!isPending ? children : null}
     </button>
   );
 };

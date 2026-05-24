@@ -38,10 +38,10 @@ export const RegistrationPage = () => {
 
   return (
     <main className="ui-form-page">
-      <section className="ui-card-form w-full max-w-[600px]">
-        <h1 className="ui-form-title mb-4">Регистрация</h1>
+      <section className="ui-card-form w-full max-w-70">
+        <h1 className="ui-form-title mb-1">Регистрация</h1>
 
-        <form className="flex w-full flex-col gap-4" onSubmit={handleSubmit}>
+        <form className="flex w-full flex-col" onSubmit={handleSubmit}>
           <Input
             title="Введите имя пользователя:"
             inputName="login"
@@ -88,7 +88,11 @@ export const RegistrationPage = () => {
             </p>
           ) : null}
 
-          <Button buttonType="submit" buttonName="Выбрать язык">
+          <Button
+            className="mt-3"
+            buttonType="submit"
+            buttonName="Выбрать язык"
+          >
             <span aria-hidden>→</span>
           </Button>
         </form>

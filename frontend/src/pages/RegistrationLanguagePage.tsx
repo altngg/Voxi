@@ -68,7 +68,7 @@ export const RegistrationLanguagePage = () => {
 
   return (
     <main className="ui-form-page">
-      <section className="ui-card-form w-full max-w-[600px]">
+      <section className="ui-card-form w-full max-w-78">
         <h1 className="ui-form-title mb-4">Выбор языка</h1>
 
         <form className="flex w-full flex-col gap-4" onSubmit={handleSubmit}>
