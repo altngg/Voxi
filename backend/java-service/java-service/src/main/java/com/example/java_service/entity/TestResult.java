@@ -3,7 +3,6 @@ package com.example.java_service.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @Entity
 @Table(name = "test_results")
@@ -18,27 +17,22 @@ public class TestResult {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "language_id", nullable = false)
+    private Language language;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "test_id", nullable = false)
-    private Test test;
+    @JoinColumn(name = "overall_level_id", nullable = false)
+    private Level overallLevel;
 
-    @Column(nullable = false)
-    private Integer overallScore;
+    @Column(name = "grammar_score")
+    private Integer grammarScore;
 
-    @Column(nullable = false)
-    private Integer totalQuestions;
-
-    @Column(nullable = false)
-    private String overallLevel;
-
-    @ElementCollection
-    @CollectionTable(name = "test_result_topics", joinColumns = @JoinColumn(name = "test_result_id"))
-    @MapKeyColumn(name = "topic_name")
-    @Column(name = "topic_score")
-    private Map<String, Integer> topicScores;
+    @Column(name = "vocabulary_score")
+    private Integer vocabularyScore;
 
     @Column(name = "completed_at", nullable = false)
     private LocalDateTime completedAt;

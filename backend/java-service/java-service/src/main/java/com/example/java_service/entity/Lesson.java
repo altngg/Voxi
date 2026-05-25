@@ -1,8 +1,20 @@
 package com.example.java_service.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
 import java.util.List;
+
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "lessons")
@@ -11,6 +23,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Lesson {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,17 +37,14 @@ public class Lesson {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String theory;
 
-    @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Task> tasks;
+    @Column(name = "language_id", nullable = false)
+    private Long languageId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "level_id", nullable = false)
-    private Level level;
+    @Column(name = "level_id", nullable = false)
+    private Long levelId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "language_id", nullable = false)
-    private Language language;
-
-    @ManyToMany(mappedBy = "completedLessons")
-    private List<User> completedByUsers;
+    @ElementCollection
+    @CollectionTable(name = "lesson_tasks", joinColumns = @JoinColumn(name = "lesson_id"))
+    @Column(name = "task_id")
+    private List<Long> taskIds;
 }

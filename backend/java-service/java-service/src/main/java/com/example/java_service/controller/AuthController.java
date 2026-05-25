@@ -1,31 +1,38 @@
 package com.example.java_service.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.java_service.dto.request.LoginRequest;
 import com.example.java_service.dto.request.RegisterRequest;
 import com.example.java_service.dto.response.AuthResponse;
 import com.example.java_service.service.AuthenticationService;
-import com.example.java_service.service.CookieService;
-import jakarta.servlet.http.HttpServletRequest;
+
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@Slf4j
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"}, allowCredentials = "true")
 public class AuthController {
 
     private final AuthenticationService authenticationService;
-    private final CookieService cookieService;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(
             @Valid @RequestBody RegisterRequest request,
             HttpServletResponse response
     ) {
+        log.info("Registration request for email: {}", request.getEmail());
         AuthResponse authResponse = authenticationService.register(request, response);
         return ResponseEntity.ok(authResponse);
     }
@@ -35,23 +42,34 @@ public class AuthController {
             @Valid @RequestBody LoginRequest request,
             HttpServletResponse response
     ) {
+        log.info("Login request for email: {}", request.getEmail());
         AuthResponse authResponse = authenticationService.login(request, response);
         return ResponseEntity.ok(authResponse);
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<AuthResponse> logout(HttpServletResponse response) {
-        AuthResponse authResponse = authenticationService.logout(response);
-        return ResponseEntity.ok(authResponse);
-    }
-
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refresh(
-            HttpServletRequest request,
+    public ResponseEntity<AuthResponse> refreshTokens(
+            @CookieValue(value = "refresh_token", required = false) String refreshToken,
             HttpServletResponse response
     ) {
-        String refreshToken = cookieService.getRefreshTokenFromCookie(request);
-        AuthResponse authResponse = authenticationService.refresh(response, refreshToken);
+        log.debug("Refresh token request");
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            log.warn("Refresh token not found");
+            return ResponseEntity.status(401).build();
+        }
+        try {
+            AuthResponse authResponse = authenticationService.refreshTokens(refreshToken, response);
+            return ResponseEntity.ok(authResponse);
+        } catch (Exception e) {
+            log.warn("Token refresh failed: {}", e.getMessage());
+            return ResponseEntity.status(401).build();
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<AuthResponse> logout(HttpServletResponse response) {
+        log.info("Logout request");
+        AuthResponse authResponse = authenticationService.logout(response);
         return ResponseEntity.ok(authResponse);
     }
 }

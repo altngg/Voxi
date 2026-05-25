@@ -1,0 +1,412 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ */
+/* Fonts                                                              */
+/* ------------------------------------------------------------------ */
+@font-face {
+  font-family: "Jura";
+  src:
+    url("../../assets/fonts/Jura-Bold.woff2") format("woff2"),
+    url("../../assets/fonts/Jura-Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Jura";
+  src:
+    url("../../assets/fonts/Jura-Medium.woff2") format("woff2"),
+    url("../../assets/fonts/Jura-Medium.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Jura";
+  src:
+    url("../../assets/fonts/Jura-Light.woff2") format("woff2"),
+    url("../../assets/fonts/Jura-Light.woff") format("woff");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Jura";
+  src:
+    url("../../assets/fonts/Jura-Regular.woff2") format("woff2"),
+    url("../../assets/fonts/Jura-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Jura";
+  src:
+    url("../../assets/fonts/Jura-SemiBold.woff2") format("woff2"),
+    url("../../assets/fonts/Jura-SemiBold.woff") format("woff");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ------------------------------------------------------------------ */
+/* Design tokens                                                      */
+/* ------------------------------------------------------------------ */
+:root {
+  --font-primary: "Jura", "Manrope", "Segoe UI", sans-serif;
+
+  /* Surfaces */
+  --bg-canvas: #dbdae2;
+  --bg-primary: #7066cc;
+  --bg-secondary: #cac6e8;
+  --bg-muted: #f1f0f6;
+  --bg-error: #fff5f5;
+  --bg-alert: #f7eccd;
+  --bg-success: #5aab3a33;
+
+  /* Borders */
+  --default-border: #7066cc;
+  --soft-border: rgba(112, 102, 204, 0.25);
+  --border-card: 4px;
+  --border-default: 2px;
+  --border-control: 3px;
+
+  /* Text */
+  --text-primary: #7066cc;
+  --text-secondary: #00000080;
+  --text-on-primary: #ffffff;
+
+  /* Semantic colors */
+  --success: #439f6e;
+  --danger: #e5484d;
+  --alert: #fcaa06;
+
+  /* Tint / overlays */
+  --tint-primary-soft: rgba(112, 102, 204, 0.08);
+  --tint-primary-medium: rgba(112, 102, 204, 0.15);
+  --tint-primary-strong: rgba(112, 102, 204, 0.25);
+
+  /* Radii */
+  --radius-pill: 9999px;
+  --radius-form: 50px;
+  --radius-card: 1.5rem;
+  --radius-card-sm: 1.25rem;
+  --radius-input: 50px;
+
+  /* Shadows */
+  --shadow-card: 0 8px 28px -16px rgba(112, 102, 204, 0.35);
+  --shadow-focus: 0 0 0 3px var(--tint-primary-medium);
+  --shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.14);
+}
+
+/* ------------------------------------------------------------------ */
+/* Base                                                               */
+/* ------------------------------------------------------------------ */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html,
+  #root {
+    height: 100%;
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 32px;
+  }
+
+  body {
+    height: 100%;
+    margin: 0;
+    background: var(--bg-canvas);
+    color: var(--text-primary);
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 1.1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p {
+    margin: 0;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  ::selection {
+    background: var(--tint-primary-strong);
+    color: var(--text-primary);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--default-border);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--default-border) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--soft-border);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--default-border);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Reusable component classes                                         */
+/* ------------------------------------------------------------------ */
+@layer components {
+  /* ---------- Page wrappers --------------------------------------- */
+  .ui-page {
+    box-sizing: border-box;
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    padding-block-end: 1rem;
+  }
+  @media (min-width: 640px) {
+    .ui-page {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  .ui-form-page {
+    display: flex;
+    min-height: 100%;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  /* Inner section helper for ui-page (vertical card layout) */
+  .ui-page-section {
+    margin-inline: auto;
+    margin-block-start: 1rem;
+    width: 100%;
+    max-width: 72rem;
+  }
+
+  /* ---------- Cards ----------------------------------------------- */
+  .ui-card {
+    border-radius: var(--radius-card);
+    border: var(--border-card) solid var(--default-border);
+    background: var(--bg-canvas);
+    box-shadow: var(--shadow-card);
+  }
+
+  .ui-card-form {
+    border-radius: var(--radius-form);
+    border: var(--border-card) solid var(--default-border);
+    background: var(--bg-canvas);
+    box-shadow: var(--shadow-card);
+    padding: 1.5rem;
+  }
+
+  .ui-card-inset {
+    border-radius: var(--radius-card-sm);
+    border: var(--border-default) solid var(--default-border);
+    transition: border-color 200ms ease, background-color 200ms ease;
+  }
+
+  /* ---------- Pills / tags ---------------------------------------- */
+  .ui-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-pill);
+    border: var(--border-default) solid var(--default-border);
+    padding-inline: 1rem;
+    padding-block: 0.25rem;
+  }
+
+  /* ---------- Icon tiles ------------------------------------------ */
+  .ui-icon-tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    height: 2.5rem;
+    width: 2.5rem;
+    border-radius: 0.625rem;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+
+  .ui-icon-tile--sm {
+    height: 2.25rem;
+    width: 2.25rem;
+    border-radius: 0.5rem;
+  }
+
+  .ui-icon-tile--lg {
+    height: 3rem;
+    width: 3rem;
+    border-radius: 0.875rem;
+  }
+
+  .ui-icon-tile--circle {
+    height: 4rem;
+    width: 4rem;
+    border-radius: 9999px;
+    background: var(--bg-primary);
+    color: var(--text-on-primary);
+  }
+
+  /* ---------- Typography ------------------------------------------ */
+  .ui-page-title {
+    font-size: 1.5rem;
+    line-height: 1.15;
+    font-weight: 700;
+  }
+
+  .ui-form-title {
+    font-size: 1.25rem;
+    line-height: 1.15;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .ui-section-title {
+    font-size: 1.125rem;
+    line-height: 1.2;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .ui-text-muted {
+    color: var(--text-secondary);
+  }
+
+  /* ---------- Divider --------------------------------------------- */
+  .ui-divider {
+    border: 0;
+    border-top: 2px solid var(--default-border);
+    opacity: 0.35;
+    margin-block: 1.25rem;
+  }
+
+  /* ---------- Form controls --------------------------------------- */
+  .ui-input {
+    display: block;
+    height: 45px;
+    width: 100%;
+    border-radius: var(--radius-input);
+    border: var(--border-control) solid var(--default-border);
+    background: transparent;
+    padding-inline: 1rem;
+    color: var(--text-primary);
+    outline: none;
+    transition:
+      border-color 200ms ease,
+      box-shadow 200ms ease;
+  }
+
+  .ui-input:hover:not(:disabled):not([data-error="true"]) {
+    border-color: var(--bg-primary);
+  }
+
+  .ui-input:focus:not(:disabled):not([data-error="true"]) {
+    box-shadow: var(--shadow-focus);
+  }
+
+  .ui-input[data-error="true"] {
+    border-color: var(--danger);
+  }
+
+  .ui-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* ---------- Button (pill primary) ------------------------------- */
+  .ui-button {
+    display: inline-flex;
+    height: 46px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 50px;
+    cursor: pointer;
+    border-radius: var(--radius-pill);
+    border: var(--border-control) solid var(--default-border);
+    background: var(--bg-primary);
+    color: var(--bg-canvas);
+    padding-inline: 14px;
+    transition:
+      background-color 200ms ease,
+      color 200ms ease,
+      transform 120ms ease;
+  }
+
+  .ui-button:hover:not(:disabled) {
+    background: transparent;
+    color: var(--text-primary);
+  }
+
+  .ui-button:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  .ui-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
+
+  .ui-button--pending {
+    justify-content: center;
+    gap: 0;
+  }
+
+  .ui-button--ghost {
+    background: transparent;
+    color: var(--text-primary);
+  }
+
+  .ui-button--ghost:hover:not(:disabled) {
+    background: var(--bg-primary);
+    color: var(--bg-canvas);
+  }
+}

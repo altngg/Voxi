@@ -1,8 +1,18 @@
 package com.example.java_service.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import java.time.LocalDateTime;
 import java.util.List;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "tasks")
@@ -11,39 +21,32 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Task {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false, columnDefinition = "TEXT")
     private String name;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private TaskType type;
-
-    @Column(columnDefinition = "TEXT")
-    private String content;
-
-    @ElementCollection
-    @CollectionTable(name = "task_options", joinColumns = @JoinColumn(name = "task_id"))
-    @Column(name = "option_value")
-    private List<String> options;
-
-    @Column(nullable = false)
+    @Column(name = "answer", nullable = false, columnDefinition = "TEXT")
     private String answer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lesson_id")
-    private Lesson lesson;
+    @Column(name = "topic_id", nullable = false)
+    private Long topicId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "test_id")
-    private Test test;
+    @Column(name = "language_id", nullable = false)
+    private Long languageId;
 
-    public enum TaskType {
-        MULTIPLY_CHOICE,
-        GAP_FILLING,
-        TRUE_FALSE
-    }
+    @Column(name = "task_type_id", nullable = false)
+    private Long taskTypeId;
+
+    @Column(name = "options")
+    private List<String> options;  
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }
