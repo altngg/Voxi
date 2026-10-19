@@ -1,0 +1,1024 @@
+{
+  "how_to_mark": "Ожидаемый результат — оценка по английскому, не по промпту. Верный ответ: форма подходит заданию, включая допустимый вариант (doesn't = does not). Неверный: другая конструкция, даже если фраза по-английски возможна и смысл близкий. Тема из 3 пунктов: 0 верных → 0, 1 → 3, 2 → 7, 3 → 12. grammar_score и vocabulary_score — процент верных пунктов этой группы. overall_level — по тем конструкциям, которые человек уже держит, а не по проценту.",
+  "cases": [
+    {
+      "id": "1-a1",
+      "expected": {
+        "overall_level": "A1",
+        "grammar_score": 33,
+        "vocabulary_score": 67,
+        "topic_scores": [
+          { "topic": "Present Simple", "score": 3 },
+          { "topic": "Verb to be", "score": 3 },
+          { "topic": "Articles", "score": 3 },
+          { "topic": "Basic vocabulary", "score": 7 }
+        ],
+        "why": "Ошибки в самых частых формах A1: нет -s, путает am/is/are, ставит a перед гласным звуком. Два бытовых слова из трёх не поднимают уровень."
+      },
+      "request": {
+        "language": "English",
+        "levels": ["A1", "A2", "B1", "B2", "C1", "C2"],
+        "topics": [
+          "Present Simple",
+          "Verb to be",
+          "Articles",
+          "Basic vocabulary"
+        ],
+        "tasks_results": [
+          {
+            "name": "She ___ to school every day.",
+            "answer": "goes",
+            "topic": "Present Simple",
+            "user_answer": "go"
+          },
+          {
+            "name": "I ___ coffee in the morning.",
+            "answer": "drink",
+            "topic": "Present Simple",
+            "user_answer": "drink"
+          },
+          {
+            "name": "My brother ___ football on Fridays.",
+            "answer": "plays",
+            "topic": "Present Simple",
+            "user_answer": "play"
+          },
+          {
+            "name": "I ___ from Spain.",
+            "answer": "am",
+            "topic": "Verb to be",
+            "user_answer": "is"
+          },
+          {
+            "name": "They ___ students.",
+            "answer": "are",
+            "topic": "Verb to be",
+            "user_answer": "are"
+          },
+          {
+            "name": "She ___ a doctor.",
+            "answer": "is",
+            "topic": "Verb to be",
+            "user_answer": "am"
+          },
+          {
+            "name": "This is ___ apple.",
+            "answer": "an",
+            "topic": "Articles",
+            "user_answer": "a"
+          },
+          {
+            "name": "I need ___ pen.",
+            "answer": "a",
+            "topic": "Articles",
+            "user_answer": "a"
+          },
+          {
+            "name": "He is ___ honest man.",
+            "answer": "an",
+            "topic": "Articles",
+            "user_answer": "a"
+          },
+          {
+            "name": "The opposite of big is ___.",
+            "answer": "small",
+            "topic": "Basic vocabulary",
+            "user_answer": "small"
+          },
+          {
+            "name": "A person who teaches at school is a ___.",
+            "answer": "teacher",
+            "topic": "Basic vocabulary",
+            "user_answer": "student"
+          },
+          {
+            "name": "You sleep in a ___.",
+            "answer": "bed",
+            "topic": "Basic vocabulary",
+            "user_answer": "bed"
+          }
+        ]
+      }
+    },
+    {
+      "id": "2-a2",
+      "expected": {
+        "overall_level": "A2",
+        "grammar_score": 67,
+        "vocabulary_score": 67,
+        "topic_scores": [
+          { "topic": "Present Simple", "score": 12 },
+          { "topic": "Past Simple", "score": 3 },
+          { "topic": "Prepositions", "score": 7 },
+          { "topic": "Everyday vocabulary", "score": 7 }
+        ],
+        "why": "Present Simple устойчивый, включая полную форму does not вместо doesn't: это тот же английский. Неправильные past (goed, seed) не держатся. Это A2, хотя верных ответов уже две трети."
+      },
+      "request": {
+        "language": "English",
+        "levels": ["A1", "A2", "B1", "B2", "C1", "C2"],
+        "topics": [
+          "Present Simple",
+          "Past Simple",
+          "Prepositions",
+          "Everyday vocabulary"
+        ],
+        "tasks_results": [
+          {
+            "name": "She ___ in a bank.",
+            "answer": "works",
+            "topic": "Present Simple",
+            "user_answer": "works"
+          },
+          {
+            "name": "He ___ fish.",
+            "answer": "doesn't like",
+            "topic": "Present Simple",
+            "user_answer": "does not like"
+          },
+          {
+            "name": "My father ___ TV after dinner.",
+            "answer": "watches",
+            "topic": "Present Simple",
+            "user_answer": "watches"
+          },
+          {
+            "name": "I ___ my grandma yesterday.",
+            "answer": "visited",
+            "topic": "Past Simple",
+            "user_answer": "visited"
+          },
+          {
+            "name": "She ___ home at six.",
+            "answer": "went",
+            "topic": "Past Simple",
+            "user_answer": "goed"
+          },
+          {
+            "name": "We ___ a film last night.",
+            "answer": "saw",
+            "topic": "Past Simple",
+            "user_answer": "seed"
+          },
+          {
+            "name": "The keys are ___ the bag.",
+            "answer": "in",
+            "topic": "Prepositions",
+            "user_answer": "in"
+          },
+          {
+            "name": "I get up ___ 7 o'clock.",
+            "answer": "at",
+            "topic": "Prepositions",
+            "user_answer": "in"
+          },
+          {
+            "name": "Her birthday is ___ May.",
+            "answer": "in",
+            "topic": "Prepositions",
+            "user_answer": "in"
+          },
+          {
+            "name": "The meal you eat in the morning is ___.",
+            "answer": "breakfast",
+            "topic": "Everyday vocabulary",
+            "user_answer": "breakfast"
+          },
+          {
+            "name": "A ticket to go somewhere and come back is a ___ ticket.",
+            "answer": "return",
+            "topic": "Everyday vocabulary",
+            "user_answer": "double"
+          },
+          {
+            "name": "You wear these on your feet.",
+            "answer": "shoes",
+            "topic": "Everyday vocabulary",
+            "user_answer": "shoes"
+          }
+        ]
+      }
+    },
+    {
+      "id": "3-b1",
+      "expected": {
+        "overall_level": "B1",
+        "grammar_score": 67,
+        "vocabulary_score": 67,
+        "topic_scores": [
+          { "topic": "Present Simple and Present Continuous", "score": 7 },
+          { "topic": "Past Simple", "score": 12 },
+          { "topic": "Present Perfect", "score": 3 },
+          { "topic": "Work vocabulary", "score": 7 }
+        ],
+        "why": "Прошедшее время уже спокойное, вид в настоящем почти различает, но один раз ставит Continuous вместо общего факта. Present Perfect с since/for почти не выходит. Это середина B1, не B2."
+      },
+      "request": {
+        "language": "English",
+        "levels": ["A1", "A2", "B1", "B2", "C1", "C2"],
+        "topics": [
+          "Present Simple and Present Continuous",
+          "Past Simple",
+          "Present Perfect",
+          "Work vocabulary"
+        ],
+        "tasks_results": [
+          {
+            "name": "Look! She ___ across the road.",
+            "answer": "is running",
+            "topic": "Present Simple and Present Continuous",
+            "user_answer": "is running"
+          },
+          {
+            "name": "Water ___ at 100 degrees.",
+            "answer": "boils",
+            "topic": "Present Simple and Present Continuous",
+            "user_answer": "is boiling"
+          },
+          {
+            "name": "I ___ this book every summer.",
+            "answer": "read",
+            "topic": "Present Simple and Present Continuous",
+            "user_answer": "read"
+          },
+          {
+            "name": "We ___ to Paris in 2019.",
+            "answer": "went",
+            "topic": "Past Simple",
+            "user_answer": "went"
+          },
+          {
+            "name": "She ___ a new coat last week.",
+            "answer": "bought",
+            "topic": "Past Simple",
+            "user_answer": "bought"
+          },
+          {
+            "name": "They ___ the report yesterday.",
+            "answer": "finished",
+            "topic": "Past Simple",
+            "user_answer": "finished"
+          },
+          {
+            "name": "I ___ here since 2019.",
+            "answer": "have lived",
+            "topic": "Present Perfect",
+            "user_answer": "live"
+          },
+          {
+            "name": "They ___ each other for ten years.",
+            "answer": "have known",
+            "topic": "Present Perfect",
+            "user_answer": "know"
+          },
+          {
+            "name": "She ___ her keys. She is looking for them now.",
+            "answer": "has lost",
+            "topic": "Present Perfect",
+            "user_answer": "has lost"
+          },
+          {
+            "name": "A person who writes for a newspaper is a ___.",
+            "answer": "journalist",
+            "topic": "Work vocabulary",
+            "user_answer": "journalist"
+          },
+          {
+            "name": "Money you receive for your work is your ___.",
+            "answer": "salary",
+            "topic": "Work vocabulary",
+            "user_answer": "money"
+          },
+          {
+            "name": "When people stop working at about 65, they ___.",
+            "answer": "retire",
+            "topic": "Work vocabulary",
+            "user_answer": "retire"
+          }
+        ]
+      }
+    },
+    {
+      "id": "4-b2",
+      "expected": {
+        "overall_level": "B2",
+        "grammar_score": 67,
+        "vocabulary_score": 67,
+        "topic_scores": [
+          { "topic": "Present Perfect and Past Simple", "score": 12 },
+          { "topic": "Passive", "score": 7 },
+          { "topic": "Second Conditional", "score": 3 },
+          { "topic": "Precise vocabulary", "score": 7 }
+        ],
+        "why": "Разницу Past Simple и Present Perfect держит. В пассиве два ответа верные, третий — активный пересказ с тем же смыслом: конструкция не показана, балл за пункт не ставим. Второй условный не собран. Это B2 с дыркой, не C1."
+      },
+      "request": {
+        "language": "English",
+        "levels": ["A1", "A2", "B1", "B2", "C1", "C2"],
+        "topics": [
+          "Present Perfect and Past Simple",
+          "Passive",
+          "Second Conditional",
+          "Precise vocabulary"
+        ],
+        "tasks_results": [
+          {
+            "name": "I ___ that film in 2010.",
+            "answer": "saw",
+            "topic": "Present Perfect and Past Simple",
+            "user_answer": "saw"
+          },
+          {
+            "name": "I ___ that film already.",
+            "answer": "have seen",
+            "topic": "Present Perfect and Past Simple",
+            "user_answer": "have seen"
+          },
+          {
+            "name": "She ___ in Paris when she was a child.",
+            "answer": "lived",
+            "topic": "Present Perfect and Past Simple",
+            "user_answer": "lived"
+          },
+          {
+            "name": "The letter ___ yesterday.",
+            "answer": "was sent",
+            "topic": "Passive",
+            "user_answer": "was sent"
+          },
+          {
+            "name": "English ___ in many countries.",
+            "answer": "is spoken",
+            "topic": "Passive",
+            "user_answer": "is spoken"
+          },
+          {
+            "name": "Rewrite in the passive: The storm broke the window.",
+            "answer": "The window was broken by the storm.",
+            "topic": "Passive",
+            "user_answer": "The storm broke the window."
+          },
+          {
+            "name": "If I ___ more time, I would travel.",
+            "answer": "had",
+            "topic": "Second Conditional",
+            "user_answer": "would have"
+          },
+          {
+            "name": "If she ___ his number, she would call him.",
+            "answer": "knew",
+            "topic": "Second Conditional",
+            "user_answer": "knew"
+          },
+          {
+            "name": "I would buy it if it ___ cheaper.",
+            "answer": "were",
+            "topic": "Second Conditional",
+            "user_answer": "is"
+          },
+          {
+            "name": "Scarce means ___.",
+            "answer": "rare",
+            "topic": "Precise vocabulary",
+            "user_answer": "rare"
+          },
+          {
+            "name": "A decision that cannot be changed is ___.",
+            "answer": "irreversible",
+            "topic": "Precise vocabulary",
+            "user_answer": "unimportant"
+          },
+          {
+            "name": "To make a problem less severe is to ___ it.",
+            "answer": "alleviate",
+            "topic": "Precise vocabulary",
+            "user_answer": "alleviate"
+          }
+        ]
+      }
+    },
+    {
+      "id": "5-c1",
+      "expected": {
+        "overall_level": "C1",
+        "grammar_score": 78,
+        "vocabulary_score": 67,
+        "topic_scores": [
+          { "topic": "Mixed Conditionals", "score": 7 },
+          { "topic": "Articles", "score": 7 },
+          { "topic": "Inversion", "score": 12 },
+          { "topic": "Nuanced vocabulary", "score": 7 }
+        ],
+        "why": "Инверсия стабильна. В смешанном условном один раз подставляет форму второго типа. С абстрактным существительным лишний the. Для C2 этих сбоев уже много, для C1 это обычный потолок."
+      },
+      "request": {
+        "language": "English",
+        "levels": ["A1", "A2", "B1", "B2", "C1", "C2"],
+        "topics": [
+          "Mixed Conditionals",
+          "Articles",
+          "Inversion",
+          "Nuanced vocabulary"
+        ],
+        "tasks_results": [
+          {
+            "name": "If I ___ medicine, I would be a doctor now.",
+            "answer": "had studied",
+            "topic": "Mixed Conditionals",
+            "user_answer": "had studied"
+          },
+          {
+            "name": "If she ___ the train, she would be here now.",
+            "answer": "hadn't missed",
+            "topic": "Mixed Conditionals",
+            "user_answer": "didn't miss"
+          },
+          {
+            "name": "If he ___ the job, he would live in Berlin now.",
+            "answer": "had taken",
+            "topic": "Mixed Conditionals",
+            "user_answer": "had taken"
+          },
+          {
+            "name": "She plays ___ piano.",
+            "answer": "the",
+            "topic": "Articles",
+            "user_answer": "the"
+          },
+          {
+            "name": "___ life is short.",
+            "answer": "no article",
+            "topic": "Articles",
+            "user_answer": "The"
+          },
+          {
+            "name": "She has ___ flu.",
+            "answer": "the",
+            "topic": "Articles",
+            "user_answer": "the"
+          },
+          {
+            "name": "Never ___ I seen such a mess.",
+            "answer": "have",
+            "topic": "Inversion",
+            "user_answer": "have"
+          },
+          {
+            "name": "Rarely ___ she complain.",
+            "answer": "does",
+            "topic": "Inversion",
+            "user_answer": "does"
+          },
+          {
+            "name": "Not only ___ he late, but he also forgot the files.",
+            "answer": "was",
+            "topic": "Inversion",
+            "user_answer": "was"
+          },
+          {
+            "name": "To mitigate means to ___.",
+            "answer": "make less severe",
+            "topic": "Nuanced vocabulary",
+            "user_answer": "make less severe"
+          },
+          {
+            "name": "A word's suggested meaning, not its direct meaning, is its ___.",
+            "answer": "connotation",
+            "topic": "Nuanced vocabulary",
+            "user_answer": "definition"
+          },
+          {
+            "name": "A pragmatic person is ___.",
+            "answer": "practical",
+            "topic": "Nuanced vocabulary",
+            "user_answer": "practical"
+          }
+        ]
+      }
+    },
+    {
+      "id": "6-c2",
+      "expected": {
+        "overall_level": "C2",
+        "grammar_score": 100,
+        "vocabulary_score": 100,
+        "topic_scores": [
+          { "topic": "Subjunctive", "score": 12 },
+          { "topic": "Inversion", "score": 12 },
+          { "topic": "Articles", "score": 12 },
+          { "topic": "Advanced vocabulary", "score": 12 }
+        ],
+        "why": "Все 12 ответов допустимы, и сами пункты уже уровня C2: subjunctive, инверсия, артикли the rich / нулевой артикль prison. Поэтому здесь 100% — это C2. Те же 100% на тесте из I am / I like уровнем C2 не были бы."
+      },
+      "request": {
+        "language": "English",
+        "levels": ["A1", "A2", "B1", "B2", "C1", "C2"],
+        "topics": [
+          "Subjunctive",
+          "Inversion",
+          "Articles",
+          "Advanced vocabulary"
+        ],
+        "tasks_results": [
+          {
+            "name": "The teacher insists that he ___ on time.",
+            "answer": "be",
+            "topic": "Subjunctive",
+            "user_answer": "be"
+          },
+          {
+            "name": "I suggest that she ___ the earlier train.",
+            "answer": "take",
+            "topic": "Subjunctive",
+            "user_answer": "take"
+          },
+          {
+            "name": "It is vital that the door ___ shut.",
+            "answer": "remain",
+            "topic": "Subjunctive",
+            "user_answer": "remain"
+          },
+          {
+            "name": "Had I known, I ___ you.",
+            "answer": "would have told",
+            "topic": "Inversion",
+            "user_answer": "would have told"
+          },
+          {
+            "name": "Under no circumstances ___ you allowed to enter.",
+            "answer": "are",
+            "topic": "Inversion",
+            "user_answer": "are"
+          },
+          {
+            "name": "Little ___ she realize the danger.",
+            "answer": "did",
+            "topic": "Inversion",
+            "user_answer": "did"
+          },
+          {
+            "name": "___ rich are getting richer.",
+            "answer": "The",
+            "topic": "Articles",
+            "user_answer": "The"
+          },
+          {
+            "name": "He was sent to ___ prison for fraud.",
+            "answer": "no article",
+            "topic": "Articles",
+            "user_answer": "no article"
+          },
+          {
+            "name": "She has ___ good knowledge of Latin.",
+            "answer": "a",
+            "topic": "Articles",
+            "user_answer": "a"
+          },
+          {
+            "name": "Ephemeral means ___.",
+            "answer": "lasting for a very short time",
+            "topic": "Advanced vocabulary",
+            "user_answer": "lasting for a very short time"
+          },
+          {
+            "name": "Ubiquitous means ___.",
+            "answer": "found everywhere",
+            "topic": "Advanced vocabulary",
+            "user_answer": "found everywhere"
+          },
+          {
+            "name": "To flout a rule means ___.",
+            "answer": "to break it openly",
+            "topic": "Advanced vocabulary",
+            "user_answer": "to break it openly"
+          }
+        ]
+      }
+    },
+    {
+      "id": "7-aspect",
+      "expected": {
+        "overall_level": "A2",
+        "grammar_score": 33,
+        "vocabulary_score": 100,
+        "topic_scores": [
+          { "topic": "Present Simple", "score": 0 },
+          { "topic": "Present Perfect", "score": 0 },
+          { "topic": "Articles", "score": 12 },
+          { "topic": "Basic vocabulary", "score": 12 }
+        ],
+        "why": "Ответы по временам — нормальный английский, но не та конструкция: is going вместо привычки, knew вместо have known с since. Смысл близкий, задание не сделано. Артикли и слова при этом все верные, уровень из-за этого не растёт. Совпадает с тестом 2 по уровню и отличается по ошибкам."
+      },
+      "request": {
+        "language": "English",
+        "levels": ["A1", "A2", "B1", "B2", "C1", "C2"],
+        "topics": [
+          "Present Simple",
+          "Present Perfect",
+          "Articles",
+          "Basic vocabulary"
+        ],
+        "tasks_results": [
+          {
+            "name": "She ___ to work every day.",
+            "answer": "goes",
+            "topic": "Present Simple",
+            "user_answer": "is going"
+          },
+          {
+            "name": "Water ___ at 0°C.",
+            "answer": "freezes",
+            "topic": "Present Simple",
+            "user_answer": "is freezing"
+          },
+          {
+            "name": "I ___ my parents every Sunday.",
+            "answer": "visit",
+            "topic": "Present Simple",
+            "user_answer": "am visiting"
+          },
+          {
+            "name": "I ___ him since Monday.",
+            "answer": "haven't seen",
+            "topic": "Present Perfect",
+            "user_answer": "didn't see"
+          },
+          {
+            "name": "She ___ here for two hours.",
+            "answer": "has been",
+            "topic": "Present Perfect",
+            "user_answer": "was"
+          },
+          {
+            "name": "They ___ each other since school.",
+            "answer": "have known",
+            "topic": "Present Perfect",
+            "user_answer": "knew"
+          },
+          {
+            "name": "I saw ___ elephant.",
+            "answer": "an",
+            "topic": "Articles",
+            "user_answer": "an"
+          },
+          {
+            "name": "___ sun is bright today.",
+            "answer": "The",
+            "topic": "Articles",
+            "user_answer": "The"
+          },
+          {
+            "name": "She wants to be ___ teacher.",
+            "answer": "a",
+            "topic": "Articles",
+            "user_answer": "a"
+          },
+          {
+            "name": "The opposite of hot is ___.",
+            "answer": "cold",
+            "topic": "Basic vocabulary",
+            "user_answer": "cold"
+          },
+          {
+            "name": "A baby dog is a ___.",
+            "answer": "puppy",
+            "topic": "Basic vocabulary",
+            "user_answer": "puppy"
+          },
+          {
+            "name": "You drink water from a ___.",
+            "answer": "glass",
+            "topic": "Basic vocabulary",
+            "user_answer": "glass"
+          }
+        ]
+      }
+    },
+    {
+      "id": "8-split",
+      "expected": {
+        "overall_level": "A2",
+        "grammar_score": 50,
+        "vocabulary_score": 100,
+        "topic_scores": [
+          { "topic": "Present Simple", "score": 12 },
+          { "topic": "Past Simple", "score": 12 },
+          { "topic": "Conditionals", "score": 0 },
+          { "topic": "Passive", "score": 0 },
+          { "topic": "Everyday vocabulary", "score": 12 }
+        ],
+        "why": "Present Simple и Past Simple без ошибок, условные и пассив нулевые. Активный пересказ пассива смысл сохраняет, но тему не показывает. Уровень не усредняется до B1: человек останавливается на A2."
+      },
+      "request": {
+        "language": "English",
+        "levels": ["A1", "A2", "B1", "B2", "C1", "C2"],
+        "topics": [
+          "Present Simple",
+          "Past Simple",
+          "Conditionals",
+          "Passive",
+          "Everyday vocabulary"
+        ],
+        "tasks_results": [
+          {
+            "name": "She works in an office.",
+            "answer": "works",
+            "topic": "Present Simple",
+            "user_answer": "works"
+          },
+          {
+            "name": "They don't live here.",
+            "answer": "don't",
+            "topic": "Present Simple",
+            "user_answer": "don't"
+          },
+          {
+            "name": "He watches the news every night.",
+            "answer": "watches",
+            "topic": "Present Simple",
+            "user_answer": "watches"
+          },
+          {
+            "name": "I visited Rome last year.",
+            "answer": "visited",
+            "topic": "Past Simple",
+            "user_answer": "visited"
+          },
+          {
+            "name": "She went home early.",
+            "answer": "went",
+            "topic": "Past Simple",
+            "user_answer": "went"
+          },
+          {
+            "name": "We saw a good film.",
+            "answer": "saw",
+            "topic": "Past Simple",
+            "user_answer": "saw"
+          },
+          {
+            "name": "If it rains tomorrow, I ___ at home.",
+            "answer": "will stay",
+            "topic": "Conditionals",
+            "user_answer": "would stay"
+          },
+          {
+            "name": "If I ___ a car, I would drive.",
+            "answer": "had",
+            "topic": "Conditionals",
+            "user_answer": "have"
+          },
+          {
+            "name": "If she had left earlier, she ___ the train.",
+            "answer": "would have caught",
+            "topic": "Conditionals",
+            "user_answer": "caught"
+          },
+          {
+            "name": "Rewrite in the passive: The storm broke the window.",
+            "answer": "The window was broken by the storm.",
+            "topic": "Passive",
+            "user_answer": "The storm broke the window."
+          },
+          {
+            "name": "Rewrite in the passive: People speak English all over the world.",
+            "answer": "English is spoken all over the world.",
+            "topic": "Passive",
+            "user_answer": "People speak English all over the world."
+          },
+          {
+            "name": "Rewrite in the passive: Someone will write the report tomorrow.",
+            "answer": "The report will be written tomorrow.",
+            "topic": "Passive",
+            "user_answer": "Someone will write the report tomorrow."
+          },
+          {
+            "name": "Choose the synonym for happy.",
+            "answer": "joyful",
+            "topic": "Everyday vocabulary",
+            "user_answer": "joyful"
+          },
+          {
+            "name": "The opposite of ancient is ___.",
+            "answer": "modern",
+            "topic": "Everyday vocabulary",
+            "user_answer": "modern"
+          },
+          {
+            "name": "Purchase means ___.",
+            "answer": "buy",
+            "topic": "Everyday vocabulary",
+            "user_answer": "buy"
+          }
+        ]
+      }
+    },
+    {
+      "language": "English",
+      "levels": ["A1", "A2", "B1", "B2", "C1", "C2"],
+      "topics": [
+        "Present Simple",
+        "Past Simple",
+        "Present Continuous",
+        "Present Perfect",
+        "Articles",
+        "Prepositions",
+        "Modals",
+        "Conditionals",
+        "Passive",
+        "Vocabulary"
+      ],
+      "tasks_results": [
+        {
+          "name": "She ___ (work) in a hospital.",
+          "answer": "works",
+          "topic": "Present Simple",
+          "user_answer": "works"
+        },
+        {
+          "name": "They ___ (not/live) in Paris.",
+          "answer": "don't live",
+          "topic": "Present Simple",
+          "user_answer": "don't live"
+        },
+        {
+          "name": "He ___ (watch) football on Sundays.",
+          "answer": "watches",
+          "topic": "Present Simple",
+          "user_answer": "watches"
+        },
+
+        {
+          "name": "I ___ (visit) my uncle yesterday.",
+          "answer": "visited",
+          "topic": "Past Simple",
+          "user_answer": "visited"
+        },
+        {
+          "name": "She ___ (go) home at eight.",
+          "answer": "went",
+          "topic": "Past Simple",
+          "user_answer": "went"
+        },
+        {
+          "name": "We ___ (see) that film last Friday.",
+          "answer": "saw",
+          "topic": "Past Simple",
+          "user_answer": "saw"
+        },
+
+        {
+          "name": "Look! The baby ___ (sleep).",
+          "answer": "is sleeping",
+          "topic": "Present Continuous",
+          "user_answer": "is sleeping"
+        },
+        {
+          "name": "I ___ (read) a letter right now.",
+          "answer": "am reading",
+          "topic": "Present Continuous",
+          "user_answer": "am reading"
+        },
+        {
+          "name": "Water ___ (boil) at 100 degrees.",
+          "answer": "boils",
+          "topic": "Present Continuous",
+          "user_answer": "is boiling"
+        },
+
+        {
+          "name": "I ___ (live) here since 2020.",
+          "answer": "have lived",
+          "topic": "Present Perfect",
+          "user_answer": "live"
+        },
+        {
+          "name": "She ___ (know) him for five years.",
+          "answer": "has known",
+          "topic": "Present Perfect",
+          "user_answer": "knows"
+        },
+        {
+          "name": "Oh no, I ___ (lose) my ticket.",
+          "answer": "have lost",
+          "topic": "Present Perfect",
+          "user_answer": "have lost"
+        },
+
+        {
+          "name": "This is ___ apple.",
+          "answer": "an",
+          "topic": "Articles",
+          "user_answer": "an"
+        },
+        {
+          "name": "She is ___ honest person.",
+          "answer": "an",
+          "topic": "Articles",
+          "user_answer": "a"
+        },
+        {
+          "name": "I need ___ pen.",
+          "answer": "a",
+          "topic": "Articles",
+          "user_answer": "a"
+        },
+
+        {
+          "name": "The keys are ___ the bag.",
+          "answer": "in",
+          "topic": "Prepositions",
+          "user_answer": "in"
+        },
+        {
+          "name": "The meeting is ___ Monday.",
+          "answer": "on",
+          "topic": "Prepositions",
+          "user_answer": "in"
+        },
+        {
+          "name": "She was born ___ 1998.",
+          "answer": "in",
+          "topic": "Prepositions",
+          "user_answer": "in"
+        },
+
+        {
+          "name": "You look ill. You ___ see a doctor.",
+          "answer": "should",
+          "topic": "Modals",
+          "user_answer": "should"
+        },
+        {
+          "name": "She ___ swim very well.",
+          "answer": "can",
+          "topic": "Modals",
+          "user_answer": "can"
+        },
+        {
+          "name": "You ___ wear a seatbelt. It's the law.",
+          "answer": "must",
+          "topic": "Modals",
+          "user_answer": "can"
+        },
+
+        {
+          "name": "If it rains tomorrow, I ___ (stay) at home.",
+          "answer": "will stay",
+          "topic": "Conditionals",
+          "user_answer": "would stay"
+        },
+        {
+          "name": "If I ___ (have) a car, I would drive.",
+          "answer": "had",
+          "topic": "Conditionals",
+          "user_answer": "have"
+        },
+        {
+          "name": "If she had left earlier, she ___ (catch) the train.",
+          "answer": "would have caught",
+          "topic": "Conditionals",
+          "user_answer": "caught"
+        },
+
+        {
+          "name": "The letter ___ (send) yesterday.",
+          "answer": "was sent",
+          "topic": "Passive",
+          "user_answer": "sent"
+        },
+        {
+          "name": "English ___ (speak) all over the world.",
+          "answer": "is spoken",
+          "topic": "Passive",
+          "user_answer": "speaks"
+        },
+        {
+          "name": "Rewrite in the passive: The storm broke the window.",
+          "answer": "The window was broken by the storm.",
+          "topic": "Passive",
+          "user_answer": "The storm broke the window."
+        },
+
+        {
+          "name": "The opposite of ancient is ___.",
+          "answer": "modern",
+          "topic": "Vocabulary",
+          "user_answer": "modern"
+        },
+        {
+          "name": "Scarce means ___.",
+          "answer": "rare",
+          "topic": "Vocabulary",
+          "user_answer": "small"
+        },
+        {
+          "name": "A person who writes for a newspaper is a ___.",
+          "answer": "journalist",
+          "topic": "Vocabulary",
+          "user_answer": "journalist"
+        }
+      ]
+    }
+  ]
+}

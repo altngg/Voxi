@@ -1,4 +1,4 @@
-from schemas.test_results import TestResultsRequest, TestResultsResponse
+from schemas.test_results import TaskEvaluationScore, TestResultsIncomplete, TestResultsRequest, TestResultsResponse
 from clients.ollama_client import OllamaClient
 import pydantic
 from fastapi import HTTPException
@@ -6,52 +6,122 @@ import json
 import re
 
 
-async def evaluate_test_results(request: TestResultsRequest) -> TestResultsResponse:
+LEVELS_CONFIG = [ "A1", "A2", "B1", "B2", "C1", "C2" ]
+
+LANGUAGE_CONFIG = {
+    "en": {
+        "grammar_topics" : [ "Present Simple", "Present Continuous", "Present Perfect", "Present Perfect Continuous" ],
+        "levels_criteria" : {
+            "A1": {
+                "grammar_min": 40,
+                "vocabulary_min": 40,
+                "topics": {
+                    "Present Simple": 8,
+                    "to be": 8,
+                    "Articles": 6,
+                    "Pronouns": 6,
+                    "There is / There are": 6,
+                },
+            },
+            "A2": {
+                "grammar_min": 50,
+                "vocabulary_min": 50,
+                "topics": {
+                    "Present Simple": 8,
+                    "Present Continuous": 8,
+                    "Past Simple": 7,
+                    "Articles": 7,
+                    "Countable / Uncountable nouns": 7,
+                    "Comparatives and Superlatives": 7,
+                },
+            },
+            "B1": {
+                "grammar_min": 60,
+                "vocabulary_min": 60,
+                "topics": {
+                    "Present Simple": 8,
+                    "Present Continuous": 8,
+                    "Past Simple": 8,
+                    "Present Perfect": 8,
+                    "Future forms": 8,
+                    "Modal verbs": 8,
+                    "First Conditional": 7,
+                },
+            },
+            "B2": {
+                "grammar_min": 70,
+                "vocabulary_min": 70,
+                "topics": {
+                    "Present Perfect": 9,
+                    "Present Perfect Continuous": 8,
+                    "Passive Voice": 8,
+                    "Reported Speech": 8,
+                    "Second Conditional": 8,
+                    "Third Conditional": 7,
+                    "Relative clauses": 8,
+                },
+            },
+            "C1": {
+                "grammar_min": 80,
+                "vocabulary_min": 80,
+                "topics": {
+                    "Mixed Conditionals": 9,
+                    "Inversion": 8,
+                    "Cleft sentences": 8,
+                    "Advanced modal verbs": 9,
+                    "Advanced participle clauses": 8,
+                },
+            },
+            "C2": {
+                "grammar_min": 90,
+                "vocabulary_min": 90,
+                "topics": {
+                    "Advanced conditionals": 10,
+                    "Inversion": 10,
+                    "Complex clause structures": 10,
+                    "Advanced tense and aspect contrasts": 10,
+                    "Advanced modal and pragmatic usage": 10,
+                },
+            },
+        }
+    }
+}
+
+
+async def evaluate_tasks_results(request: TestResultsRequest) -> TaskEvaluationScore:
     prompt = convert_test_results_to_prompt(request)
+    tasks_count = len(request.tasks_results)
 
     json_schema = {
         "type": "object",
         "properties": {
-            "overall_level": {
-                "type": "string",
-                "enum": request.levels,
-            },
-            "grammar_score": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 100,
-            },
             "vocabulary_score": {
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 100,
             },
-            "topic_scores": {
+            "tasks_scores": {
                 "type": "array",
-                "minItems": len(request.topics),
-                "maxItems": len(request.topics),
+                "minItems": tasks_count,
+                "maxItems": tasks_count,
                 "items": {
                     "type": "object",
                     "properties": {
                         "topic": {
                             "type": "string",
-                            "enum": request.topics,
+                            "enum": request.topics, # topics can repeat, can't fix it here
                         },
-                        "score": {
-                            "type": "integer",
-                            "minimum": 0,
-                            "maximum": 12,
+                        "is_correct": {
+                            "type": "boolean",
                         },
                     },
-                    "required": ["topic", "score"],
+                    "required": ["topic", "is_correct"],
                 },
             },
         },
         "required": [
-            "overall_level",
-            "grammar_score",
             "vocabulary_score",
-            "topic_scores",
+            "tasks_scores",
         ],
     }
 
@@ -68,7 +138,7 @@ async def evaluate_test_results(request: TestResultsRequest) -> TestResultsRespo
     json_str = extract_json(raw_response)
 
     try:
-        return TestResultsResponse.model_validate_json(json_str)
+        return TaskEvaluationScore.model_validate_json(json_str)
     except pydantic.ValidationError as e:
         print(f"Validation error: {e}\nRaw response: {raw_response}")
         raise HTTPException(
@@ -89,50 +159,52 @@ def extract_json(text: str) -> str:
 
 
 def convert_test_results_to_prompt(request: TestResultsRequest) -> str:
-    levels_str = ", ".join(request.levels)
+    tasks_count = len(request.tasks_results)
     topics_str = ", ".join(request.topics)
-    topics_count = len(request.topics)
 
     tasks_results_str = ""
     for i, task in enumerate(request.tasks_results, 1):
-        tasks_results_str += f"\n{i}. Задание: {task.name}\n"
-        tasks_results_str += f"   Тема: {task.topic}\n"
-        tasks_results_str += f"   Правильный ответ: {task.answer}\n"
-        tasks_results_str += f"   Ответ пользователя: {task.user_answer}\n"
+        tasks_results_str += f"\n{i}. task: {task.name}\n"
+        tasks_results_str += f"   topic: {task.topic}\n"
+        tasks_results_str += f"   correct answer: {task.answer}\n"
+        tasks_results_str += f"   user answer: {task.user_answer}\n"
 
-    prompt = f"""
-        Evaluate English proficiency using {levels_str} levels.
+    return f"""
+        Check if each task in {request.language} is correct. Do not merge tasks.
 
-        input data:
-            - language: {request.language}
-            - possible levels: {levels_str}
-            - topics for evaluation: {topics_str}
-            - test results: {tasks_results_str}
+        Tasks, in order:
+        {tasks_results_str}
 
-        evaluation rules:
-            - If the user's answer matches the correct one, then the task is completed fully.
-            - If the user's answer is grammatically correct and fits the meaning, but differs from the example, then the task is completed partially.
-            - If the user's answer is incorrect or missing, then the task is not completed.
+        Allowed topic names: {topics_str}
 
-        rules for filling the fields:
-        "overall_level" - one of the values: {levels_str}
-            - A1/A2: basic everyday vocabulary
-            - B1/B2: broader and topic-specific vocabulary
-            - C1/C2: precise, natural, and nuanced vocabulary
+        For each task set is_correct by the target of that task, not by whether the sentence is grammatical English.
 
-        vocabulary_score - integer from 0 to 100
-            - 0-30: basic everyday vocabulary
-            - 31-60: broader and topic-specific vocabulary
-            - 61-100: precise, natural, and nuanced vocabulary
-        
-        grammar_score - integer from 0 to 100
-            - 0-30: basic grammar - frequent mistakes, meaning is sometimes unclear
-            - 31-60: intermediate grammar - some mistakes, but the meaning is understandable
-            - 61-100: advanced grammar - no mistakes, the meaning is clear
-        
-        topic_scores - array of {topics_count} objects
-            - 0-3: no to little knowledge of the topic
-            - 4-7: some knowledge of the topic
-            - 8-12: complete knowledge of the topic
+        is_correct is true only when the user answer is an acceptable form of the correct answer:
+        - the same answer, ignoring letter case and extra spaces
+        - the same grammar and meaning in another written form: doesn't / does not, it's / it is, no article / "-" when the correct answer is "no article"
+        - the user answer makes sense grammatically and semantically, even if does not match the correct answer exactly
+
+        is_correct is false when:
+        - the user answer is missing
+        - the user entered a random string
+        - the required grammar or word is wrong
+
+        tasks_scores: an array of exactly {tasks_count} objects, one per task, in the same order as the list above.
+        Object number i belongs to task number i. Do not skip a task and do not add a task.
+        Each object has:
+        - topic: the topic of that task, copied exactly from the list
+        - is_correct: true or false
+
+        vocabulary_score: an integer from 0 to 100
+        - evaluate vocabulary knowledge only
+        - if the task tests a specific word, phrase, or meaning, check whether the user demonstrates knowledge of that particular vocabulary item
+
     """
-    return prompt
+# TODO: need to work on vocabulary score evaluation
+
+
+def evaluate_tasks_score(request: TaskEvaluationScore) -> TestResultsIncomplete:
+    pass
+
+def evaluate_full_score(request: TestResultsIncomplete) -> TestResultsResponse:
+    pass
