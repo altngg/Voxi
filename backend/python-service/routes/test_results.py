@@ -10,5 +10,5 @@ router = APIRouter()
 async def generate_test_results(request: TestResultsRequest) -> TestResultsResponse:
     tasks_evaluation_score = await evaluate_tasks_results(request)
     tasks_score = evaluate_tasks_score(tasks_evaluation_score, request.topics)
-    full_score = evaluate_full_score(tasks_score)
+    full_score = evaluate_full_score(tasks_score, request.language, request.levels)
     return full_score

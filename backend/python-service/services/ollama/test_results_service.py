@@ -4,8 +4,13 @@ import pydantic
 from fastapi import HTTPException
 import json
 import re
-from typing import List
+from typing import Dict, List
 
+
+LANGUAGE_KEYS = {
+    "en": "en",
+    "english": "en",
+}
 
 LEVELS_CONFIG = [ "A1", "A2", "B1", "B2", "C1", "C2" ]
 
@@ -245,7 +250,95 @@ def evaluate_tasks_score(tasks_evaluation_score: TaskEvaluationScore, topics: Li
         grammar_score=grammar_score,
         vocabulary_score=tasks_evaluation_score.vocabulary_score,
         topics_scores=topics_scores,
-    ) 
+    )
 
-def evaluate_full_score(request: TestResultsIncomplete) -> TestResultsResponse:
-    pass
+
+def resolve_language_key(language: str) -> str:
+    key = LANGUAGE_KEYS.get(language.strip().casefold())
+    if key is None or key not in LANGUAGE_CONFIG:
+        raise HTTPException(status_code=400, detail=f"Unsupported language: {language}")
+    return key
+
+
+def normalize_topic(name: str) -> str:
+    return " ".join(name.casefold().replace("/", " ").replace("-", " ").split())
+
+
+def is_vocabulary_topic(name: str) -> bool:
+    normalized = normalize_topic(name)
+    return "vocabulary" in normalized or normalized == "vocab"
+
+
+def topics_match(user_topic: str, config_topic: str) -> bool:
+    if is_vocabulary_topic(user_topic):
+        return False
+
+    user = normalize_topic(user_topic)
+    config = normalize_topic(config_topic)
+    if user == config or config in user:
+        return True
+    if user in config and (config.startswith(user + " ") or config.endswith(" " + user)):
+        return True
+    if user in {"conditional", "conditionals"} and config in {
+        "first conditional",
+        "second conditional",
+        "third conditional",
+    }:
+        return True
+    if user in {"modal", "modals"} and config == "modal verbs":
+        return True
+    return False
+
+
+def matched_topic_scores(criteria_topics: Dict[str, int], topic_scores: Dict[str, int]) -> Dict[str, int]:
+    matched = {}
+    for config_topic in criteria_topics:
+        scores = [
+            score
+            for user_topic, score in topic_scores.items()
+            if topics_match(user_topic, config_topic)
+        ]
+        if scores:
+            matched[config_topic] = max(scores)
+    return matched
+
+
+def evaluate_full_score(scores: TestResultsIncomplete, language: str, levels: List[str]) -> TestResultsResponse:
+    criteria_by_level = LANGUAGE_CONFIG[resolve_language_key(language)]["levels_criteria"]
+    requested_levels = {level.strip().upper() for level in levels}
+    ordered_levels = [
+        level
+        for level in LEVELS_CONFIG
+        if level in requested_levels and level in criteria_by_level
+    ]
+
+    topic_scores = {item.topic: item.score for item in scores.topics_scores}
+    achieved = None
+
+    for level in ordered_levels:
+        criteria = criteria_by_level[level]
+        matched = matched_topic_scores(criteria["topics"], topic_scores)
+        if not matched:
+            continue
+
+        failing = [
+            score
+            for topic, score in matched.items()
+            if score < criteria["topics"][topic]
+        ]
+        if not failing:
+            achieved = level
+            continue
+        if all(score > 0 for score in failing):
+            achieved = level
+        break
+
+    if achieved is None and ordered_levels:
+        achieved = ordered_levels[0]
+
+    return TestResultsResponse(
+        overall_level=achieved or "",
+        grammar_score=scores.grammar_score,
+        vocabulary_score=scores.vocabulary_score,
+        topic_scores=scores.topics_scores,
+    )
