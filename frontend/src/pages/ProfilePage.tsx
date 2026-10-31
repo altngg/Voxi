@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 import { authApi } from "../shared/api/auth";
+import { clearAuthUser } from "../shared/auth";
 import { usersApi, type UserProfile } from "../shared/api/users";
 import { Button } from "../shared/ui/Button";
 
@@ -78,11 +79,7 @@ const ProfileContent = ({ user }: ProfileContentProps) => {
   const { mutate: logout, isPending: isLoggingOut } = useMutation({
     mutationFn: authApi.logout,
     onSettled: () => {
-      try {
-        localStorage.removeItem("authUser");
-      } catch {
-        // localStorage may be unavailable
-      }
+      clearAuthUser();
       navigate("/login", { replace: true });
     },
   });

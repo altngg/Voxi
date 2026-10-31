@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { authApi } from "../shared/api/auth";
+import { saveAuthUser } from "../shared/auth";
 import { Input } from "../shared/ui/Input";
 import { Button } from "../shared/ui/Button";
 
@@ -20,7 +21,7 @@ export const LoginPage = () => {
     try {
       setIsLoading(true);
       const response = await authApi.login({ email, password });
-      localStorage.setItem("authUser", JSON.stringify(response.user));
+      saveAuthUser(response.user);
       navigate("/lesson");
     } catch (submitError) {
       const message =
@@ -70,6 +71,12 @@ export const LoginPage = () => {
           <Button buttonType="submit" isPending={isLoading} buttonName="Войти">
             <span aria-hidden>→</span>
           </Button>
+          <Button
+            buttonType="button"
+            buttonName="Зарегистрироваться"
+            onClick={() => navigate("/registration")}
+            disabled={isLoading}
+          />
         </form>
       </section>
     </main>
