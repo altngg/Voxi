@@ -97,8 +97,10 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
     [],
   );
 
-  const safeTotal = totalTasks > 0 ? totalTasks : 1;
-  const percent = Math.round((correctTasks / safeTotal) * 100);
+  const scoreCorrect = pendingResult?.correctTasks ?? correctTasks;
+  const scoreTotal = pendingResult ? newTasks.length : totalTasks;
+  const safeTotal = scoreTotal > 0 ? scoreTotal : 1;
+  const percent = Math.round((scoreCorrect / safeTotal) * 100);
 
   const hasRetryTasks = newTasks.length > 0;
   const allRetryAnswered =
@@ -133,7 +135,7 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
         <header className="mb-6 flex flex-col items-center gap-1 text-center text-(--text-primary)">
           <h1 className="ui-page-title">Результаты урока</h1>
           <p className="text-base text-(--text-secondary)">
-            Правильно: {correctTasks} из {totalTasks}
+            Правильно: {scoreCorrect} из {scoreTotal}
           </p>
         </header>
 
@@ -216,11 +218,12 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
 };
 
 export const LessonResultsPage = () => {
-  const { state } = useLocation();
+  const location = useLocation();
+  const { state } = location;
 
   if (!isLessonResultsState(state)) {
     return <Navigate to="/lesson" replace />;
   }
 
-  return <LessonResultsContent data={state} />;
+  return <LessonResultsContent key={location.key} data={state} />;
 };
