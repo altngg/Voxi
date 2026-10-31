@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import type { LessonResultsResponse } from "../shared/api/lesson-result";
 import { Button } from "../shared/ui/Button";
@@ -11,8 +11,6 @@ import {
 } from "./lesson";
 import type { TestTask } from "./test/api/test-queries";
 import { isTaskAnswered } from "./test/taskAnswerUtils";
-
-const RESULT_TRANSITION_MS = 2500;
 
 type LessonResultsState = {
   correctTasks: number;
@@ -66,23 +64,19 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
     [pendingResult],
   );
 
-  useEffect(() => {
+  const handleGoToResults = useCallback(() => {
     if (!pendingResult) {
       return;
     }
-    const timer = window.setTimeout(() => {
-      navigate("/lesson/result", {
-        replace: true,
-        state: {
-          correctTasks: pendingResult.correctTasks,
-          totalTasks: newTasks.length,
-          newTasks: pendingResult.newTasks,
-          languageId,
-        },
-      });
-    }, RESULT_TRANSITION_MS);
-
-    return () => window.clearTimeout(timer);
+    navigate("/lesson/result", {
+      replace: true,
+      state: {
+        correctTasks: pendingResult.correctTasks,
+        totalTasks: newTasks.length,
+        newTasks: pendingResult.newTasks,
+        languageId,
+      },
+    });
   }, [pendingResult, navigate, newTasks.length, languageId, newTasks]);
 
   const handleAnswerValueChange = useCallback(
@@ -97,10 +91,8 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
     [],
   );
 
-  const scoreCorrect = pendingResult?.correctTasks ?? correctTasks;
-  const scoreTotal = pendingResult ? newTasks.length : totalTasks;
-  const safeTotal = scoreTotal > 0 ? scoreTotal : 1;
-  const percent = Math.round((scoreCorrect / safeTotal) * 100);
+  const safeTotal = totalTasks > 0 ? totalTasks : 1;
+  const percent = Math.round((correctTasks / safeTotal) * 100);
 
   const hasRetryTasks = newTasks.length > 0;
   const allRetryAnswered =
@@ -135,7 +127,7 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
         <header className="mb-6 flex flex-col items-center gap-1 text-center text-(--text-primary)">
           <h1 className="ui-page-title">Результаты урока</h1>
           <p className="text-base text-(--text-secondary)">
-            Правильно: {scoreCorrect} из {scoreTotal}
+            Правильно: {correctTasks} из {totalTasks}
           </p>
         </header>
 
@@ -169,12 +161,14 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
                 </p>
               ) : null}
               {pendingResult ? (
-                <p
-                  className="max-w-full text-right text-base font-medium text-(--text-primary)"
-                  role="status"
+                <Button
+                  buttonType="button"
+                  buttonName="К результатам"
+                  variant="ghost"
+                  onClick={handleGoToResults}
                 >
-                  Переходим к результатам...
-                </p>
+                  <ArrowRightLine />
+                </Button>
               ) : (
                 <Button
                   buttonType="button"
