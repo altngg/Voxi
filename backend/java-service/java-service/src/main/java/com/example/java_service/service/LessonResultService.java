@@ -1,5 +1,7 @@
+
 package com.example.java_service.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -87,15 +89,54 @@ public class LessonResultService {
             PythonRetryRequest retryRequest = buildRetryRequest(userId, incorrectTasks, request.getLanguageId());
             PythonRetryResponse retryResponse = pythonRetryService.generateRetryTasks(retryRequest);
 
-            if (retryResponse.getTasks() != null) {
-                newTasks = retryResponse.getTasks().stream()
-                        .map(t -> LessonResultResponse.RetryTaskDto.builder()
-                                .name(t.getName())
-                                .options(t.getOptions() != null ? String.join(",", t.getOptions()) : null)
-                                .topic(t.getTopic())
-                                .taskType(t.getTaskType())
-                                .build())
-                        .collect(Collectors.toList());
+            if (retryResponse != null && retryResponse.getTasks() != null) {
+                newTasks = new ArrayList<>();
+
+                for (PythonRetryResponse.NewTask generated : retryResponse.getTasks()) {
+                    if (generated.getName() == null || generated.getName().isBlank()
+                            || generated.getAnswer() == null || generated.getAnswer().isBlank()
+                            || generated.getTopic() == null || generated.getTaskType() == null) {
+                        log.warn("Skipping incomplete generated task: {}", generated);
+                        continue;
+                    }
+
+                    Topic topic = topicRepository.findByName(generated.getTopic())
+                            .orElse(null);
+                    if (topic == null || topic.getLanguage() == null
+                            || !request.getLanguageId().equals(topic.getLanguage().getId())) {
+                        log.warn("Skipping generated task with unknown topic: {}", generated.getTopic());
+                        continue;
+                    }
+
+                    Long taskTypeId = getTaskTypeId(generated.getTaskType());
+                    if (taskTypeId == null) {
+                        log.warn("Skipping generated task with unknown type: {}", generated.getTaskType());
+                        continue;
+                    }
+
+                    Task task = Task.builder()
+                            .name(generated.getName())
+                            .answer(generated.getAnswer())
+                            .topicId(topic.getId())
+                            .languageId(request.getLanguageId())
+                            .taskTypeId(taskTypeId)
+                            .options(generated.getOptions())
+                            .createdAt(LocalDateTime.now())
+                            .updatedAt(LocalDateTime.now())
+                            .build();
+
+                    Task savedTask = taskRepository.save(task);
+
+                    newTasks.add(LessonResultResponse.RetryTaskDto.builder()
+                            .id(savedTask.getId())
+                            .name(savedTask.getName())
+                            .answer(savedTask.getAnswer())
+                            .options(savedTask.getOptions() == null || savedTask.getOptions().isEmpty()
+                                    ? null : String.join(",", savedTask.getOptions()))
+                            .topic(topic.getName())
+                            .taskType(savedTask.getTaskTypeId().toString())
+                            .build());
+                }
             }
         }
 
@@ -112,6 +153,22 @@ public class LessonResultService {
                 .updatedTopicScores(topicScoreChanges)
                 .newTasks(newTasks)
                 .build();
+    }
+
+    private Long getTaskTypeId(String taskType) {
+        switch (taskType) {
+            case "MULTIPLE_CHOICE":
+            case "1":
+                return 1L;
+            case "GAP_FILLING":
+            case "2":
+                return 2L;
+            case "TRUE_FALSE":
+            case "3":
+                return 3L;
+            default:
+                return null;
+        }
     }
 
     private PythonRetryRequest buildRetryRequest(Long userId, List<PythonRetryRequest.IncorrectTask> incorrectTasks, Long languageId) {

@@ -1,3 +1,4 @@
+
 package com.example.java_service.dto.response;
 
 import java.util.List;
@@ -19,6 +20,8 @@ public class LessonResultResponse {
     @Data
     @Builder
     public static class RetryTaskDto {
+        private Long id;
+        private String answer;
         private String name;
         private String options;
         private String topic;
