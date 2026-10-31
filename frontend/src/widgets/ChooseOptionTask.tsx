@@ -58,9 +58,7 @@ export const ChooseOptionTask = ({
 
   return (
     <section>
-      <h2 className="mb-2 text-lg font-medium text-(--text-primary)">
-        {title}
-      </h2>
+      <h2 className="ui-section-title mb-2">{title}</h2>
 
       <ol className="space-y-3 text-lg font-medium text-(--text-primary)">
         {items.map((item, index) => (

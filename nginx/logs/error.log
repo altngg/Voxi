@@ -73,3 +73,4 @@
 2026/05/17 18:07:52 [error] 23#23: *5 connect() failed (113: Host is unreachable) while connecting to upstream, client: 172.18.0.1, server: localhost, request: "POST /api/auth/login HTTP/1.1", upstream: "http://172.18.0.5:8080/api/auth/login", host: "localhost"
 2026/05/17 18:09:31 [error] 23#23: *5 upstream timed out (110: Operation timed out) while reading response header from upstream, client: 172.18.0.1, server: localhost, request: "POST /api/lesson/results HTTP/1.1", upstream: "http://172.18.0.5:8080/api/lesson/results", host: "localhost"
 2026/05/17 18:26:18 [emerg] 1#1: host not found in upstream "voxi-backend:8080" in /etc/nginx/nginx.conf:18
+2026/05/17 20:33:20 [error] 27#27: *17 upstream prematurely closed connection while reading response header from upstream, client: 172.18.0.1, server: localhost, request: "POST /api/lesson/results HTTP/1.1", upstream: "http://172.18.0.5:8080/api/lesson/results", host: "localhost", referrer: "http://localhost:5173/"

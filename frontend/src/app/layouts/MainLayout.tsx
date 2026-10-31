@@ -13,7 +13,7 @@ export const MainLayout = () => {
       />
       <div
         className="size-full transition-all duration-300"
-        style={{ marginLeft: isSidebarCollapsed ? "4rem" : "15rem" }}
+        style={{ marginLeft: isSidebarCollapsed ? "4rem" : "13rem" }}
       >
         <Outlet />
       </div>

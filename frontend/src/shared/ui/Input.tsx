@@ -35,7 +35,9 @@ export const Input = ({
 }: FormProps) => {
   return (
     <label className={cn("block", labelClassName)}>
-      {title ? <span className="mb-[6px] block">{title}</span> : null}
+      {title ? (
+        <span className="mb-[6px] block text-base">{title}</span>
+      ) : null}
       <input
         type={inputType}
         name={inputName}
@@ -47,13 +49,8 @@ export const Input = ({
         disabled={disabled}
         defaultValue={defaultValue}
         aria-label={ariaLabel}
-        className={cn(
-          "mb-[6px] h-[45px] w-full rounded-[50px] border-[3px] bg-transparent px-4 text-(--text-primary) outline-none",
-          error
-            ? "border-(--danger) hover:border-(--danger) focus:border-(--danger)"
-            : "border-(--default-border)",
-          inputClassName,
-        )}
+        data-error={error ? "true" : undefined}
+        className={cn("ui-input", inputClassName)}
       />
     </label>
   );

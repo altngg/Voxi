@@ -100,33 +100,39 @@ def convert_test_results_to_prompt(request: TestResultsRequest) -> str:
         tasks_results_str += f"   Правильный ответ: {task.answer}\n"
         tasks_results_str += f"   Ответ пользователя: {task.user_answer}\n"
 
-    prompt = f"""Вы — профессиональный преподаватель {request.language} языка.
-        Ваша задача — оценить результаты теста ученика и вернуть СТРОГО JSON-объект.
+    prompt = f"""
+        Evaluate English proficiency using {levels_str} levels.
 
-        ВХОДНЫЕ ДАННЫЕ:
-        - Язык: {request.language}
-        - Возможные уровни: {levels_str}
-        - Темы для оценки ({topics_count} шт.): {topics_str}
-        - Результаты теста:{tasks_results_str}
+        input data:
+            - language: {request.language}
+            - possible levels: {levels_str}
+            - topics for evaluation: {topics_str}
+            - test results: {tasks_results_str}
 
-        ПРАВИЛА ОЦЕНКИ ЗАДАНИЙ:
-        1. Если ответ пользователя совпадает с правильным — задание выполнено полностью.
-        2. Если ответ грамматически верен и подходит по смыслу, но отличается от эталона — задание выполнено частично.
-        3. Если ответ неверен или отсутствует — задание не выполнено.
+        evaluation rules:
+            - If the user's answer matches the correct one, then the task is completed fully.
+            - If the user's answer is grammatically correct and fits the meaning, but differs from the example, then the task is completed partially.
+            - If the user's answer is incorrect or missing, then the task is not completed.
 
-        ФОРМАТ ОТВЕТА (строго JSON, без markdown и пояснений):
-        - "overall_level" — общий уровень владения языком, ОДИН из значений: {levels_str}.
-        - "grammar_score" — целое число от 0 до 100 по 100-балльной шкале
-        (0 — нет знаний грамматики, 50 — средне, 100 — идеальная грамматика).
-        - "vocabulary_score" — целое число от 0 до 100 по 100-балльной шкале
-        (0 — нет словарного запаса, 50 — средне, 100 — идеальный словарь).
-        - "topic_scores" — массив из РОВНО {topics_count} объектов вида {{"topic": <тема>, "score": <0..12>}}.
-        Каждая тема из списка [{topics_str}] должна встречаться РОВНО ОДИН раз.
+        rules for filling the fields:
+        "overall_level" - one of the values: {levels_str}
+            - A1/A2: basic everyday vocabulary
+            - B1/B2: broader and topic-specific vocabulary
+            - C1/C2: precise, natural, and nuanced vocabulary
 
-        ВАЖНЫЕ ТРЕБОВАНИЯ:
-        - grammar_score и vocabulary_score используют шкалу 0–100, а НЕ 0–10. Например, средний уровень — это около 50–70, а не 5–7.
-        - В topic_scores должно быть ровно {topics_count} элементов — по одному на каждую тему из списка выше.
-        - Если по теме не было заданий — оцените её на основании общего уровня владения языком.
-        - Возвращайте ТОЛЬКО JSON-объект, без обёрток ```json и без комментариев.
+        vocabulary_score - integer from 0 to 100
+            - 0-30: basic everyday vocabulary
+            - 31-60: broader and topic-specific vocabulary
+            - 61-100: precise, natural, and nuanced vocabulary
+        
+        grammar_score - integer from 0 to 100
+            - 0-30: basic grammar - frequent mistakes, meaning is sometimes unclear
+            - 31-60: intermediate grammar - some mistakes, but the meaning is understandable
+            - 61-100: advanced grammar - no mistakes, the meaning is clear
+        
+        topic_scores - array of {topics_count} objects
+            - 0-3: no to little knowledge of the topic
+            - 4-7: some knowledge of the topic
+            - 8-12: complete knowledge of the topic
     """
     return prompt

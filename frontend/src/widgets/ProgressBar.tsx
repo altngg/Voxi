@@ -17,11 +17,11 @@ export const ProgressBar = ({
     safeTotal === 0 ? 0 : clamp(completedQuestions, 0, safeTotal);
 
   const progressPercent =
-    safeTotal === 0 ? 0 : Math.round((safeCompleted / safeTotal) * 100); // change text later
+    safeTotal === 0 ? 0 : Math.round((safeCompleted / safeTotal) * 100);
 
   return (
     <section className={className}>
-      <p className="mb-1 text-lg font-medium text-(--accent-primary)">
+      <p className="mb-1 text-base font-medium text-(--text-primary)">
         Вопрос {safeCompleted} из {safeTotal}
       </p>
 

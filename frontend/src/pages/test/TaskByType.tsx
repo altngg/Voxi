@@ -6,9 +6,12 @@ import {
   FillInTheBlanksTask,
   type FillInTheBlanksItem,
 } from "../../widgets/FillInTheBlanksTask";
-import { TrueFalseTask, type TrueFalseTaskItem } from "../../widgets/TrueFalseTask";
+import {
+  TrueFalseTask,
+  type TrueFalseTaskItem,
+} from "../../widgets/TrueFalseTask";
 import type { TestTask } from "./api/test-queries";
-import { BLANK_MARKER, TASK_TYPE_ID } from "./taskAnswerUtils";
+import { BLANK_MARKER, normalizeTaskType } from "./taskAnswerUtils";
 
 const splitAtBlank = (text: string): { before: string; after: string } => {
   const i = text.indexOf(BLANK_MARKER);
@@ -62,8 +65,8 @@ export const TaskByType = ({
 }) => {
   const taskId = String(task.id);
 
-  switch (task.taskType) {
-    case TASK_TYPE_ID.MULTIPLE_CHOICE: {
+  switch (normalizeTaskType(task.taskType)) {
+    case "MULTIPLE_CHOICE": {
       const chooseItem = toChooseOptionItem(task);
       return (
         <ChooseOptionTask
@@ -78,7 +81,7 @@ export const TaskByType = ({
         />
       );
     }
-    case TASK_TYPE_ID.GAP_FILLING:
+    case "GAP_FILLING":
       return (
         <FillInTheBlanksTask
           title="Заполните пропуски"
@@ -89,7 +92,7 @@ export const TaskByType = ({
           }}
         />
       );
-    case TASK_TYPE_ID.TRUE_FALSE:
+    case "TRUE_FALSE":
       return (
         <TrueFalseTask
           title="Выберите правильный ответ"
