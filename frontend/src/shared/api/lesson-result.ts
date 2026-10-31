@@ -24,6 +24,7 @@ type LessonResultsApiResponse = {
   progressPercent: number;
   updatedTopicScores: Record<string, number>;
   newTasks: {
+    id: number;
     name: string;
     options: string | null;
     topic: string;
@@ -42,8 +43,8 @@ export const lessonResultsApi = {
     return {
       correctTasks: data.correctTasks,
       incorrectTasks: data.incorrectTaskIds ?? [],
-      newTasks: (data.newTasks ?? []).map((task, index) => ({
-        id: -(index + 1),
+      newTasks: (data.newTasks ?? []).map((task) => ({
+        id: task.id,
         name: task.name,
         topic: task.topic,
         taskType: task.taskType,
