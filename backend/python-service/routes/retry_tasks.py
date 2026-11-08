@@ -1,9 +1,7 @@
 from fastapi import APIRouter
 
 from schemas.retry_tasks import RetryTasksRequest, RetryTasksResponse
-from services.ollama.retry_tasks_service import (
-    generate_retry_tasks as generate_retry_tasks_service,
-)
+from services.retry_tasks import generate_retry_tasks as generate_retry_tasks_service
 
 router = APIRouter()
 

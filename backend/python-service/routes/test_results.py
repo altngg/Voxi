@@ -1,7 +1,11 @@
 from fastapi import APIRouter
 
 from schemas.test_results import TestResultsRequest, TestResultsResponse
-from services.ollama.test_results_service import evaluate_full_score, evaluate_tasks_results, evaluate_tasks_score
+from services.test_results import (
+    evaluate_full_score,
+    evaluate_tasks_results,
+    evaluate_tasks_score,
+)
 
 router = APIRouter()
 

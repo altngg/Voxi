@@ -1,8 +1,8 @@
 from pydantic import BaseModel, ConfigDict, Field
 from typing import List, Optional
 
+from .common import Language, ShortText, TaskType
 from .test_results import TopicScore
-from guardrails.input_validation import Language, ShortText, TaskType
 
 class IncorrectTaskInfo(BaseModel):
     model_config = ConfigDict(extra="forbid")

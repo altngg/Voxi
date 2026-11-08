@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field
 from typing import List
 
-from guardrails.input_validation import ShortText
+from .common import ShortText
 
 class TaskResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
