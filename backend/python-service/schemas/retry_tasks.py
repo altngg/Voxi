@@ -1,12 +1,15 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 from typing import List, Optional
 
 from .test_results import TopicScore
+from guardrails.input_validation import Language, ShortText, TaskType
 
 class IncorrectTaskInfo(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     name: str
-    topic: str
-    task_type: str
+    topic: ShortText
+    task_type: TaskType
 
 class NewCorrectTask(BaseModel):
     name: str
@@ -16,9 +19,11 @@ class NewCorrectTask(BaseModel):
     task_type: str
 
 class RetryTasksRequest(BaseModel):
-    language: str
-    incorrect_tasks: List[IncorrectTaskInfo]
-    topics_scores: List[TopicScore]
+    model_config = ConfigDict(extra="forbid")
+
+    language: Language
+    incorrect_tasks: List[IncorrectTaskInfo] = Field(min_length=1, max_length=50)
+    topics_scores: List[TopicScore] = Field(min_length=1, max_length=100)
 
 class RetryTasksResponse(BaseModel):
     tasks: List[NewCorrectTask]

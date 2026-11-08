@@ -1,7 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 from typing import List
 
+from guardrails.input_validation import ShortText
+
 class TaskResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     name: str
     answer: str
     topic: str
@@ -12,8 +16,10 @@ class TaskScore(BaseModel):
     is_correct: bool
 
 class TopicScore(BaseModel):
-    topic: str
-    score: int
+    model_config = ConfigDict(extra="forbid")
+
+    topic: ShortText
+    score: int = Field(ge=0, le=12)
 
 class TestResultsRequest(BaseModel):
     language: str
