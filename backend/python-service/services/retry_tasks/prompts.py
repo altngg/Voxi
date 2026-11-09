@@ -1,4 +1,32 @@
+from guardrails.output_validation import EXPLANATION_PREFIX
 from guardrails.prompt_injection import security_rules, untrusted_field
+
+
+def convert_incorrect_task_to_explanation_prompt(
+    task_name: str, task_topic: str, task_type: str, language: str
+):
+    return f"""
+        Explain in Russian why the learner's answer is wrong.
+        {security_rules()}
+
+        input data:
+        - language: {language}
+        - topic: {task_topic}
+        - task type: {task_type}
+        - exercise, learner's answers are in parentheses: {untrusted_field(task_name, "exercise")}
+
+        FIELD RULES:
+        - "correct_answer": the correct {language} word or phrase for the wrong part.
+        - "explanation": 2-3 short sentences, no greetings.
+          Start with "{EXPLANATION_PREFIX}", state the "{task_topic}" rule the learner broke,
+          end with "Поэтому <wrong> → <correct_answer>."
+        - Write the explanation ONLY in Russian (Cyrillic). {language} is allowed only
+          for quoted words and grammar terms.
+        - Explain {language} rules only, do not compare with Russian grammar.
+
+        GOOD EXAMPLE for "(Have) you ever (ate) sushi?", topic "Present Perfect":
+            {{"correct_answer": "eaten", "explanation": "{EXPLANATION_PREFIX} в Present Perfect после have/has используется V3 (Past Participle), а не Past Simple. У глагола eat три формы: eat – ate – eaten. Поэтому ate → eaten."}}
+    """
 
 
 def convert_retry_task_to_prompt(

@@ -2,12 +2,13 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from typing import List
 
 from guardrails.prompt_injection import reject_injected_topics
-from .common import AnswerText, Language, ShortText, TaskText, TaskType
+from .common import AnswerText, ExplanationText, Language, ShortText, TaskText, TaskType
 
 
 class IncorrectTaskInfo(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    id: int = Field(ge=1)
     name: TaskText
     topic: ShortText
     task_type: TaskType
@@ -30,6 +31,13 @@ class NewCorrectTask(BaseModel):
     task_type: TaskType
 
 
+class IncorrectTaskExplanation(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    incorrect_task_id: int
+    explanation: ExplanationText
+
+
 class RetryTasksRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -42,6 +50,9 @@ class RetryTasksRequest(BaseModel):
         topics = [item.topic for item in self.topics_scores]
         if len(topics) != len(set(topics)):
             raise ValueError("topics_scores contains duplicate topics")
+        task_ids = [task.id for task in self.incorrect_tasks]
+        if len(task_ids) != len(set(task_ids)):
+            raise ValueError("incorrect_tasks contains duplicate ids")
         reject_injected_topics(topics)
         reject_injected_topics([task.topic for task in self.incorrect_tasks])
         return self
@@ -49,3 +60,4 @@ class RetryTasksRequest(BaseModel):
 
 class RetryTasksResponse(BaseModel):
     tasks: List[NewCorrectTask]
+    incorrect_tasks_explanations: List[IncorrectTaskExplanation]

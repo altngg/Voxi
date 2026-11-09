@@ -1,6 +1,7 @@
 from guardrails.output_validation import (
     MAX_OUTPUT_ATTEMPTS,
     OutputValidationError,
+    validate_generated_explanation,
     validate_generated_retry_task,
     validate_task_evaluation,
 )
@@ -19,6 +20,7 @@ __all__ = [
     "quote_data",
     "untrusted_field",
     "validate_answer_and_grammar",
+    "validate_generated_explanation",
     "validate_generated_retry_task",
     "validate_retry_task_semantics",
     "validate_task_evaluation",

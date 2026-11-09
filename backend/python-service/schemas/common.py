@@ -26,6 +26,11 @@ AnswerText = Annotated[
     StringConstraints(strip_whitespace=True, min_length=1, max_length=200),
 ]
 
+ExplanationText = Annotated[
+    str,
+    StringConstraints(strip_whitespace=True, min_length=20, max_length=600),
+]
+
 
 def parse_language(value: object) -> str:
     if not isinstance(value, str):

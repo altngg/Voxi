@@ -1,13 +1,24 @@
+import re
 from typing import Any, Dict, List
 
 from pydantic import ValidationError
 
 from guardrails.prompt_injection import injection_reason
 from schemas.common import TaskType
-from schemas.retry_tasks import IncorrectTaskInfo, NewCorrectTask
+from schemas.retry_tasks import (
+    IncorrectTaskExplanation,
+    IncorrectTaskInfo,
+    NewCorrectTask,
+)
 from schemas.test_results import TaskEvaluationScore, TestResultsRequest
 
 MAX_OUTPUT_ATTEMPTS = 2
+
+EXPLANATION_PREFIX = "Правило:"
+CJK_CHAR_RANGES = "\u3000-\u9fff\uac00-\ud7af\uff00-\uffef"
+_MIN_RUSSIAN_WORDS = 5
+_RUSSIAN_WORD = re.compile(r"[А-Яа-яЁё]+")
+_CJK = re.compile(f"[{CJK_CHAR_RANGES}]")
 
 
 class OutputValidationError(ValueError):
@@ -56,6 +67,37 @@ def validate_generated_retry_task(
         raise OutputValidationError("; ".join(errors))
 
     return _normalize_generated_task(task, original)
+
+
+def validate_generated_explanation(
+    data: Dict[str, Any], original: IncorrectTaskInfo
+) -> IncorrectTaskExplanation:
+    try:
+        result = IncorrectTaskExplanation.model_validate(
+            {"incorrect_task_id": original.id, "explanation": data.get("explanation")}
+        )
+    except ValidationError as e:
+        raise OutputValidationError(str(e)) from e
+
+    explanation = " ".join(result.explanation.split())
+    errors: List[str] = []
+
+    reason = injection_reason(explanation)
+    if reason:
+        errors.append(f"explanation looks like prompt injection ({reason})")
+
+    if _CJK.search(explanation):
+        errors.append("explanation must not contain Chinese, Japanese or Korean characters")
+    elif len(_RUSSIAN_WORD.findall(explanation)) < _MIN_RUSSIAN_WORDS:
+        errors.append("explanation must be written in Russian")
+
+    if errors:
+        raise OutputValidationError("; ".join(errors))
+
+    if not explanation.casefold().startswith(EXPLANATION_PREFIX.casefold()):
+        explanation = f"{EXPLANATION_PREFIX} {explanation}"
+
+    return result.model_copy(update={"explanation": explanation})
 
 
 def validate_task_evaluation(

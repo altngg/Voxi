@@ -9,6 +9,7 @@ from guardrails.output_validation import (
 )
 from guardrails.prompt_injection import quote_data
 from guardrails.semantic_validation import validate_retry_task_semantics
+from services.retry_tasks.explain import generate_validated_explanation
 from services.retry_tasks.prompts import convert_retry_task_to_prompt
 from fastapi import HTTPException
 import json
@@ -24,6 +25,7 @@ from schemas.retry_tasks import (
 
 async def generate_retry_tasks(request: RetryTasksRequest) -> RetryTasksResponse:
     tasks = []
+    explanations = []
 
     for task in request.incorrect_tasks:
         tasks.append(
@@ -31,8 +33,13 @@ async def generate_retry_tasks(request: RetryTasksRequest) -> RetryTasksResponse
                 task, request.language, request.topics_scores
             )
         )
+        explanations.append(
+            await generate_validated_explanation(task, request.language)
+        )
 
-    return RetryTasksResponse(tasks=tasks)
+    return RetryTasksResponse(
+        tasks=tasks, incorrect_tasks_explanations=explanations
+    )
 
 
 async def generate_validated_retry_task(
