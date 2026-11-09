@@ -4,14 +4,14 @@ import type { TestTask } from "../pages/test/api/test-queries";
 
 type LessonTaskRowProps = {
   task: TestTask;
-  theory?: string;
+  explanation?: string;
   isIncorrect?: boolean;
   onAnswerValueChange?: (taskId: string, value: string) => void;
 };
 
 export const LessonTaskRow = ({
   task,
-  theory,
+  explanation,
   isIncorrect = false,
   onAnswerValueChange,
 }: LessonTaskRowProps) => {
@@ -31,9 +31,9 @@ export const LessonTaskRow = ({
           Неправильный ответ
         </p>
       ) : null}
-      {theory ? (
+      {isIncorrect && explanation ? (
         <div className="mb-4 rounded-2xl border-2 border-(--soft-border) px-4 py-3 text-base text-(--text-primary)">
-          {theory}
+          {explanation}
         </div>
       ) : null}
       <TaskByType task={task} onAnswerValueChange={onAnswerValueChange} />

@@ -6,7 +6,7 @@ import { ArrowRightLine } from "../shared/ui/icons/ArrowRightLine";
 import { LessonTaskRow } from "../widgets/LessonTaskRow";
 import { ProgressBar } from "../widgets/ProgressBar";
 import {
-  buildMockTheoryByTaskId,
+  mapExplanationsByTaskId,
   useSubmitLessonResultsMutation,
 } from "./lesson";
 import { isTaskAnswered } from "./test/taskAnswerUtils";
@@ -23,7 +23,6 @@ export const LessonPage = () => {
   });
 
   const tasks = data?.tasks ?? [];
-  const [theorySeed] = useState(() => Math.floor(Math.random() * 10_000));
   const [answersByTaskId, setAnswersByTaskId] = useState<
     Record<string, string>
   >({});
@@ -37,14 +36,16 @@ export const LessonPage = () => {
     error: submitError,
   } = useSubmitLessonResultsMutation();
 
-  const theoryByTaskId = useMemo(
-    () => buildMockTheoryByTaskId(tasks, theorySeed),
-    [tasks, theorySeed],
+  const incorrectTasks = pendingResult?.incorrectTasksWithExplanations;
+
+  const explanationByTaskId = useMemo(
+    () => mapExplanationsByTaskId(incorrectTasks ?? []),
+    [incorrectTasks],
   );
 
   const incorrectTaskIds = useMemo(
-    () => new Set(pendingResult?.incorrectTasks ?? []),
-    [pendingResult],
+    () => new Set((incorrectTasks ?? []).map((task) => task.id)),
+    [incorrectTasks],
   );
 
   const handleGoToResults = useCallback(() => {
@@ -133,7 +134,7 @@ export const LessonPage = () => {
                 <LessonTaskRow
                   key={task.id}
                   task={task}
-                  theory={theoryByTaskId[task.id]}
+                  explanation={explanationByTaskId[task.id]}
                   isIncorrect={incorrectTaskIds.has(task.id)}
                   onAnswerValueChange={handleAnswerValueChange}
                 />
