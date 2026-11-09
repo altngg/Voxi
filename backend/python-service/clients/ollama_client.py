@@ -14,6 +14,7 @@ class OllamaClient:
         prompt: str,
         model: Optional[str] = settings.ollama_model,
         format: Optional[Union[str, Dict[str, Any]]] = None,
+        num_predict: Optional[int] = None,
     ) -> str:
         payload: Dict[str, Any] = {
             "model": model,
@@ -22,7 +23,7 @@ class OllamaClient:
             "keep_alive": settings.ollama_keep_alive,
             "options": {
                 "num_ctx": settings.ollama_num_ctx,
-                "num_predict": settings.ollama_num_predict,
+                "num_predict": num_predict if num_predict is not None else settings.ollama_num_predict,
             },
         }
 

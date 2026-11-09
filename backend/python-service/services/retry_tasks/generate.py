@@ -7,6 +7,7 @@ from guardrails.output_validation import (
     OutputValidationError,
     validate_generated_retry_task,
 )
+from guardrails.semantic_validation import validate_retry_task_semantics
 from services.retry_tasks.prompts import convert_retry_task_to_prompt
 from fastapi import HTTPException
 import json
@@ -50,7 +51,9 @@ async def generate_validated_retry_task(
                 task_data = task_data["task"]
             if not isinstance(task_data, dict):
                 raise OutputValidationError("response must be a JSON object")
-            return validate_generated_retry_task(task_data, task)
+            generated = validate_generated_retry_task(task_data, task)
+            await validate_retry_task_semantics(generated, language)
+            return generated
         except HTTPException:
             raise
         except (json.JSONDecodeError, OutputValidationError) as e:
