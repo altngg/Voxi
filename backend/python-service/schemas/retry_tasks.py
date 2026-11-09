@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-from typing import List, Optional
+from typing import List
 
-from .common import Language, ShortText, TaskText, TaskType
+from .common import AnswerText, Language, ShortText, TaskText, TaskType
 
 
 class IncorrectTaskInfo(BaseModel):
@@ -20,11 +20,13 @@ class RetryTopicScore(BaseModel):
 
 
 class NewCorrectTask(BaseModel):
-    name: str
-    answer: str
-    topic: str
-    options: Optional[List[str]]
-    task_type: str
+    model_config = ConfigDict(extra="forbid")
+
+    name: TaskText
+    answer: AnswerText
+    topic: ShortText
+    options: List[str] = Field(default_factory=list)
+    task_type: TaskType
 
 
 class RetryTasksRequest(BaseModel):

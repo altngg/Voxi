@@ -14,6 +14,8 @@ class TaskResult(BaseModel):
 
 
 class TaskScore(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     topic: str
     is_correct: bool
 
@@ -52,8 +54,10 @@ class TestResultsRequest(BaseModel):
 
 
 class TaskEvaluationScore(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     tasks_scores: List[TaskScore]
-    vocabulary_score: int
+    vocabulary_score: int = Field(ge=0, le=100)
 
 
 class TestResultsIncomplete(BaseModel):

@@ -1,6 +1,11 @@
 from schemas.test_results import TaskEvaluationScore, TestResultsRequest
 from clients.ollama_client import OllamaClient
 from core.json_extract import extract_json
+from guardrails.output_validation import (
+    MAX_OUTPUT_ATTEMPTS,
+    OutputValidationError,
+    validate_task_evaluation,
+)
 from services.test_results.prompts import convert_test_results_to_prompt
 import pydantic
 from fastapi import HTTPException
@@ -8,7 +13,45 @@ import json
 
 
 async def evaluate_tasks_results(request: TestResultsRequest) -> TaskEvaluationScore:
-    prompt = convert_test_results_to_prompt(request)
+    last_error = None
+    last_raw = None
+
+    for _ in range(MAX_OUTPUT_ATTEMPTS):
+        prompt = convert_test_results_to_prompt(request)
+        if last_error:
+            prompt += f"""
+
+        Previous JSON failed validation:
+        {last_error}
+        Return corrected JSON only. Keep tasks_scores in the same order as the tasks.
+        Copy each topic exactly from the task list.
+        """
+
+        try:
+            raw_response = await _generate_evaluation(request, prompt)
+            last_raw = raw_response
+            parsed = TaskEvaluationScore.model_validate_json(extract_json(raw_response))
+            return validate_task_evaluation(parsed, request)
+        except HTTPException:
+            raise
+        except (
+            pydantic.ValidationError,
+            json.JSONDecodeError,
+            OutputValidationError,
+        ) as e:
+            last_error = str(e)
+            print(f"Output validation error: {e}\nRaw response: {last_raw}")
+        except Exception as e:
+            print(f"Error details: {type(e).__name__}: {str(e)}")
+            raise HTTPException(status_code=500, detail=str(e))
+
+    raise HTTPException(
+        status_code=500,
+        detail=f"Invalid response format: {last_error}. Raw response: {last_raw}",
+    )
+
+
+async def _generate_evaluation(request: TestResultsRequest, prompt: str) -> str:
     tasks_count = len(request.tasks_results)
 
     json_schema = {
@@ -42,29 +85,13 @@ async def evaluate_tasks_results(request: TestResultsRequest) -> TaskEvaluationS
             "vocabulary_score",
             "tasks_scores",
         ],
+        "additionalProperties": False,
     }
 
-    try:
-        async with OllamaClient() as client:
-            raw_response = await client.generate(prompt, format=json_schema)
-    except Exception as e:
-        print(f"Error details: {type(e).__name__}: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+    async with OllamaClient() as client:
+        raw_response = await client.generate(prompt, format=json_schema)
 
     if not raw_response or not raw_response.strip():
-        raise HTTPException(status_code=500, detail="Empty response from Ollama")
+        raise OutputValidationError("Empty response from Ollama")
 
-    json_str = extract_json(raw_response)
-
-    try:
-        return TaskEvaluationScore.model_validate_json(json_str)
-    except pydantic.ValidationError as e:
-        print(f"Validation error: {e}\nRaw response: {raw_response}")
-        raise HTTPException(
-            status_code=500, detail=f"Invalid response format: {str(e)}"
-        )
-    except json.JSONDecodeError as e:
-        print(f"JSON decode error: {e}\nRaw response: {raw_response}")
-        raise HTTPException(
-            status_code=500, detail=f"Invalid JSON in response: {str(e)}"
-        )
+    return raw_response
