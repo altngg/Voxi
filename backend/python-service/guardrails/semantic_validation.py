@@ -5,6 +5,7 @@ from typing import List
 from clients.ollama_client import OllamaClient
 from core.json_extract import extract_json
 from core.languages import LANGUAGE_KEYS
+from guardrails.grammar import validate_answer_and_grammar
 from guardrails.output_validation import OutputValidationError
 from schemas.retry_tasks import NewCorrectTask
 
@@ -47,6 +48,8 @@ async def validate_retry_task_semantics(task: NewCorrectTask, language: str) -> 
         topic_errors = await _judge_topic(task)
         if topic_errors:
             raise OutputValidationError("; ".join(topic_errors))
+
+    validate_answer_and_grammar(task)
 
 
 def _task_text(task: NewCorrectTask) -> str:
