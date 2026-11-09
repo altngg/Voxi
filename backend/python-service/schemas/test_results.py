@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from typing import List
 
+from guardrails.prompt_injection import reject_injected_topics
 from .common import AnswerText, Language, Level, ShortText, TaskText, UserAnswerText
 
 
@@ -42,6 +43,7 @@ class TestResultsRequest(BaseModel):
 
         if len(self.topics) != len(set(self.topics)):
             raise ValueError("topics contains duplicates")
+        reject_injected_topics(self.topics)
 
         known_topics = set(self.topics)
         missing = sorted(

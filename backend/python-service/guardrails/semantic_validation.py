@@ -7,6 +7,7 @@ from core.json_extract import extract_json
 from core.languages import LANGUAGE_KEYS
 from guardrails.grammar import validate_answer_and_grammar
 from guardrails.output_validation import OutputValidationError
+from guardrails.prompt_injection import security_rules, untrusted_field
 from schemas.retry_tasks import NewCorrectTask
 
 _NON_LATIN = re.compile(r"[\u0400-\u04FF\u0600-\u06FF\u3040-\u30FF\u4E00-\u9FFF]")
@@ -151,11 +152,12 @@ async def _judge_topic(task: NewCorrectTask) -> List[str]:
     options = ", ".join(task.options) if task.options else "(none)"
     prompt = f"""
         Decide if this exercise really tests the declared topic.
+        {security_rules()}
 
         Declared topic: {task.topic}
-        Exercise: {task.name}
-        Answer: {task.answer}
-        Options: {options}
+        Exercise: {untrusted_field(task.name, "exercise")}
+        Answer: {untrusted_field(task.answer, "answer")}
+        Options: {untrusted_field(options, "options")}
 
         matches_topic is true only if a learner would practice "{task.topic}"
         by solving this exercise. If it tests a different skill or grammar point,

@@ -1,12 +1,16 @@
+from guardrails.prompt_injection import security_rules, untrusted_field
+
+
 def convert_retry_task_to_prompt(
     task_name: str, task_topic: str, task_type: str, language: str, topic_score: int
 ):
     prompt = f"""
         Generate a new task to replace the existing one.
+        {security_rules()}
 
         input data:
         - language: {language}
-        - existing task: "{task_name}"
+        - existing task: {untrusted_field(task_name, "existing_task")}
         - new task topic: {task_topic}
         - new task type: {task_type}
         - user's score for this topic: {topic_score}

@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from guardrails.prompt_injection import injection_reason
 from schemas.test_chat import TestChatRequest, TestChatResponse
 from clients.ollama_client import OllamaClient
 import traceback
@@ -12,6 +13,9 @@ async def health():
 
 @router.post("/generate", response_model=TestChatResponse)
 async def generate(req: TestChatRequest):
+    reason = injection_reason(req.prompt)
+    if reason:
+        raise HTTPException(status_code=400, detail=f"prompt rejected: {reason}")
     try:
         response_text = await OllamaClient().generate(
             prompt=req.prompt,

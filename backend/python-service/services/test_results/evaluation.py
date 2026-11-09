@@ -6,6 +6,7 @@ from guardrails.output_validation import (
     OutputValidationError,
     validate_task_evaluation,
 )
+from guardrails.prompt_injection import injection_reason, quote_data
 from services.test_results.prompts import convert_test_results_to_prompt
 import pydantic
 from fastapi import HTTPException
@@ -22,7 +23,7 @@ async def evaluate_tasks_results(request: TestResultsRequest) -> TaskEvaluationS
             prompt += f"""
 
         Previous JSON failed validation:
-        {last_error}
+        {quote_data(last_error, "validation_error")}
         Return corrected JSON only. Keep tasks_scores in the same order as the tasks.
         Copy each topic exactly from the task list.
         """
@@ -31,7 +32,9 @@ async def evaluate_tasks_results(request: TestResultsRequest) -> TaskEvaluationS
             raw_response = await _generate_evaluation(request, prompt)
             last_raw = raw_response
             parsed = TaskEvaluationScore.model_validate_json(extract_json(raw_response))
-            return validate_task_evaluation(parsed, request)
+            return _force_injected_answers_incorrect(
+                validate_task_evaluation(parsed, request), request
+            )
         except HTTPException:
             raise
         except (
@@ -95,3 +98,19 @@ async def _generate_evaluation(request: TestResultsRequest, prompt: str) -> str:
         raise OutputValidationError("Empty response from Ollama")
 
     return raw_response
+
+
+def _force_injected_answers_incorrect(
+    score: TaskEvaluationScore, request: TestResultsRequest
+) -> TaskEvaluationScore:
+    tasks = []
+    changed = False
+    for expected, got in zip(request.tasks_results, score.tasks_scores):
+        if injection_reason(expected.user_answer):
+            tasks.append(got.model_copy(update={"is_correct": False}))
+            changed = True
+        else:
+            tasks.append(got)
+    if not changed:
+        return score
+    return score.model_copy(update={"tasks_scores": tasks})

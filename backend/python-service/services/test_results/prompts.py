@@ -1,3 +1,4 @@
+from guardrails.prompt_injection import security_rules, untrusted_field
 from schemas.test_results import TestResultsRequest
 
 
@@ -7,13 +8,14 @@ def convert_test_results_to_prompt(request: TestResultsRequest) -> str:
 
     tasks_results_str = ""
     for i, task in enumerate(request.tasks_results, 1):
-        tasks_results_str += f"\n{i}. task: {task.name}\n"
+        tasks_results_str += f"\n{i}. task: {untrusted_field(task.name, 'task_name')}\n"
         tasks_results_str += f"   topic: {task.topic}\n"
-        tasks_results_str += f"   correct answer: {task.answer}\n"
-        tasks_results_str += f"   user answer: {task.user_answer}\n"
+        tasks_results_str += f"   correct answer: {untrusted_field(task.answer, 'correct_answer')}\n"
+        tasks_results_str += f"   user answer: {untrusted_field(task.user_answer, 'user_answer')}\n"
 
     return f"""
         Check if each task in {request.language} is correct. Do not merge tasks.
+        {security_rules()}
 
         Tasks, in order:
         {tasks_results_str}

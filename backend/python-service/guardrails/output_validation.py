@@ -2,6 +2,7 @@ from typing import Any, Dict, List
 
 from pydantic import ValidationError
 
+from guardrails.prompt_injection import injection_reason
 from schemas.common import TaskType
 from schemas.retry_tasks import IncorrectTaskInfo, NewCorrectTask
 from schemas.test_results import TaskEvaluationScore, TestResultsRequest
@@ -40,6 +41,8 @@ def validate_generated_retry_task(
 
     if len(task.name.strip()) < 5:
         errors.append("name is too short")
+
+    errors.extend(_injection_errors(task))
 
     match expected_type:
         case TaskType.MULTIPLE_CHOICE.value:
@@ -89,6 +92,19 @@ def validate_task_evaluation(
 
 def _normalize_text(value: str) -> str:
     return " ".join(value.casefold().split())
+
+
+def _injection_errors(task: NewCorrectTask) -> List[str]:
+    errors: List[str] = []
+    for field, value in (
+        ("name", task.name),
+        ("answer", task.answer),
+        *((f"options[{index}]", option) for index, option in enumerate(task.options)),
+    ):
+        reason = injection_reason(value)
+        if reason:
+            errors.append(f"{field} looks like prompt injection ({reason})")
+    return errors
 
 
 def _multiple_choice_errors(task: NewCorrectTask) -> List[str]:

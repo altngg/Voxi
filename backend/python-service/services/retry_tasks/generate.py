@@ -7,6 +7,7 @@ from guardrails.output_validation import (
     OutputValidationError,
     validate_generated_retry_task,
 )
+from guardrails.prompt_injection import quote_data
 from guardrails.semantic_validation import validate_retry_task_semantics
 from services.retry_tasks.prompts import convert_retry_task_to_prompt
 from fastapi import HTTPException
@@ -84,7 +85,7 @@ async def generate_retry_task(
         prompt += f"""
 
         The previous result failed these checks:
-        {previous_error}
+        {quote_data(previous_error, "validation_error")}
         Generate a different valid task. Keep topic and task_type exactly as requested.
         """
 

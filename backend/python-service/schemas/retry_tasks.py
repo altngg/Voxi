@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from typing import List
 
+from guardrails.prompt_injection import reject_injected_topics
 from .common import AnswerText, Language, ShortText, TaskText, TaskType
 
 
@@ -41,6 +42,8 @@ class RetryTasksRequest(BaseModel):
         topics = [item.topic for item in self.topics_scores]
         if len(topics) != len(set(topics)):
             raise ValueError("topics_scores contains duplicate topics")
+        reject_injected_topics(topics)
+        reject_injected_topics([task.topic for task in self.incorrect_tasks])
         return self
 
 
