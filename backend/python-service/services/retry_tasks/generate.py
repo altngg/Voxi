@@ -7,8 +7,7 @@ import pydantic
 from fastapi import HTTPException
 import json
 
-from schemas.retry_tasks import IncorrectTaskInfo, RetryTasksRequest, RetryTasksResponse
-from schemas.test_results import TopicScore
+from schemas.retry_tasks import IncorrectTaskInfo, RetryTasksRequest, RetryTasksResponse, RetryTopicScore
 
 
 async def generate_retry_tasks(request: RetryTasksRequest) -> RetryTasksResponse:
@@ -38,7 +37,7 @@ async def generate_retry_tasks(request: RetryTasksRequest) -> RetryTasksResponse
             status_code=500, detail=f"Invalid response format: {str(e)}"
         )
 
-async def generate_retry_task(task: IncorrectTaskInfo, language: str, topics: List[TopicScore]):
+async def generate_retry_task(task: IncorrectTaskInfo, language: str, topics: List[RetryTopicScore]):
     topics_names = [t.topic for t in topics]
     topic_score = next((t.score for t in topics if t.topic == task.topic), 0)
 

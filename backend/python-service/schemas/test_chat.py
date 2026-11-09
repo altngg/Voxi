@@ -1,8 +1,12 @@
-from pydantic import BaseModel
+from typing import Annotated
+
+from pydantic import BaseModel, ConfigDict, StringConstraints
 
 
 class TestChatRequest(BaseModel):
-    prompt: str
+    model_config = ConfigDict(extra="forbid")
+
+    prompt: Annotated[str, StringConstraints(min_length=1, max_length=4000)]
 
 
 class TestChatResponse(BaseModel):
