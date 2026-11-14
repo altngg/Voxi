@@ -10,7 +10,7 @@ export type LessonTask = {
 };
 
 export type LessonTasksResponse = {
-  testId: number;
+  testId?: number;
   language: string;
   tasks: LessonTask[];
 };
@@ -18,7 +18,11 @@ export type LessonTasksResponse = {
 type FetchLessonTasksParams = {
   languageId: number;
   maxTasks: number;
+  restored?: LessonTasksResponse | null;
 };
+
+export const lessonTasksQueryKey = (languageId: number, maxTasks: number) =>
+  ["lesson", "tasks", languageId, maxTasks] as const;
 
 const fetchLessonTasks = ({ languageId, maxTasks }: FetchLessonTasksParams) =>
   requestGet<LessonTasksResponse>("/lesson/tasks", { languageId, maxTasks });
@@ -26,8 +30,13 @@ const fetchLessonTasks = ({ languageId, maxTasks }: FetchLessonTasksParams) =>
 export const useLessonTasksQuery = ({
   languageId,
   maxTasks,
+  restored = null,
 }: FetchLessonTasksParams) =>
   useQuery({
-    queryKey: ["lesson", "tasks", languageId, maxTasks],
+    queryKey: lessonTasksQueryKey(languageId, maxTasks),
     queryFn: () => fetchLessonTasks({ languageId, maxTasks }),
+    enabled: restored == null,
+    staleTime: Infinity,
+    retry: 0,
+    initialData: restored ?? undefined,
   });

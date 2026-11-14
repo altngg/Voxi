@@ -19,13 +19,25 @@ export type TestTasksResponse = {
 type FetchTestTasksParams = {
   languageId: number;
   count: number;
+  restored?: TestTasksResponse | null;
 };
+
+export const testTasksQueryKey = (languageId: number, count: number) =>
+  ["test", "tasks", languageId, count] as const;
 
 const fetchTestTasks = ({ languageId, count }: FetchTestTasksParams) =>
   requestGet<TestTasksResponse>("/test", { languageId, count });
 
-export const useTestTasksQuery = ({ languageId, count }: FetchTestTasksParams) =>
+export const useTestTasksQuery = ({
+  languageId,
+  count,
+  restored = null,
+}: FetchTestTasksParams) =>
   useQuery({
-    queryKey: ["test", "tasks", languageId, count],
+    queryKey: testTasksQueryKey(languageId, count),
     queryFn: () => fetchTestTasks({ languageId, count }),
+    enabled: restored == null,
+    staleTime: Infinity,
+    retry: 0,
+    initialData: restored ?? undefined,
   });

@@ -58,9 +58,13 @@ const toTrueFalseItem = (task: TestTask): TrueFalseTaskItem => ({
 
 export const TaskByType = ({
   task,
+  answerValue,
+  disabled = false,
   onAnswerValueChange,
 }: {
   task: TestTask;
+  answerValue?: string;
+  disabled?: boolean;
   onAnswerValueChange?: (taskId: string, value: string) => void;
 }) => {
   const taskId = String(task.id);
@@ -68,10 +72,17 @@ export const TaskByType = ({
   switch (normalizeTaskType(task.taskType)) {
     case "MULTIPLE_CHOICE": {
       const chooseItem = toChooseOptionItem(task);
+      const selectedOptionId = chooseItem.options.find(
+        (option) => option.label === answerValue,
+      )?.id;
       return (
         <ChooseOptionTask
           title="Выберите правильный ответ"
           items={[chooseItem]}
+          initialAnswers={
+            selectedOptionId ? { [taskId]: selectedOptionId } : undefined
+          }
+          disabled={disabled}
           onAnswersChange={(answers) => {
             const optionId = answers[taskId] ?? "";
             const label =
@@ -86,6 +97,10 @@ export const TaskByType = ({
         <FillInTheBlanksTask
           title="Заполните пропуски"
           items={[toFillInTheBlanksItem(task)]}
+          initialAnswers={
+            answerValue !== undefined ? { [taskId]: answerValue } : undefined
+          }
+          disabled={disabled}
           onAnswersChange={(answers) => {
             const text = answers[taskId] ?? "";
             onAnswerValueChange?.(taskId, text);
@@ -97,6 +112,14 @@ export const TaskByType = ({
         <TrueFalseTask
           title="Выберите правильный ответ"
           items={[toTrueFalseItem(task)]}
+          initialAnswers={
+            answerValue === "true"
+              ? { [taskId]: true }
+              : answerValue === "false"
+                ? { [taskId]: false }
+                : undefined
+          }
+          disabled={disabled}
           onAnswersChange={(answers) => {
             if (!Object.hasOwn(answers, taskId)) {
               onAnswerValueChange?.(taskId, "");

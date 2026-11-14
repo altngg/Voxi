@@ -6,6 +6,8 @@ type LessonTaskRowProps = {
   task: TestTask;
   explanation?: string;
   isIncorrect?: boolean;
+  answerValue?: string;
+  disabled?: boolean;
   onAnswerValueChange?: (taskId: string, value: string) => void;
 };
 
@@ -13,6 +15,8 @@ export const LessonTaskRow = ({
   task,
   explanation,
   isIncorrect = false,
+  answerValue,
+  disabled = false,
   onAnswerValueChange,
 }: LessonTaskRowProps) => {
   return (
@@ -36,7 +40,12 @@ export const LessonTaskRow = ({
           {explanation}
         </div>
       ) : null}
-      <TaskByType task={task} onAnswerValueChange={onAnswerValueChange} />
+      <TaskByType
+        task={task}
+        answerValue={answerValue}
+        disabled={disabled}
+        onAnswerValueChange={onAnswerValueChange}
+      />
     </li>
   );
 };

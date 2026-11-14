@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useInitialAnswers } from "../shared/lib/use-initial-answers";
 import { Input } from "../shared/ui/Input";
 
 export type FillInTheBlanksItem = {
@@ -11,27 +11,28 @@ export type FillInTheBlanksItem = {
 type FillInTheBlanksTaskProps = {
   title: string;
   items: FillInTheBlanksItem[];
+  initialAnswers?: Record<string, string>;
+  disabled?: boolean;
   onAnswersChange?: (answers: Record<string, string>) => void;
 };
 
 export const FillInTheBlanksTask = ({
   title,
   items,
+  initialAnswers,
+  disabled = false,
   onAnswersChange,
 }: FillInTheBlanksTaskProps) => {
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const onAnswersChangeRef = useRef(onAnswersChange);
-
-  useEffect(() => {
-    onAnswersChangeRef.current = onAnswersChange;
-  }, [onAnswersChange]);
-
-  useEffect(() => {
-    onAnswersChangeRef.current?.(answers);
-  }, [answers]);
+  const [answers, commitAnswers] = useInitialAnswers(
+    initialAnswers,
+    onAnswersChange,
+  );
 
   const handleAnswerChange = (id: string, value: string) => {
-    setAnswers((prev) => ({
+    if (disabled) {
+      return;
+    }
+    commitAnswers((prev) => ({
       ...prev,
       [id]: value,
     }));
@@ -50,6 +51,7 @@ export const FillInTheBlanksTask = ({
               inputType="text"
               inputName={item.id}
               value={answers[item.id] ?? ""}
+              disabled={disabled}
               onChange={(value) => handleAnswerChange(item.id, value)}
               placeholder={item.placeholder}
               ariaLabel={`Ответ для предложения ${index + 1}`}
