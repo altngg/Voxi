@@ -5,6 +5,7 @@ from typing import List
 from clients.ollama_client import OllamaClient
 from core.json_extract import extract_json
 from core.languages import LANGUAGE_KEYS
+from core.ollama_cache import get_or_fill
 from guardrails.grammar import validate_answer_and_grammar
 from guardrails.output_validation import OutputValidationError
 from guardrails.prompt_injection import security_rules, untrusted_field
@@ -148,7 +149,46 @@ def _looks_like_form_drill(task: NewCorrectTask) -> bool:
     return verb_like >= 3
 
 
+def _judge_cache_payload(task: NewCorrectTask) -> dict:
+    return {
+        "name": task.name,
+        "answer": task.answer,
+        "topic": task.topic,
+        "options": list(task.options or []),
+    }
+
+
+def _parse_judge(raw: object) -> dict | None:
+    if not isinstance(raw, dict) or "matches_topic" not in raw:
+        return None
+    return {
+        "matches_topic": bool(raw.get("matches_topic") is True),
+        "reason": str(raw.get("reason") or "topic mismatch").strip(),
+    }
+
+
+def _judge_errors(task: NewCorrectTask, data: dict) -> List[str]:
+    if data.get("matches_topic") is True:
+        return []
+    reason = str(data.get("reason") or "topic mismatch").strip()
+    return [f'task does not match topic "{task.topic}": {reason}']
+
+
 async def _judge_topic(task: NewCorrectTask) -> List[str]:
+    data = await get_or_fill(
+        "judge",
+        _judge_cache_payload(task),
+        parse=_parse_judge,
+        compute=lambda: _judge_topic_uncached(task),
+        dump=lambda value: {
+            "matches_topic": bool(value.get("matches_topic") is True),
+            "reason": str(value.get("reason") or "topic mismatch").strip(),
+        },
+    )
+    return _judge_errors(task, data)
+
+
+async def _judge_topic_uncached(task: NewCorrectTask) -> dict:
     options = ", ".join(task.options) if task.options else "(none)"
     prompt = f"""
         Decide if this exercise really tests the declared topic.
@@ -180,8 +220,7 @@ async def _judge_topic(task: NewCorrectTask) -> List[str]:
     except Exception as e:
         raise OutputValidationError(f"topic judge returned invalid JSON: {e}") from e
 
-    if data.get("matches_topic") is True:
-        return []
-
-    reason = str(data.get("reason") or "topic mismatch").strip()
-    return [f'task does not match topic "{task.topic}": {reason}']
+    parsed = _parse_judge(data)
+    if parsed is None:
+        raise OutputValidationError("topic judge returned invalid JSON")
+    return parsed

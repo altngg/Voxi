@@ -1,6 +1,7 @@
 from schemas.test_results import TaskEvaluationScore, TestResultsRequest
 from clients.ollama_client import OllamaClient
 from core.json_extract import extract_json
+from core.ollama_cache import get_or_fill
 from guardrails.output_validation import (
     MAX_OUTPUT_ATTEMPTS,
     OutputValidationError,
@@ -13,7 +14,45 @@ from fastapi import HTTPException
 import json
 
 
+def _evaluation_cache_payload(request: TestResultsRequest) -> dict:
+    return {
+        "language": request.language,
+        "levels": list(request.levels),
+        "topics": sorted(request.topics),
+        "tasks_results": [
+            {
+                "name": task.name,
+                "answer": task.answer,
+                "topic": task.topic,
+                "user_answer": task.user_answer,
+            }
+            for task in request.tasks_results
+        ],
+    }
+
+
+def _parse_evaluation(raw: object) -> TaskEvaluationScore | None:
+    if not isinstance(raw, dict):
+        return None
+    try:
+        return TaskEvaluationScore.model_validate(raw)
+    except pydantic.ValidationError:
+        return None
+
+
 async def evaluate_tasks_results(request: TestResultsRequest) -> TaskEvaluationScore:
+    return await get_or_fill(
+        "evaluation",
+        _evaluation_cache_payload(request),
+        parse=_parse_evaluation,
+        compute=lambda: _evaluate_tasks_results_uncached(request),
+        dump=lambda score: score.model_dump(mode="json"),
+    )
+
+
+async def _evaluate_tasks_results_uncached(
+    request: TestResultsRequest,
+) -> TaskEvaluationScore:
     last_error = None
     last_raw = None
 

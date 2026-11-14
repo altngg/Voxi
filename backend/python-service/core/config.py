@@ -8,5 +8,7 @@ class Settings(BaseSettings):
     ollama_num_ctx: int = 1024
     ollama_num_predict: int = 300
     ollama_keep_alive: str = "30m"
+    redis_url: str | None = None
+    ollama_cache_ttl_seconds: int = 86400
 
 settings = Settings()

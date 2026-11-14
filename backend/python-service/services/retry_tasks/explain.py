@@ -5,6 +5,7 @@ from fastapi import HTTPException
 
 from clients.ollama_client import OllamaClient
 from core.json_extract import extract_json
+from core.ollama_cache import get_or_fill
 from guardrails.output_validation import (
     CJK_CHAR_RANGES,
     EXPLANATION_PREFIX,
@@ -37,6 +38,26 @@ _INJECTED_TASK_EXPLANATION = (
 )
 
 
+def _explanation_cache_payload(task: IncorrectTaskInfo, language: str) -> dict:
+    return {
+        "language": language,
+        "name": task.name,
+        "topic": task.topic,
+        "task_type": task.task_type.value,
+    }
+
+
+def _parse_explanation(raw: object, task_id: int) -> IncorrectTaskExplanation | None:
+    if not isinstance(raw, dict) or not isinstance(raw.get("explanation"), str):
+        return None
+    try:
+        return IncorrectTaskExplanation(
+            incorrect_task_id=task_id, explanation=raw["explanation"]
+        )
+    except Exception:
+        return None
+
+
 async def generate_validated_explanation(
     task: IncorrectTaskInfo, language: str
 ) -> IncorrectTaskExplanation:
@@ -45,6 +66,18 @@ async def generate_validated_explanation(
             incorrect_task_id=task.id, explanation=_INJECTED_TASK_EXPLANATION
         )
 
+    return await get_or_fill(
+        "explanation",
+        _explanation_cache_payload(task, language),
+        parse=lambda raw: _parse_explanation(raw, task.id),
+        compute=lambda: _generate_validated_explanation_uncached(task, language),
+        dump=lambda result: {"explanation": result.explanation},
+    )
+
+
+async def _generate_validated_explanation_uncached(
+    task: IncorrectTaskInfo, language: str
+) -> IncorrectTaskExplanation:
     last_error = None
     last_raw = None
 
