@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useInitialAnswers } from "../shared/lib/use-initial-answers";
 import { Button } from "../shared/ui/Button";
 
 export type TrueFalseTaskItem = {
@@ -9,6 +9,8 @@ export type TrueFalseTaskItem = {
 type TrueFalseTaskProps = {
   title: string;
   items: TrueFalseTaskItem[];
+  initialAnswers?: Record<string, boolean>;
+  disabled?: boolean;
   onAnswersChange?: (answers: Record<string, boolean>) => void;
 };
 
@@ -18,21 +20,20 @@ const ANSWER_BUTTON_CLASS =
 export const TrueFalseTask = ({
   title,
   items,
+  initialAnswers,
+  disabled = false,
   onAnswersChange,
 }: TrueFalseTaskProps) => {
-  const [answers, setAnswers] = useState<Record<string, boolean>>({});
-  const onAnswersChangeRef = useRef(onAnswersChange);
-
-  useEffect(() => {
-    onAnswersChangeRef.current = onAnswersChange;
-  }, [onAnswersChange]);
-
-  useEffect(() => {
-    onAnswersChangeRef.current?.(answers);
-  }, [answers]);
+  const [answers, commitAnswers] = useInitialAnswers(
+    initialAnswers,
+    onAnswersChange,
+  );
 
   const handleAnswerChange = (itemId: string, value: boolean) => {
-    setAnswers((prev) => ({
+    if (disabled) {
+      return;
+    }
+    commitAnswers((prev) => ({
       ...prev,
       [itemId]: value,
     }));
@@ -54,12 +55,14 @@ export const TrueFalseTask = ({
               <Button
                 buttonName="True"
                 variant={answers[item.id] === true ? "primary" : "ghost"}
+                disabled={disabled}
                 onClick={() => handleAnswerChange(item.id, true)}
                 className={ANSWER_BUTTON_CLASS}
               />
               <Button
                 buttonName="False"
                 variant={answers[item.id] === false ? "primary" : "ghost"}
+                disabled={disabled}
                 onClick={() => handleAnswerChange(item.id, false)}
                 className={ANSWER_BUTTON_CLASS}
               />

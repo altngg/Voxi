@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useInitialAnswers } from "../shared/lib/use-initial-answers";
 import { Checkbox } from "../shared/ui/Checkbox";
 
 type ChooseOption = {
@@ -16,6 +16,8 @@ export type ChooseOptionItem = {
 type ChooseOptionTaskProps = {
   title: string;
   items: ChooseOptionItem[];
+  initialAnswers?: Record<string, string>;
+  disabled?: boolean;
   onAnswersChange?: (answers: Record<string, string>) => void;
 };
 
@@ -28,32 +30,27 @@ const getLongestOptionLength = (options: ChooseOption[]) =>
 export const ChooseOptionTask = ({
   title,
   items,
+  initialAnswers,
+  disabled = false,
   onAnswersChange,
 }: ChooseOptionTaskProps) => {
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const onAnswersChangeRef = useRef(onAnswersChange);
-
-  useEffect(() => {
-    onAnswersChangeRef.current = onAnswersChange;
-  }, [onAnswersChange]);
-
-  useEffect(() => {
-    onAnswersChangeRef.current?.(answers);
-  }, [answers]);
+  const [answers, commitAnswers] = useInitialAnswers(
+    initialAnswers,
+    onAnswersChange,
+  );
 
   const handleOptionToggle = (
     itemId: string,
     optionId: string,
     isChecked: boolean,
   ) => {
-    setAnswers((prev) => {
-      const nextAnswerForItem = isChecked ? optionId : "";
-
-      return {
-        ...prev,
-        [itemId]: nextAnswerForItem,
-      };
-    });
+    if (disabled) {
+      return;
+    }
+    commitAnswers((prev) => ({
+      ...prev,
+      [itemId]: isChecked ? optionId : "",
+    }));
   };
 
   return (
@@ -85,6 +82,7 @@ export const ChooseOptionTask = ({
                   name={`${item.id}-${option.id}`}
                   label={option.label}
                   checked={answers[item.id] === option.id}
+                  disabled={disabled}
                   onChange={(checked) =>
                     handleOptionToggle(item.id, option.id, checked)
                   }
