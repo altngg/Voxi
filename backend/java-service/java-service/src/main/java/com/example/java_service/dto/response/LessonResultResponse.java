@@ -1,4 +1,3 @@
-
 package com.example.java_service.dto.response;
 
 import java.util.List;
@@ -16,6 +15,14 @@ public class LessonResultResponse {
     private Double progressPercent;
     private Map<String, Integer> updatedTopicScores;
     private List<RetryTaskDto> newTasks;
+    private List<IncorrectTaskExplanationDto> incorrectTasksWithExplanations;
+
+    @Data
+    @Builder
+    public static class IncorrectTaskExplanationDto {
+        private Long id;
+        private String explanation;
+    }
 
     @Data
     @Builder

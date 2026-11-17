@@ -109,6 +109,8 @@ public class LessonResultService {
         }
 
         List<LessonResultResponse.RetryTaskDto> newTasks = Collections.emptyList();
+        List<LessonResultResponse.IncorrectTaskExplanationDto> incorrectTasksWithExplanations =
+        Collections.emptyList();
 
         if (!incorrectTasks.isEmpty()) {
             PythonRetryRequest retryRequest = buildRetryRequest(
@@ -133,6 +135,10 @@ public class LessonResultService {
                         "Сервис генерации вернул не все повторные задания. Попробуйте ещё раз."
                 );
             }
+            incorrectTasksWithExplanations = mapIncorrectTaskExplanations(
+                    retryResponse,
+                    incorrectTasks
+            );
 
             newTasks = new ArrayList<>();
 
@@ -203,8 +209,71 @@ public class LessonResultService {
                 .progressPercent(Math.round(progress * 10.0) / 10.0)
                 .updatedTopicScores(topicScoreChanges)
                 .newTasks(newTasks)
+                .incorrectTasksWithExplanations(incorrectTasksWithExplanations)
                 .build();
     }
+
+    private List<LessonResultResponse.IncorrectTaskExplanationDto> mapIncorrectTaskExplanations(
+            PythonRetryResponse retryResponse,
+            List<PythonRetryRequest.IncorrectTask> incorrectTasks) {
+
+        List<PythonRetryResponse.IncorrectTaskExplanation> generatedExplanations =
+                retryResponse.getIncorrectTasksExplanations();
+
+        if (generatedExplanations == null || generatedExplanations.size() != incorrectTasks.size()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_GATEWAY,
+                    "Сервис генерации вернул не все объяснения неправильных заданий. Попробуйте ещё раз."
+            );
+        }
+
+        Map<Long, String> explanationsByTaskId = new HashMap<>();
+
+        for (PythonRetryResponse.IncorrectTaskExplanation generated : generatedExplanations) {
+            if (generated == null || generated.getIncorrectTaskId() == null
+                    || generated.getExplanation() == null) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_GATEWAY,
+                        "Сервис генерации вернул некорректное объяснение. Попробуйте ещё раз."
+                );
+            }
+
+            Long taskId = generated.getIncorrectTaskId();
+            String explanation = generated.getExplanation().trim();
+
+            boolean taskExists = incorrectTasks.stream()
+                    .anyMatch(task -> Objects.equals(task.getId(), taskId));
+
+            if (!taskExists || explanation.length() < 20 || explanation.length() > 600
+                    || explanationsByTaskId.putIfAbsent(taskId, explanation) != null) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_GATEWAY,
+                        "Сервис генерации вернул некорректные объяснения неправильных заданий. Попробуйте ещё раз."
+                );
+            }
+        }
+
+        List<LessonResultResponse.IncorrectTaskExplanationDto> result = new ArrayList<>();
+
+        for (PythonRetryRequest.IncorrectTask incorrectTask : incorrectTasks) {
+            String explanation = explanationsByTaskId.get(incorrectTask.getId());
+
+            if (explanation == null) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_GATEWAY,
+                        "Для одного из неправильных заданий не найдено объяснение. Попробуйте ещё раз."
+                );
+            }
+
+            result.add(LessonResultResponse.IncorrectTaskExplanationDto.builder()
+                    .id(incorrectTask.getId())
+                    .explanation(explanation)
+                    .build());
+        }
+
+        return result;
+    }
+
 
     private Long getTaskTypeId(String taskType) {
         switch (taskType) {
