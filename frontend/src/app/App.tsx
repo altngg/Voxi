@@ -4,6 +4,7 @@ import { RegistrationPage } from "../pages/RegistrationPage";
 import { RegistrationLanguagePage } from "../pages/RegistrationLanguagePage";
 import { Route, Routes } from "react-router-dom";
 import { MainLayout } from "./layouts/MainLayout";
+import { RequireAuth } from "./RequireAuth";
 import { TestPage } from "../pages/TestPage";
 import { TestResultPage } from "../pages/TestResultPage";
 import { LessonPage } from "../pages/LessonPage";
@@ -34,12 +35,14 @@ function App() {
           element={<RegistrationLanguagePage />}
         />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={<MainLayout />}>
-          <Route path="/test" element={<TestPage />} />
-          <Route path="/test/result" element={<TestResultPage />} />
-          <Route path="/lesson" element={<LessonPage />} />
-          <Route path="/lesson/result" element={<LessonResultsPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
+        <Route element={<RequireAuth />}>
+          <Route path="/" element={<MainLayout />}>
+            <Route path="/test" element={<TestPage />} />
+            <Route path="/test/result" element={<TestResultPage />} />
+            <Route path="/lesson" element={<LessonPage />} />
+            <Route path="/lesson/result" element={<LessonResultsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+          </Route>
         </Route>
       </Routes>
     </QueryClientProvider>

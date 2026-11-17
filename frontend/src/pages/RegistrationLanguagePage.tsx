@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { authApi } from "../shared/api/auth";
+import { saveAuthUser } from "../shared/auth";
 import { Button } from "../shared/ui/Button";
 import { Combobox } from "../shared/ui/Combobox";
 import type { RegistrationDraft } from "./registrationFlow";
@@ -35,7 +36,8 @@ export const RegistrationLanguagePage = () => {
   const [error, setError] = useState<string>("");
   const { mutate: register, isPending } = useMutation({
     mutationFn: authApi.register,
-    onSuccess: () => {
+    onSuccess: (response) => {
+      saveAuthUser(response.user);
       navigate(languageLevel === "Не знаю" ? "/test" : "/");
     },
     onError: (submitError) => {

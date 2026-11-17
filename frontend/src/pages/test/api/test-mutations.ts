@@ -8,4 +8,5 @@ export const useSubmitTestResultMutation = () =>
   useMutation({
     mutationFn: (payload: SubmitTestResultPayload) =>
       testResultApi.submit(payload),
+    retry: 0,
   });

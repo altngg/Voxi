@@ -3,6 +3,7 @@ import axios, {
   type AxiosRequestConfig,
   type AxiosResponse,
 } from "axios";
+import { clearAuthUser } from "../auth";
 
 const api = axios.create({
   baseURL: "http://localhost/api",
@@ -19,11 +20,7 @@ let pendingRefresh: Promise<AxiosResponse> | null = null;
 const isAuthRoute = (url?: string) => Boolean(url?.includes("/auth/"));
 
 const handleAuthFailure = () => {
-  try {
-    localStorage.removeItem("authUser");
-  } catch {
-    // localStorage may be unavailable
-  }
+  clearAuthUser();
   if (typeof window === "undefined") {
     return;
   }

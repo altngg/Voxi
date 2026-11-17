@@ -95,6 +95,12 @@ export const RegistrationPage = () => {
           >
             <span aria-hidden>→</span>
           </Button>
+          <Button
+            className="mt-2"
+            buttonType="button"
+            buttonName="Войти"
+            onClick={() => navigate("/login")}
+          />
         </form>
       </section>
     </main>
