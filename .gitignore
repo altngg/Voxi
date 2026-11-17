@@ -50,3 +50,7 @@ pnpm-debug.log*
 ### Cursor
 .agents/
 skills-lock.json
+nginx/logs/access.log
+
+### 
+access.log

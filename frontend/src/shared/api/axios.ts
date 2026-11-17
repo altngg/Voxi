@@ -70,14 +70,22 @@ api.interceptors.response.use(
   },
 );
 
+
 const getRequestErrorMessage = (err: unknown) => {
   if (err && typeof err === "object") {
     const errorObject = err as {
       message?: string;
-      response?: { data?: { message?: string } };
+      response?: {
+        data?: {
+          message?: string;
+          detail?: string;
+        };
+      };
     };
+
     return (
       errorObject.response?.data?.message ||
+      errorObject.response?.data?.detail ||
       errorObject.message ||
       "Запрос не выполнен"
     );
@@ -85,6 +93,7 @@ const getRequestErrorMessage = (err: unknown) => {
 
   return "Запрос не выполнен";
 };
+
 
 export async function request<T>(path: string, payload: unknown): Promise<T> {
   try {

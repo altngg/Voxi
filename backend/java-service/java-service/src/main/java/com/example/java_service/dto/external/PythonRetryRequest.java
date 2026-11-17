@@ -27,9 +27,10 @@ public class PythonRetryRequest {
     @AllArgsConstructor
     @Builder
     public static class IncorrectTask {
+        private Long id;
         private String name;
         private String topic;
-        
+
         @JsonProperty("task_type")
         private String taskType;
     }

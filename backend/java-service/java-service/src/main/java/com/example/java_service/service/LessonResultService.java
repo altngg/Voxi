@@ -1,4 +1,3 @@
-
 package com.example.java_service.service;
 
 import java.time.LocalDateTime;
@@ -7,10 +6,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.example.java_service.dto.external.PythonRetryRequest;
 import com.example.java_service.dto.external.PythonRetryResponse;
@@ -47,6 +49,13 @@ public class LessonResultService {
 
     @Transactional
     public LessonResultResponse processLessonResults(Long userId, LessonResultRequest request) {
+        if (request == null || request.getTaskResults() == null || request.getTaskResults().isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Не переданы ответы на задания."
+            );
+        }
+
         log.info("Processing lesson results for user {} with {} answers", userId, request.getTaskResults().size());
 
         Map<Long, Task> taskMap = taskRepository.findAllById(
@@ -65,14 +74,23 @@ public class LessonResultService {
 
         for (LessonResultRequest.TaskAnswer answer : request.getTaskResults()) {
             Task task = taskMap.get(answer.getTaskId());
-            if (task == null) continue;
+            if (task == null) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Одно из отправленных заданий не найдено."
+                );
+            }
 
             Topic topic = topicRepository.findById(task.getTopicId())
-                    .orElse(null);
-            if (topic == null) continue;
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST,
+                            "Для одного из заданий не найдена тема."
+                    ));
 
             String topicName = topic.getName();
-            boolean isCorrect = answer.getUserAnswer().equalsIgnoreCase(task.getAnswer());
+            boolean isCorrect = answer.getUserAnswer() != null
+                    && task.getAnswer() != null
+                    && answer.getUserAnswer().equalsIgnoreCase(task.getAnswer());
 
             if (isCorrect) {
                 correctCount++;
@@ -82,6 +100,7 @@ public class LessonResultService {
                 topicScoreChanges.merge(topicName, -1, Integer::sum);
 
                 incorrectTasks.add(PythonRetryRequest.IncorrectTask.builder()
+                        .id(task.getId())
                         .name(task.getName())
                         .topic(topicName)
                         .taskType(resolveTaskTypeName(task.getTaskTypeId(), taskTypeNames))
@@ -92,57 +111,83 @@ public class LessonResultService {
         List<LessonResultResponse.RetryTaskDto> newTasks = Collections.emptyList();
 
         if (!incorrectTasks.isEmpty()) {
-            PythonRetryRequest retryRequest = buildRetryRequest(userId, incorrectTasks, request.getLanguageId());
+            PythonRetryRequest retryRequest = buildRetryRequest(
+                    userId,
+                    incorrectTasks,
+                    request.getLanguageId()
+            );
+
             PythonRetryResponse retryResponse = pythonRetryService.generateRetryTasks(retryRequest);
 
-            if (retryResponse != null && retryResponse.getTasks() != null) {
-                newTasks = new ArrayList<>();
+            if (retryResponse == null || retryResponse.getTasks() == null
+                    || retryResponse.getTasks().isEmpty()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_GATEWAY,
+                        "Не удалось получить повторные задания. Попробуйте ещё раз."
+                );
+            }
 
-                for (PythonRetryResponse.NewTask generated : retryResponse.getTasks()) {
-                    if (generated.getName() == null || generated.getName().isBlank()
-                            || generated.getAnswer() == null || generated.getAnswer().isBlank()
-                            || generated.getTopic() == null || generated.getTaskType() == null) {
-                        log.warn("Skipping incomplete generated task: {}", generated);
-                        continue;
-                    }
+            if (retryResponse.getTasks().size() != incorrectTasks.size()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_GATEWAY,
+                        "Сервис генерации вернул не все повторные задания. Попробуйте ещё раз."
+                );
+            }
 
-                    Topic topic = topicRepository.findByName(generated.getTopic())
-                            .orElse(null);
-                    if (topic == null || topic.getLanguage() == null
-                            || !request.getLanguageId().equals(topic.getLanguage().getId())) {
-                        log.warn("Skipping generated task with unknown topic: {}", generated.getTopic());
-                        continue;
-                    }
+            newTasks = new ArrayList<>();
 
-                    Long taskTypeId = getTaskTypeId(generated.getTaskType());
-                    if (taskTypeId == null) {
-                        log.warn("Skipping generated task with unknown type: {}", generated.getTaskType());
-                        continue;
-                    }
-
-                    Task task = Task.builder()
-                            .name(generated.getName())
-                            .answer(generated.getAnswer())
-                            .topicId(topic.getId())
-                            .languageId(request.getLanguageId())
-                            .taskTypeId(taskTypeId)
-                            .options(generated.getOptions())
-                            .createdAt(LocalDateTime.now())
-                            .updatedAt(LocalDateTime.now())
-                            .build();
-
-                    Task savedTask = taskRepository.save(task);
-
-                    newTasks.add(LessonResultResponse.RetryTaskDto.builder()
-                            .id(savedTask.getId())
-                            .name(savedTask.getName())
-                            .answer(savedTask.getAnswer())
-                            .options(savedTask.getOptions() == null || savedTask.getOptions().isEmpty()
-                                    ? null : String.join(",", savedTask.getOptions()))
-                            .topic(topic.getName())
-                            .taskType(savedTask.getTaskTypeId().toString())
-                            .build());
+            for (PythonRetryResponse.NewTask generated : retryResponse.getTasks()) {
+                if (generated.getName() == null || generated.getName().isBlank()
+                        || generated.getAnswer() == null || generated.getAnswer().isBlank()
+                        || generated.getTopic() == null || generated.getTaskType() == null) {
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_GATEWAY,
+                            "Сервис генерации вернул некорректное задание. Попробуйте ещё раз."
+                    );
                 }
+
+                Topic topic = topicRepository.findByName(generated.getTopic())
+                        .orElse(null);
+
+                if (topic == null || topic.getLanguage() == null
+                        || !Objects.equals(request.getLanguageId(), topic.getLanguage().getId())) {
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_GATEWAY,
+                            "Сервис генерации вернул задание с неизвестной темой."
+                    );
+                }
+
+                Long taskTypeId = getTaskTypeId(generated.getTaskType());
+
+                if (taskTypeId == null) {
+                    throw new ResponseStatusException(
+                            HttpStatus.BAD_GATEWAY,
+                            "Сервис генерации вернул задание с неизвестным типом."
+                    );
+                }
+
+                Task task = Task.builder()
+                        .name(generated.getName())
+                        .answer(generated.getAnswer())
+                        .topicId(topic.getId())
+                        .languageId(request.getLanguageId())
+                        .taskTypeId(taskTypeId)
+                        .options(generated.getOptions())
+                        .createdAt(LocalDateTime.now())
+                        .updatedAt(LocalDateTime.now())
+                        .build();
+
+                Task savedTask = taskRepository.save(task);
+
+                newTasks.add(LessonResultResponse.RetryTaskDto.builder()
+                        .id(savedTask.getId())
+                        .name(savedTask.getName())
+                        .answer(savedTask.getAnswer())
+                        .options(savedTask.getOptions() == null || savedTask.getOptions().isEmpty()
+                                ? null : String.join(",", savedTask.getOptions()))
+                        .topic(topic.getName())
+                        .taskType(savedTask.getTaskTypeId().toString())
+                        .build());
             }
         }
 

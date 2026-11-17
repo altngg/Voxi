@@ -232,6 +232,8 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
   const percent = Math.round((correctTasks / safeTotal) * 100);
 
   const hasRetryTasks = newTasks.length > 0;
+  const isLessonSuccessful =
+    correctTasks === totalTasks && !hasRetryTasks;
   const allRetryAnswered =
     newTasks.length > 0 &&
     newTasks.every((task) =>
@@ -320,6 +322,7 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
           <CircularPercentGauge label="Правильные ответы" value={percent} />
         </div>
 
+        
         {hasRetryTasks ? (
           <section className="text-(--text-primary)">
             <h2 className="ui-section-title mb-1">Поработаем над сложным</h2>
@@ -398,7 +401,7 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
               ) : null}
             </div>
           </section>
-        ) : (
+        ) : isLessonSuccessful ? (
           <section className="flex flex-col items-center gap-5 text-center text-(--text-primary)">
             <h2 className="ui-section-title">
               Поздравляем! Урок успешно завершён.
@@ -418,7 +421,26 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
               <ArrowRightLine />
             </Button>
           </section>
+        ) : (
+          <section className="flex flex-col items-center gap-5 text-center text-(--text-primary)">
+            <h2 className="ui-section-title">
+              Не удалось завершить урок
+            </h2>
+            <p className="max-w-md text-base text-(--text-secondary)">
+              Не удалось подготовить повторные задания для неправильных ответов.
+              Попробуйте пройти урок ещё раз.
+            </p>
+            <Button
+              buttonType="button"
+              buttonName="Вернуться к уроку"
+              variant="ghost"
+              onClick={() => navigate("/lesson", { replace: true })}
+            >
+              <ArrowRightLine />
+            </Button>
+          </section>
         )}
+
       </section>
     </main>
   );
