@@ -14,7 +14,7 @@ from schemas.test_results import TaskEvaluationScore, TestResultsRequest
 
 MAX_OUTPUT_ATTEMPTS = 2
 
-EXPLANATION_PREFIX = "Правило:"
+CORRECT_ANSWER_LABEL = "Правильный ответ:"
 CJK_CHAR_RANGES = "\u3000-\u9fff\uac00-\ud7af\uff00-\uffef"
 _MIN_RUSSIAN_WORDS = 5
 _RUSSIAN_WORD = re.compile(r"[А-Яа-яЁё]+")
@@ -80,7 +80,14 @@ def validate_generated_explanation(
         raise OutputValidationError(str(e)) from e
 
     explanation = " ".join(result.explanation.split())
+    if explanation.casefold().startswith("правило:"):
+        explanation = explanation[len("правило:") :].strip()
+
     errors: List[str] = []
+    correct_answer = data.get("correct_answer")
+    answer = (
+        " ".join(correct_answer.split()) if isinstance(correct_answer, str) else ""
+    )
 
     reason = injection_reason(explanation)
     if reason:
@@ -91,11 +98,20 @@ def validate_generated_explanation(
     elif len(_RUSSIAN_WORD.findall(explanation)) < _MIN_RUSSIAN_WORDS:
         errors.append("explanation must be written in Russian")
 
+    if not answer:
+        errors.append("correct_answer is required")
+    elif original.task_type == TaskType.TRUE_FALSE and answer.casefold() not in {
+        "true",
+        "false",
+    }:
+        errors.append('TRUE_FALSE correct_answer must be "true" or "false"')
+    else:
+        ending_error = _correct_answer_ending_error(explanation, answer)
+        if ending_error:
+            errors.append(ending_error)
+
     if errors:
         raise OutputValidationError("; ".join(errors))
-
-    if not explanation.casefold().startswith(EXPLANATION_PREFIX.casefold()):
-        explanation = f"{EXPLANATION_PREFIX} {explanation}"
 
     return result.model_copy(update={"explanation": explanation})
 
@@ -130,6 +146,22 @@ def validate_task_evaluation(
         raise OutputValidationError("; ".join(errors))
 
     return score.model_copy(update={"tasks_scores": coerced})
+
+
+def _correct_answer_ending_error(explanation: str, correct_answer: str) -> str | None:
+    label = CORRECT_ANSWER_LABEL.casefold()
+    expected = f"{label} {correct_answer.casefold()}"
+    folded = explanation.casefold().rstrip()
+    if folded.endswith("."):
+        folded = folded[:-1].rstrip()
+    if not folded.endswith(expected):
+        return f'explanation must end with "{CORRECT_ANSWER_LABEL} {correct_answer}"'
+    head = folded[: folded.rfind(label)].rstrip()
+    if head and head[-1] not in ".!?":
+        return (
+            f'"{CORRECT_ANSWER_LABEL}" must be its own last sentence, after the explanation'
+        )
+    return None
 
 
 def _normalize_text(value: str) -> str:

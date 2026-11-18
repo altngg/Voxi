@@ -8,7 +8,6 @@ from core.json_extract import extract_json
 from core.ollama_cache import get_or_fill
 from guardrails.output_validation import (
     CJK_CHAR_RANGES,
-    EXPLANATION_PREFIX,
     MAX_OUTPUT_ATTEMPTS,
     OutputValidationError,
     validate_generated_explanation,
@@ -17,7 +16,7 @@ from guardrails.prompt_injection import injection_reason, quote_data
 from schemas.retry_tasks import IncorrectTaskExplanation, IncorrectTaskInfo
 from services.retry_tasks.prompts import convert_incorrect_task_to_explanation_prompt
 
-_EXPLANATION_NUM_PREDICT = 200
+_EXPLANATION_NUM_PREDICT = 400
 
 _EXPLANATION_SCHEMA = {
     "type": "object",
@@ -25,7 +24,9 @@ _EXPLANATION_SCHEMA = {
         "correct_answer": {"type": "string", "minLength": 1, "maxLength": 100},
         "explanation": {
             "type": "string",
-            "pattern": f"^{EXPLANATION_PREFIX} [^{CJK_CHAR_RANGES}]+$",
+            "minLength": 20,
+            "maxLength": 600,
+            "pattern": f"^[^{CJK_CHAR_RANGES}]+$",
         },
     },
     "required": ["correct_answer", "explanation"],
@@ -33,8 +34,8 @@ _EXPLANATION_SCHEMA = {
 }
 
 _INJECTED_TASK_EXPLANATION = (
-    f"{EXPLANATION_PREFIX} ответ должен содержать только решение задания. "
-    "Этот ответ содержит посторонний текст, поэтому он не засчитан."
+    "Ответ должен содержать только решение задания. "
+    "В этом ответе есть посторонний текст, поэтому он не засчитан."
 )
 
 
@@ -44,6 +45,7 @@ def _explanation_cache_payload(task: IncorrectTaskInfo, language: str) -> dict:
         "name": task.name,
         "topic": task.topic,
         "task_type": task.task_type.value,
+        "explanation_prompt": 2,
     }
 
 
