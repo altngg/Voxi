@@ -8,20 +8,20 @@ SELECT
     v.options
 FROM (
     VALUES
-        ('She ___ to school yesterday.', 'went', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['go', 'went', 'gone', 'going']::TEXT[]),
-        ('They ___ football last weekend.', 'played', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['play', 'played', 'plays', 'playing']::TEXT[]),
-        ('He ___ not like coffee.', 'does', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['do', 'does', 'did', 'doing']::TEXT[]),
-        ('We ___ at home now.', 'are', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['is', 'am', 'are', 'be']::TEXT[]),
-        ('I ___ a book every week.', 'read', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['reads', 'read', 'reading', 'readed']::TEXT[]),
-        ('She ___ TV right now.', 'is watching', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['watch', 'watches', 'is watching', 'watched']::TEXT[]),
-        ('They ___ dinner at the moment.', 'are cooking', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['cook', 'cooks', 'are cooking', 'cooked']::TEXT[]),
-        ('He ___ to music now.', 'is listening', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['listen', 'listens', 'is listening', 'listened']::TEXT[]),
-        ('I saw ___ elephant at the zoo.', 'an', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['a', 'an', 'the', '-']::TEXT[]),
-        ('___ sun is very bright today.', 'The', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['A', 'An', 'The', '-']::TEXT[]),
-        ('She wants to be ___ teacher.', 'a', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['a', 'an', 'the', '-']::TEXT[]),
-        ('The cat is ___ the table.', 'on', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['in', 'on', 'at', 'under']::TEXT[]),
-        ('We meet ___ Monday.', 'on', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['in', 'on', 'at', 'by']::TEXT[]),
-        ('She was born ___ 1995.', 'in', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['in', 'on', 'at', 'by']::TEXT[]),
+        ('She _ to school yesterday.', 'went', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['go', 'went', 'gone', 'going']::TEXT[]),
+        ('They _ football last weekend.', 'played', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['play', 'played', 'plays', 'playing']::TEXT[]),
+        ('He _ not like coffee.', 'does', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['do', 'does', 'did', 'doing']::TEXT[]),
+        ('We _ at home now.', 'are', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['is', 'am', 'are', 'be']::TEXT[]),
+        ('I _ a book every week.', 'read', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['reads', 'read', 'reading', 'readed']::TEXT[]),
+        ('She _ TV right now.', 'is watching', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['watch', 'watches', 'is watching', 'watched']::TEXT[]),
+        ('They _ dinner at the moment.', 'are cooking', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['cook', 'cooks', 'are cooking', 'cooked']::TEXT[]),
+        ('He _ to music now.', 'is listening', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['listen', 'listens', 'is listening', 'listened']::TEXT[]),
+        ('I saw _ elephant at the zoo.', 'an', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['a', 'an', 'the', '-']::TEXT[]),
+        ('_ sun is very bright today.', 'The', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['A', 'An', 'The', '-']::TEXT[]),
+        ('She wants to be _ teacher.', 'a', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['a', 'an', 'the', '-']::TEXT[]),
+        ('The cat is _ the table.', 'on', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['in', 'on', 'at', 'under']::TEXT[]),
+        ('We meet _ Monday.', 'on', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['in', 'on', 'at', 'by']::TEXT[]),
+        ('She was born _ 1995.', 'in', 'Grammar', 'MULTIPLE_CHOICE', ARRAY['in', 'on', 'at', 'by']::TEXT[]),
         ('Choose the synonym for ''happy'':', 'joyful', 'Vocabulary', 'MULTIPLE_CHOICE', ARRAY['sad', 'joyful', 'angry', 'tired']::TEXT[]),
         ('Choose the synonym for ''big'':', 'large', 'Vocabulary', 'MULTIPLE_CHOICE', ARRAY['small', 'large', 'tiny', 'short']::TEXT[]),
         ('Choose the synonym for ''fast'':', 'quick', 'Vocabulary', 'MULTIPLE_CHOICE', ARRAY['slow', 'quick', 'late', 'early']::TEXT[]),
@@ -36,11 +36,11 @@ FROM (
         ('''Happy'' and ''sad'' are synonyms.', 'false', 'Vocabulary', 'TRUE_FALSE', NULL::TEXT[]),
         ('The plural of ''child'' is ''childs''.', 'false', 'Grammar', 'TRUE_FALSE', NULL::TEXT[]),
         ('''Quickly'' is an adverb.', 'true', 'Grammar', 'TRUE_FALSE', NULL::TEXT[]),
-        ('Complete: To be or ___ to be.', 'not', 'Grammar', 'GAP_FILLING', NULL::TEXT[]),
-        ('Complete: All that glitters is ___ gold.', 'not', 'Vocabulary', 'GAP_FILLING', NULL::TEXT[]),
-        ('Complete: The early bird catches the ___.', 'worm', 'Vocabulary', 'GAP_FILLING', NULL::TEXT[]),
-        ('Complete: When in Rome, do ___ the Romans do.', 'as', 'Grammar', 'GAP_FILLING', NULL::TEXT[]),
-        ('Complete: Actions speak ___ than words.', 'louder', 'Vocabulary', 'GAP_FILLING', NULL::TEXT[])
+        ('Complete: To be or _ to be.', 'not', 'Grammar', 'GAP_FILLING', NULL::TEXT[]),
+        ('Complete: All that glitters is _ gold.', 'not', 'Vocabulary', 'GAP_FILLING', NULL::TEXT[]),
+        ('Complete: The early bird catches the _.', 'worm', 'Vocabulary', 'GAP_FILLING', NULL::TEXT[]),
+        ('Complete: When in Rome, do _ the Romans do.', 'as', 'Grammar', 'GAP_FILLING', NULL::TEXT[]),
+        ('Complete: Actions speak _ than words.', 'louder', 'Vocabulary', 'GAP_FILLING', NULL::TEXT[])
 ) AS v(name, answer, topic_name, task_type_name, options)
 JOIN languages lang ON lang.name = 'English'
 JOIN topics tp ON tp.name = v.topic_name AND tp.language_id = lang.id

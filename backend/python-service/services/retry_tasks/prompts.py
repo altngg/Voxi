@@ -42,13 +42,13 @@ def convert_incorrect_task_to_explanation_prompt(
         case "MULTIPLE_CHOICE":
             prompt += f"""
                 THIS EXERCISE:
-                - A question, or a sentence with a blank written as "___" or "_".
+                - A question, or a sentence with a blank written as "_".
                 - Several options exist; only one is right. You do not see the options.
                 - Name the form or word that belongs here and why the usual wrong forms
                   do not fit this sentence.
                 - "correct_answer" is that word or phrase, not the whole sentence.
 
-                GOOD EXAMPLE for "She ___ to school yesterday.", topic "Past Simple":
+                GOOD EXAMPLE for "She _ to school yesterday.", topic "Past Simple":
                     {{"correct_answer": "went", "explanation": "В предложении есть yesterday, поэтому речь о действии, которое уже закончилось. В Past Simple здесь нужна вторая форма глагола, и go меняется на went. Формы go, going и gone относятся к другим временам и в этот пропуск не встают. {CORRECT_ANSWER_LABEL} went."}}
             """
         case "TRUE_FALSE":
@@ -67,13 +67,13 @@ def convert_incorrect_task_to_explanation_prompt(
         case "GAP_FILLING":
             prompt += f"""
                 THIS EXERCISE:
-                - One sentence with a missing word. The gap is "___", "_",
+                - One sentence with a missing word. The gap is "_",
                   or the sentence starts with "Complete:".
                 - Explain which word the gap needs and how the "{task_topic}" rule
                   or the set phrase decides it.
                 - "correct_answer" is only the missing word or short phrase.
 
-                GOOD EXAMPLE for "Complete: To be or ___ to be.", topic "Grammar":
+                GOOD EXAMPLE for "Complete: To be or _ to be.", topic "Grammar":
                     {{"correct_answer": "not", "explanation": "Это устойчивая фраза to be or not to be, и пропуск стоит между or и to be. Без not получается другое сочетание, и цитата распадается. В пропуск входит именно отрицание. {CORRECT_ANSWER_LABEL} not."}}
             """
         case _:
