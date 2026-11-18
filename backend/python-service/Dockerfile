@@ -15,6 +15,11 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+# First grammar check downloads LanguageTool (~259MB). Keep it in the image
+# so a new container does not stall a user request on that download.
+ENV LTP_PATH=/opt/language-tool
+RUN python -c "import language_tool_python; tool = language_tool_python.LanguageTool('en-US'); tool.close()"
+
 COPY . .
 
 EXPOSE 8000
