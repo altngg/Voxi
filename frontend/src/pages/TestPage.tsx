@@ -53,6 +53,9 @@ export const TestPage = () => {
   const queryClient = useQueryClient();
   const [boot] = useState(readInitialAttempt);
   const [attempt, setAttempt] = useState<TestAttempt | null>(boot.attempt);
+  const [hasConfirmedStart, setHasConfirmedStart] = useState(
+    () => boot.attempt !== null,
+  );
   const [storageError, setStorageError] = useState<string | null>(
     boot.storageError,
   );
@@ -63,6 +66,7 @@ export const TestPage = () => {
     languageId: TEST_LANGUAGE_ID,
     count: TEST_TASK_COUNT,
     restored,
+    enabled: hasConfirmedStart,
   });
 
   const {
@@ -207,6 +211,7 @@ export const TestPage = () => {
     }
     lockRef.current = false;
     setStorageError(null);
+    setHasConfirmedStart(false);
     setAttempt(null);
     answersRef.current = {};
     setAnswersByTaskId({});
@@ -216,6 +221,37 @@ export const TestPage = () => {
   };
 
   const totalQuestions = tasks.length || TEST_TASK_COUNT;
+
+  if (!hasConfirmedStart) {
+    return (
+      <main className="ui-page">
+        <section className="ui-card ui-page-section flex min-h-[calc(100dvh-2rem)] max-w-3xl flex-col justify-center px-4 py-8 sm:px-8">
+          <div className="mx-auto w-full max-w-xl">
+            <h1 className="ui-page-title mb-4">Тест на уровень</h1>
+            <div
+              className="rounded-2xl border-2 border-(--default-border) bg-(--bg-secondary) px-4 py-4"
+              role="note"
+            >
+              <p className="text-base leading-snug font-medium text-(--text-primary)">
+                Вы начинаете тест на уровень. Это не урок: задания не
+                разбираются по ходу. Результаты будут записаны в ваш профиль и
+                использованы для персонализации обучения.
+              </p>
+            </div>
+            <div className="mt-6 flex justify-end">
+              <Button
+                buttonType="button"
+                buttonName="Начать тест"
+                onClick={() => setHasConfirmedStart(true)}
+              >
+                <ArrowRightLine />
+              </Button>
+            </div>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="ui-page">
