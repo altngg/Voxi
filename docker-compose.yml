@@ -149,21 +149,23 @@ services:
       - voxi-network
 
   nginx:
-    image: nginx:alpine
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    image: voxi-frontend
     container_name: voxi-nginx
     restart: unless-stopped
     ports:
       - "80:80"
-      - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./nginx/logs:/var/log/nginx
-      - ./frontend/dist:/usr/share/nginx/html:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
     environment:
       - BACKEND_HOST=voxi-backend
       - BACKEND_PORT=8080
+      - PYTHON_HOST=voxi-python
+      - PYTHON_PORT=8000
     depends_on:
       voxi-backend:
         condition: service_healthy

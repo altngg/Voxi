@@ -4,9 +4,6 @@ import { request, requestDelete, requestGet, requestPut } from "../../../shared/
 
 export const DICTIONARY_LANGUAGES = [
   { id: 1, name: "Английский" },
-  { id: 2, name: "Немецкий" },
-  { id: 3, name: "Французский" },
-  { id: 4, name: "Испанский" },
 ] as const;
 
 export const DICTIONARY_LANGUAGE_ID = DICTIONARY_LANGUAGES[0].id;
