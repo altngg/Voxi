@@ -20,6 +20,7 @@ type FetchTestTasksParams = {
   languageId: number;
   count: number;
   restored?: TestTasksResponse | null;
+  enabled?: boolean;
 };
 
 export const testTasksQueryKey = (languageId: number, count: number) =>
@@ -32,11 +33,12 @@ export const useTestTasksQuery = ({
   languageId,
   count,
   restored = null,
+  enabled = true,
 }: FetchTestTasksParams) =>
   useQuery({
     queryKey: testTasksQueryKey(languageId, count),
     queryFn: () => fetchTestTasks({ languageId, count }),
-    enabled: restored == null,
+    enabled: enabled && restored == null,
     staleTime: Infinity,
     retry: 0,
     initialData: restored ?? undefined,

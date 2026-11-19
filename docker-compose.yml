@@ -75,8 +75,6 @@ services:
       NVIDIA_VISIBLE_DEVICES: all
       OLLAMA_HOST: 0.0.0.0:11434
       OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:7b}
-    ports:
-      - "${OLLAMA_PORT:-11434}:11434"
     volumes:
       - ollama_data:/root/.ollama
       - ./scripts/ollama-entrypoint.sh:/entrypoint.sh:ro
@@ -105,8 +103,6 @@ services:
       WATCHFILES_FORCE_POLLING: "true"
       REDIS_URL: redis://redis:6379/0
       OLLAMA_CACHE_TTL_SECONDS: ${OLLAMA_CACHE_TTL_SECONDS:-86400}
-    ports:
-      - "${PYTHON_PORT:-8001}:8000"
     volumes:
       - ./backend/python-service:/app
       - /app/.venv
@@ -168,8 +164,6 @@ services:
     environment:
       - BACKEND_HOST=voxi-backend
       - BACKEND_PORT=8080
-      - PYTHON_HOST=voxi-python
-      - PYTHON_PORT=8000
     depends_on:
       voxi-backend:
         condition: service_healthy

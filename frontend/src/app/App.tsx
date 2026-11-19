@@ -10,6 +10,7 @@ import { TestResultPage } from "../pages/TestResultPage";
 import { LessonPage } from "../pages/LessonPage";
 import { LessonResultsPage } from "../pages/LessonResultsPage";
 import { ProfilePage } from "../pages/ProfilePage";
+import { DictionaryPage } from "../pages/DictionaryPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,6 +43,7 @@ function App() {
             <Route path="/lesson" element={<LessonPage />} />
             <Route path="/lesson/result" element={<LessonResultsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/dictionary" element={<DictionaryPage />} />
           </Route>
         </Route>
       </Routes>

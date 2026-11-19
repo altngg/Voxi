@@ -115,3 +115,20 @@ export async function requestGet<T>(
     throw new Error(getRequestErrorMessage(err));
   }
 }
+
+export async function requestPut<T>(path: string, payload: unknown): Promise<T> {
+  try {
+    const { data } = await api.put<T>(path, payload);
+    return data;
+  } catch (err: unknown) {
+    throw new Error(getRequestErrorMessage(err));
+  }
+}
+
+export async function requestDelete(path: string): Promise<void> {
+  try {
+    await api.delete(path);
+  } catch (err: unknown) {
+    throw new Error(getRequestErrorMessage(err));
+  }
+}
