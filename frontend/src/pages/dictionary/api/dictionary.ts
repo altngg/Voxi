@@ -2,8 +2,19 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { request, requestDelete, requestGet, requestPut } from "../../../shared/api/axios";
 
-export const DICTIONARY_LANGUAGE_ID = 1;
-export const DICTIONARY_LANGUAGE_NAME = "Английский";
+export const DICTIONARY_LANGUAGES = [
+  { id: 1, name: "Английский" },
+  { id: 2, name: "Немецкий" },
+  { id: 3, name: "Французский" },
+  { id: 4, name: "Испанский" },
+] as const;
+
+export const DICTIONARY_LANGUAGE_ID = DICTIONARY_LANGUAGES[0].id;
+export const DICTIONARY_LANGUAGE_NAME = DICTIONARY_LANGUAGES[0].name;
+
+export const dictionaryLanguageName = (languageId: number) =>
+  DICTIONARY_LANGUAGES.find((language) => language.id === languageId)?.name ??
+  `Язык #${languageId}`;
 
 export type DictionaryEntry = {
   id: number;

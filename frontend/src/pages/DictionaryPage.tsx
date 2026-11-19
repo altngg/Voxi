@@ -1,11 +1,23 @@
-import { useMemo, useState, type FormEvent } from "react";
-import { BookMarked, Pencil, Search, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import {
+  BookMarked,
+  Calendar,
+  Languages,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+} from "lucide-react";
 
+import { cn } from "../shared/lib/cn";
 import { Button } from "../shared/ui/Button";
+import { Combobox } from "../shared/ui/Combobox";
 import { Input } from "../shared/ui/Input";
 import {
   DICTIONARY_LANGUAGE_ID,
   DICTIONARY_LANGUAGE_NAME,
+  DICTIONARY_LANGUAGES,
+  dictionaryLanguageName,
   useCreateDictionaryEntryMutation,
   useDeleteDictionaryEntryMutation,
   useDictionaryEntriesQuery,
@@ -25,6 +37,8 @@ const EMPTY_FORM: EntryForm = {
   definition: "",
 };
 
+const ALL_LANGUAGES = "Все языки";
+
 const formatWordCount = (count: number) => {
   const mod10 = count % 10;
   const mod100 = count % 100;
@@ -37,20 +51,49 @@ const formatWordCount = (count: number) => {
   return `${count} слов`;
 };
 
-const formatCreatedAt = (raw: string) => {
-  const date = new Date(raw);
-  if (Number.isNaN(date.getTime())) {
-    return "";
-  }
-  return new Intl.DateTimeFormat("ru-RU", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(date);
-};
-
 const mutationErrorMessage = (error: unknown, fallback: string) =>
   error instanceof Error ? error.message : fallback;
+
+type SortToggleProps = {
+  byTime: boolean;
+  onToggle: () => void;
+};
+
+const SortToggle = ({ byTime, onToggle }: SortToggleProps) => (
+  <button
+    type="button"
+    onClick={onToggle}
+    aria-pressed={byTime}
+    title={byTime ? "По времени" : "По алфавиту"}
+    aria-label={
+      byTime
+        ? "Сортировка по времени. Переключить на алфавит"
+        : "Сортировка по алфавиту. Переключить на время"
+    }
+    className="flex h-[45px] w-[45px] shrink-0 items-center justify-center rounded-xl border-0 bg-transparent text-(--text-primary) transition-colors hover:bg-(--tint-primary-soft)"
+  >
+    <span className="relative h-5 w-5">
+      <Calendar
+        aria-hidden
+        className={cn(
+          "absolute inset-0 h-5 w-5 transition-all duration-500 ease-in-out",
+          byTime
+            ? "scale-100 rotate-0 opacity-100"
+            : "scale-50 -rotate-90 opacity-0",
+        )}
+      />
+      <Languages
+        aria-hidden
+        className={cn(
+          "absolute inset-0 h-5 w-5 transition-all duration-500 ease-in-out",
+          byTime
+            ? "scale-50 rotate-90 opacity-0"
+            : "scale-100 rotate-0 opacity-100",
+        )}
+      />
+    </span>
+  </button>
+);
 
 type DictionaryFormProps = {
   form: EntryForm;
@@ -62,7 +105,7 @@ type DictionaryFormProps = {
   onCancel: () => void;
 };
 
-const DictionaryForm = ({
+const DictionaryFormDialog = ({
   form,
   editingId,
   isSaving,
@@ -70,69 +113,108 @@ const DictionaryForm = ({
   onChange,
   onSubmit,
   onCancel,
-}: DictionaryFormProps) => (
-  <form className="flex flex-col gap-4" onSubmit={onSubmit}>
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <Input
-        title="Слово"
-        inputName="word"
-        inputType="text"
-        value={form.word}
-        onChange={(word) => onChange({ word })}
-        placeholder="apple"
-        autoComplete="off"
-        required
-        disabled={isSaving}
-      />
-      <Input
-        title="Перевод"
-        inputName="translation"
-        inputType="text"
-        value={form.translation}
-        onChange={(translation) => onChange({ translation })}
-        placeholder="яблоко"
-        autoComplete="off"
-        required
-        disabled={isSaving}
-      />
-    </div>
-    <label className="block">
-      <span className="mb-[6px] block text-base">Определение</span>
-      <textarea
-        name="definition"
-        value={form.definition}
-        onChange={(event) => onChange({ definition: event.target.value })}
-        placeholder="A round fruit that grows on a tree"
-        required
-        disabled={isSaving}
-        rows={3}
-        className="ui-input h-auto min-h-28 resize-y py-3"
-      />
-    </label>
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <span className="ui-pill text-base font-medium">{DICTIONARY_LANGUAGE_NAME}</span>
-      <div className="flex flex-wrap gap-2">
-        {editingId != null ? (
-          <Button
-            buttonType="button"
-            buttonName="Отмена"
-            variant="ghost"
+}: DictionaryFormProps) => {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) {
+      return;
+    }
+    dialog.showModal();
+    return () => {
+      if (dialog.open) {
+        dialog.close();
+      }
+    };
+  }, []);
+
+  return (
+    <dialog
+      ref={dialogRef}
+      aria-labelledby="dictionary-form-title"
+      onCancel={(event) => {
+        if (isSaving) {
+          event.preventDefault();
+          return;
+        }
+        onCancel();
+      }}
+      onClick={(event) => {
+        if (isSaving || event.target !== event.currentTarget) {
+          return;
+        }
+        onCancel();
+      }}
+      className="m-auto w-[min(40rem,calc(100vw-2rem))] max-h-[calc(100vh-2rem)] overflow-y-auto rounded-[1.5rem] border-4 border-(--default-border) bg-(--bg-canvas) p-6 text-(--text-primary) shadow-(--shadow-overlay) backdrop:bg-black/25"
+    >
+      <form className="flex flex-col gap-4" onSubmit={onSubmit}>
+        <h2 id="dictionary-form-title" className="ui-form-title text-left">
+          {editingId != null ? "Изменить слово" : "Новое слово"}
+        </h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Input
+            title="Слово"
+            inputName="word"
+            inputType="text"
+            value={form.word}
+            onChange={(word) => onChange({ word })}
+            placeholder="apple"
+            autoComplete="off"
+            required
             disabled={isSaving}
-            onClick={onCancel}
           />
+          <Input
+            title="Перевод"
+            inputName="translation"
+            inputType="text"
+            value={form.translation}
+            onChange={(translation) => onChange({ translation })}
+            placeholder="яблоко"
+            autoComplete="off"
+            required
+            disabled={isSaving}
+          />
+        </div>
+        <label className="block">
+          <span className="mb-[6px] block text-base">Определение</span>
+          <textarea
+            name="definition"
+            value={form.definition}
+            onChange={(event) => onChange({ definition: event.target.value })}
+            placeholder="A round fruit that grows on a tree"
+            required
+            disabled={isSaving}
+            rows={3}
+            className="ui-input h-auto min-h-28 resize-y py-3"
+          />
+        </label>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="ui-pill text-base font-medium">
+            {DICTIONARY_LANGUAGE_NAME}
+          </span>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              buttonType="button"
+              buttonName="Отмена"
+              variant="ghost"
+              disabled={isSaving}
+              onClick={onCancel}
+            />
+            <Button
+              buttonType="submit"
+              buttonName={editingId != null ? "Сохранить" : "Добавить"}
+              isPending={isSaving}
+            />
+          </div>
+        </div>
+        {error ? (
+          <p className="text-base leading-snug text-(--danger)">{error}</p>
         ) : null}
-        <Button
-          buttonType="submit"
-          buttonName={editingId != null ? "Сохранить" : "Добавить"}
-          isPending={isSaving}
-        />
-      </div>
-    </div>
-    {error ? (
-      <p className="text-base leading-snug text-(--danger)">{error}</p>
-    ) : null}
-  </form>
-);
+      </form>
+    </dialog>
+  );
+};
 
 type DictionaryCardProps = {
   entry: DictionaryEntry;
@@ -154,76 +236,66 @@ const DictionaryCard = ({
   onAskDelete,
   onCancelDelete,
   onConfirmDelete,
-}: DictionaryCardProps) => {
-  const createdAt = formatCreatedAt(entry.createdAt);
-
-  return (
-    <article
-      className={`ui-card-inset flex flex-col gap-3 px-4 py-3 ${
-        isEditing ? "border-(--bg-primary) bg-(--tint-primary-soft)" : ""
-      }`}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h3 className="text-xl leading-tight font-bold break-words">
-            {entry.word}
-          </h3>
-          <p className="mt-1 text-lg leading-snug break-words">
-            {entry.translation}
-          </p>
-        </div>
-        <div className="flex shrink-0 gap-1">
-          <Button
-            variant="ghost"
-            aria-label={`Изменить «${entry.word}»`}
-            disabled={isDeleting}
-            onClick={onEdit}
-            className="h-auto justify-center gap-0 rounded-xl border-0 px-2 py-2 hover:bg-(--tint-primary-soft)"
-          >
-            <Pencil className="h-4 w-4" aria-hidden />
-          </Button>
-          <Button
-            variant="ghost"
-            aria-label={`Удалить «${entry.word}»`}
-            disabled={isDeleting}
-            onClick={onAskDelete}
-            className="h-auto justify-center gap-0 rounded-xl border-0 px-2 py-2 hover:bg-(--tint-primary-soft)"
-          >
-            <Trash2 className="h-4 w-4" aria-hidden />
-          </Button>
-        </div>
+}: DictionaryCardProps) => (
+  <article
+    className={`ui-card-inset overflow-hidden ${
+      isEditing ? "border-(--bg-primary) bg-(--tint-primary-soft)" : ""
+    }`}
+  >
+    <div className="flex items-center justify-between gap-3 border-b-2 border-(--default-border) px-4 py-4">
+      <h3 className="min-w-0 text-xl leading-tight font-bold break-words">
+        {entry.word}
+      </h3>
+      <div className="flex shrink-0 gap-1">
+        <Button
+          variant="ghost"
+          aria-label={`Изменить «${entry.word}»`}
+          disabled={isDeleting}
+          onClick={onEdit}
+          className="h-auto justify-center gap-0 rounded-xl border-0 px-2 py-2 hover:bg-(--tint-primary-soft)"
+        >
+          <Pencil className="h-4 w-4" aria-hidden />
+        </Button>
+        <Button
+          variant="ghost"
+          aria-label={`Удалить «${entry.word}»`}
+          disabled={isDeleting}
+          onClick={onAskDelete}
+          className="h-auto justify-center gap-0 rounded-xl border-0 px-2 py-2 hover:bg-(--tint-primary-soft)"
+        >
+          <Trash2 className="h-4 w-4" aria-hidden />
+        </Button>
       </div>
+    </div>
+    <div className="flex flex-col justify-center gap-1 px-4 py-4">
+      <p className="text-lg leading-snug break-words">{entry.translation}</p>
       <p className="text-base leading-snug break-words text-(--text-secondary)">
         {entry.definition}
       </p>
-      <div className="flex flex-wrap items-center gap-2 text-sm text-(--text-secondary)">
-        <span className="ui-pill px-3 py-0.5 text-sm">{DICTIONARY_LANGUAGE_NAME}</span>
-        {createdAt ? <span>{createdAt}</span> : null}
-      </div>
-      {confirmDelete ? (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-(--bg-error) px-3 py-2">
-          <p className="text-base text-(--danger)">Удалить это слово?</p>
-          <div className="flex gap-2">
-            <Button
-              buttonType="button"
-              buttonName="Оставить"
-              variant="ghost"
-              disabled={isDeleting}
-              onClick={onCancelDelete}
-              className="h-auto px-3"
-            />
-            <Button
-              buttonType="button"
-              buttonName="Удалить"
-              isPending={isDeleting}
-              onClick={onConfirmDelete}
-            />
-          </div>
+    </div>
+    {confirmDelete ? (
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t-2 border-(--default-border) bg-(--bg-error) px-4 py-3">
+        <p className="text-base text-(--danger)">Удалить это слово?</p>
+        <div className="flex gap-2">
+          <Button
+            buttonType="button"
+            buttonName="Оставить"
+            variant="ghost"
+            disabled={isDeleting}
+            onClick={onCancelDelete}
+            className="h-auto px-3"
+          />
+          <Button
+            buttonType="button"
+            buttonName="Удалить"
+            isPending={isDeleting}
+            onClick={onConfirmDelete}
+          />
         </div>
-      ) : null}
-    </article>
-  );
-};
+      </div>
+    ) : null}
+  </article>
+);
 
 export const DictionaryPage = () => {
   const { data, isPending, error, refetch, isFetching } =
@@ -234,29 +306,62 @@ export const DictionaryPage = () => {
 
   const [form, setForm] = useState<EntryForm>(EMPTY_FORM);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [isFormOpen, setFormOpen] = useState(false);
   const [formError, setFormError] = useState("");
   const [search, setSearch] = useState("");
+  const [sortByTime, setSortByTime] = useState(true);
+  const [languageLabel, setLanguageLabel] = useState(ALL_LANGUAGES);
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
   const entries = data ?? [];
-  const normalizedSearch = search.trim().toLowerCase();
+  const languageOptions = useMemo(() => {
+    const names = DICTIONARY_LANGUAGES.map((language) => language.name);
+    const extraNames = entries
+      .map((entry) => dictionaryLanguageName(entry.languageId))
+      .filter((name) => !names.includes(name));
+    return [ALL_LANGUAGES, ...names, ...extraNames];
+  }, [entries]);
   const visibleEntries = useMemo(() => {
-    if (!normalizedSearch) {
-      return entries;
-    }
-    return entries.filter((entry) =>
-      [entry.word, entry.translation, entry.definition].some((field) =>
-        field.toLowerCase().includes(normalizedSearch),
-      ),
+    const normalizedSearch = search.trim().toLowerCase();
+    const selectedLanguage = DICTIONARY_LANGUAGES.find(
+      (language) => language.name === languageLabel,
     );
-  }, [entries, normalizedSearch]);
+
+    const filtered = entries.filter((entry) => {
+      const matchesLanguage =
+        languageLabel === ALL_LANGUAGES ||
+        entry.languageId === selectedLanguage?.id ||
+        dictionaryLanguageName(entry.languageId) === languageLabel;
+      if (!matchesLanguage) {
+        return false;
+      }
+      if (!normalizedSearch) {
+        return true;
+      }
+      return [entry.word, entry.translation, entry.definition].some((field) =>
+        field.toLowerCase().includes(normalizedSearch),
+      );
+    });
+
+    return filtered.sort((left, right) => {
+      if (!sortByTime) {
+        return left.word.localeCompare(right.word, "ru", {
+          sensitivity: "base",
+        });
+      }
+      return (
+        new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
+      );
+    });
+  }, [entries, languageLabel, search, sortByTime]);
 
   const isSaving = createEntry.isPending || updateEntry.isPending;
 
-  const resetForm = () => {
+  const closeForm = () => {
     setForm(EMPTY_FORM);
     setEditingId(null);
     setFormError("");
+    setFormOpen(false);
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -277,7 +382,7 @@ export const DictionaryPage = () => {
 
     if (editingId == null) {
       createEntry.mutate(payload, {
-        onSuccess: resetForm,
+        onSuccess: closeForm,
         onError: (submitError) => {
           setFormError(
             mutationErrorMessage(submitError, "Не удалось добавить слово"),
@@ -290,7 +395,7 @@ export const DictionaryPage = () => {
     updateEntry.mutate(
       { id: editingId, payload },
       {
-        onSuccess: resetForm,
+        onSuccess: closeForm,
         onError: (submitError) => {
           setFormError(
             mutationErrorMessage(submitError, "Не удалось сохранить слово"),
@@ -298,6 +403,14 @@ export const DictionaryPage = () => {
         },
       },
     );
+  };
+
+  const openCreate = () => {
+    setEditingId(null);
+    setPendingDeleteId(null);
+    setFormError("");
+    setForm(EMPTY_FORM);
+    setFormOpen(true);
   };
 
   const startEdit = (entry: DictionaryEntry) => {
@@ -309,6 +422,7 @@ export const DictionaryPage = () => {
       translation: entry.translation,
       definition: entry.definition,
     });
+    setFormOpen(true);
   };
 
   if (isPending) {
@@ -342,33 +456,47 @@ export const DictionaryPage = () => {
 
   return (
     <main className="ui-page">
-      <section className="ui-card ui-page-section max-w-4xl px-4 py-6 sm:px-6">
-        <header className="flex items-center gap-4">
-          <span className="ui-icon-tile" aria-hidden>
-            <BookMarked className="h-5 w-5" />
-          </span>
-          <div className="min-w-0">
-            <h1 className="ui-page-title">Словарь</h1>
-            <p className="mt-1 text-base text-(--text-secondary)">
-              {formatWordCount(entries.length)}
-            </p>
+      <section className="ui-card ui-page-section flex min-h-[calc(100dvh-2rem)] max-w-6xl flex-col px-4 pt-2 pb-4">
+        <header className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <span className="ui-icon-tile" aria-hidden>
+              <BookMarked className="h-5 w-5" />
+            </span>
+            <div className="min-w-0">
+              <h1 className="ui-page-title">Словарь</h1>
+              <p className="mt-1 text-base text-(--text-secondary)">
+                {formatWordCount(entries.length)}
+              </p>
+            </div>
           </div>
+          <Button
+            buttonType="button"
+            buttonName="Добавить слово"
+            onClick={openCreate}
+            className="h-auto justify-center gap-3 px-4"
+          >
+            <Plus className="h-4 w-4" aria-hidden />
+          </Button>
         </header>
 
         <hr className="ui-divider" />
 
-        <DictionaryForm
-          form={form}
-          editingId={editingId}
-          isSaving={isSaving}
-          error={formError}
-          onChange={(patch) => setForm((current) => ({ ...current, ...patch }))}
-          onSubmit={handleSubmit}
-          onCancel={resetForm}
-        />
+        {isFormOpen ? (
+          <DictionaryFormDialog
+            form={form}
+            editingId={editingId}
+            isSaving={isSaving}
+            error={formError}
+            onChange={(patch) =>
+              setForm((current) => ({ ...current, ...patch }))
+            }
+            onSubmit={handleSubmit}
+            onCancel={closeForm}
+          />
+        ) : null}
 
-        <div className="mt-8">
-          <label className="block">
+        <div className="grid grid-cols-1 items-end gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(14rem,18rem)_auto]">
+          <label className="block min-w-0">
             <span className="mb-[6px] block text-base">Поиск</span>
             <span className="relative block">
               <Search
@@ -379,22 +507,36 @@ export const DictionaryPage = () => {
                 type="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Слово, перевод или определение"
+                placeholder="Слово или перевод"
                 aria-label="Поиск по словарю"
                 className="ui-input pl-12"
               />
             </span>
           </label>
+          <Combobox
+            title="Язык"
+            name="dictionary-language"
+            value={languageLabel}
+            onChange={setLanguageLabel}
+            options={languageOptions}
+          />
+          <SortToggle
+            byTime={sortByTime}
+            onToggle={() => setSortByTime((current) => !current)}
+          />
         </div>
 
-        <section aria-label="Список слов" className="mt-6 flex flex-col gap-3">
+        <section
+          aria-label="Список слов"
+          className="mt-6 flex flex-1 flex-col gap-3"
+        >
           {entries.length === 0 ? (
             <p className="text-base text-(--text-secondary)">
               В словаре пока пусто. Добавьте первое слово.
             </p>
           ) : visibleEntries.length === 0 ? (
             <p className="text-base text-(--text-secondary)">
-              По запросу «{search.trim()}» ничего не найдено.
+              Ничего не найдено.
             </p>
           ) : (
             visibleEntries.map((entry) => (
@@ -414,7 +556,7 @@ export const DictionaryPage = () => {
                     onSuccess: () => {
                       setPendingDeleteId(null);
                       if (editingId === entry.id) {
-                        resetForm();
+                        closeForm();
                       }
                     },
                   });

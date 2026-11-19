@@ -225,11 +225,11 @@ export const TestPage = () => {
   if (!hasConfirmedStart) {
     return (
       <main className="ui-page">
-        <section className="ui-card ui-page-section flex min-h-[calc(100dvh-2rem)] max-w-3xl flex-col justify-center px-4 py-8 sm:px-8">
-          <div className="mx-auto w-full max-w-xl">
+        <section className="ui-card ui-page-section flex min-h-[calc(100dvh-2rem)] max-w-6xl flex-col justify-center px-4 py-2">
+          <div className="w-full">
             <h1 className="ui-page-title mb-4">Тест на уровень</h1>
             <div
-              className="rounded-2xl border-2 border-(--default-border) bg-(--bg-secondary) px-4 py-4"
+              className="ui-card-inset bg-(--bg-secondary) p-4"
               role="note"
             >
               <p className="text-base leading-snug font-medium text-(--text-primary)">
