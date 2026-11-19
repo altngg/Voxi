@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import java.util.regex.Pattern;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -47,6 +49,44 @@ public class LessonResultService {
     private final LanguageRepository languageRepository;
     private final PythonRetryService pythonRetryService;
     private final TransactionTemplate transactionTemplate;
+    private static final int MAX_USER_ANSWER_LENGTH = 500;
+
+    private static final Pattern CONTROL_CHARACTERS =
+            Pattern.compile("[\\p{Cc}\\p{Cf}]");
+
+    private static final Pattern PROMPT_INJECTION =
+            Pattern.compile(
+                    "(?iu)ignore\\s+(all\\s+)?(previous|prior|above)\\s+instructions"
+                    + "|disregard\\s+(all\\s+)?(previous|prior)\\s+instructions"
+                    + "|forget\\s+(all\\s+)?(previous\\s+)?instructions"
+                    + "|you\\s+are\\s+now\\s+"
+                    + "|system\\s+prompt"
+                    + "|developer\\s+mode"
+                    + "|jailbreak"
+                    + "|игнорируй\\s+(все\\s+)?(предыдущие|прошлые)\\s+(инструкции|правила)"
+                    + "|забудь\\s+(все\\s+)?(инструкции|правила)"
+                    + "|ты\\s+теперь\\s+"
+            );
+
+    private String normalizeUserAnswer(String userAnswer) {
+        if (userAnswer == null) {
+            return "";
+        }
+
+        String normalized = CONTROL_CHARACTERS.matcher(userAnswer).replaceAll(" ");
+        normalized = normalized.replaceAll("\\s+", " ").trim();
+
+        if (normalized.length() > MAX_USER_ANSWER_LENGTH) {
+            normalized = normalized.substring(0, MAX_USER_ANSWER_LENGTH).trim();
+        }
+
+        if (PROMPT_INJECTION.matcher(normalized).find()) {
+            log.warn("Potential prompt injection detected in user answer");
+            return "[REDACTED]";
+        }
+
+        return normalized;
+    }
 
     public LessonResultResponse processLessonResults(Long userId, LessonResultRequest request) {
         if (request == null || request.getTaskResults() == null || request.getTaskResults().isEmpty()) {
@@ -91,9 +131,10 @@ public class LessonResultService {
 
             String topicName = topic.getName();
 
-            boolean isCorrect = answer.getUserAnswer() != null
-                    && task.getAnswer() != null
-                    && answer.getUserAnswer().equalsIgnoreCase(task.getAnswer());
+            String userAnswer = normalizeUserAnswer(answer.getUserAnswer());
+
+            boolean isCorrect = task.getAnswer() != null
+                    && userAnswer.equalsIgnoreCase(task.getAnswer().trim());
 
             if (isCorrect) {
                 correctCount++;
