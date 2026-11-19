@@ -1,6 +1,6 @@
 import type { TestTask } from "./api/test-queries";
 
-export const BLANK_MARKER = "___";
+export const BLANK_MARKER = "_";
 
 export const TASK_TYPE_ID = {
   MULTIPLE_CHOICE: "1",
