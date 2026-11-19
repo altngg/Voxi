@@ -8,6 +8,7 @@ import {
   ATTEMPT_STORAGE_SAVE_ERROR,
 } from "../shared/lib/attempt-storage";
 import { Button } from "../shared/ui/Button";
+import { RunningBorzoi } from "../shared/ui/RunningBorzoi";
 import { ArrowRightLine } from "../shared/ui/icons/ArrowRightLine";
 import { LessonTaskRow } from "../widgets/LessonTaskRow";
 import { ProgressBar } from "../widgets/ProgressBar";
@@ -207,6 +208,8 @@ export const LessonPage = () => {
     tasks.every((task) =>
       isTaskAnswered(task, answersByTaskId[String(task.id)]),
     );
+  const resultsLoading =
+    isSubmitPending || attempt?.status === "submitting";
 
   const handleFinishLesson = () => {
     if (lockRef.current || !allAnswered || pendingResult) {
@@ -379,6 +382,7 @@ export const LessonPage = () => {
           ) : null}
         </div>
       </section>
+      {resultsLoading ? <RunningBorzoi /> : null}
     </main>
   );
 };

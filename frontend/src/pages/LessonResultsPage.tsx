@@ -8,6 +8,7 @@ import {
   ATTEMPT_STORAGE_SAVE_ERROR,
 } from "../shared/lib/attempt-storage";
 import { Button } from "../shared/ui/Button";
+import { RunningBorzoi } from "../shared/ui/RunningBorzoi";
 import { ArrowRightLine } from "../shared/ui/icons/ArrowRightLine";
 import { CircularPercentGauge } from "../widgets/CircularPercentGauge";
 import { LessonTaskRow } from "../widgets/LessonTaskRow";
@@ -239,6 +240,8 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
     newTasks.every((task) =>
       isTaskAnswered(task, answersByTaskId[String(task.id)]),
     );
+  const resultsLoading =
+    isSubmitPending || retryAttempt?.status === "submitting";
 
   const handleRetrySubmit = () => {
     if (lockRef.current || !allRetryAnswered || pendingResult) {
@@ -442,6 +445,7 @@ const LessonResultsContent = ({ data }: LessonResultsContentProps) => {
         )}
 
       </section>
+      {resultsLoading ? <RunningBorzoi /> : null}
     </main>
   );
 };
