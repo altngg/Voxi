@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
+  BookMarked,
   BookOpen,
   ChevronLeft,
   ChevronRight,
@@ -23,6 +24,11 @@ const leadingNavItems = [
     to: "/test",
     label: "Пройти тест",
     icon: ClipboardList,
+  },
+  {
+    to: "/dictionary",
+    label: "Словарь",
+    icon: BookMarked,
   },
 ] as const;
 
