@@ -216,6 +216,65 @@ const DictionaryFormDialog = ({
   );
 };
 
+type MeaningFlipProps = {
+  translation: string;
+  definition: string;
+  faceClassName: string;
+};
+
+const MeaningFlip = ({
+  translation,
+  definition,
+  faceClassName,
+}: MeaningFlipProps) => {
+  const [revealed, setRevealed] = useState(false);
+
+  return (
+    <button
+      type="button"
+      aria-pressed={revealed}
+      aria-label={
+        revealed
+          ? `Скрыть перевод и значение. ${translation}. ${definition}`
+          : "Показать перевод и значение"
+      }
+      onClick={() => setRevealed((current) => !current)}
+      className="group h-full min-h-full w-full cursor-pointer border-0 bg-transparent p-0 text-left [perspective:900px]"
+    >
+      <span
+        className={cn(
+          "grid h-full min-h-full transition-transform duration-500 ease-in-out [transform-style:preserve-3d] motion-reduce:transition-none",
+          revealed && "[transform:rotateY(180deg)]",
+        )}
+      >
+        <span
+          aria-hidden={revealed}
+          className={cn(
+            "col-start-1 row-start-1 flex items-center justify-center px-4 py-4 text-center text-base font-medium text-(--text-secondary) transition-colors [backface-visibility:hidden] group-hover:bg-(--tint-primary-soft)",
+            faceClassName,
+          )}
+        >
+          Перевод и значение
+        </span>
+        <span
+          aria-hidden={!revealed}
+          className={cn(
+            "col-start-1 row-start-1 flex flex-col justify-center gap-1 px-4 py-4 transition-colors [transform:rotateY(180deg)] [backface-visibility:hidden] group-hover:bg-(--tint-primary-soft)",
+            faceClassName,
+          )}
+        >
+          <span className="text-lg leading-snug break-words">
+            {translation}
+          </span>
+          <span className="text-base leading-snug break-words text-(--text-secondary)">
+            {definition}
+          </span>
+        </span>
+      </span>
+    </button>
+  );
+};
+
 type DictionaryCardProps = {
   entry: DictionaryEntry;
   isEditing: boolean;
@@ -236,66 +295,73 @@ const DictionaryCard = ({
   onAskDelete,
   onCancelDelete,
   onConfirmDelete,
-}: DictionaryCardProps) => (
-  <article
-    className={`ui-card-inset overflow-hidden ${
-      isEditing ? "border-(--bg-primary) bg-(--tint-primary-soft)" : ""
-    }`}
-  >
-    <div className="flex items-center justify-between gap-3 border-b-2 border-(--default-border) px-4 py-4">
-      <h3 className="min-w-0 text-xl leading-tight font-bold break-words">
-        {entry.word}
-      </h3>
-      <div className="flex shrink-0 gap-1">
-        <Button
-          variant="ghost"
-          aria-label={`Изменить «${entry.word}»`}
-          disabled={isDeleting}
-          onClick={onEdit}
-          className="h-auto justify-center gap-0 rounded-xl border-0 px-2 py-2 hover:bg-(--tint-primary-soft)"
-        >
-          <Pencil className="h-4 w-4" aria-hidden />
-        </Button>
-        <Button
-          variant="ghost"
-          aria-label={`Удалить «${entry.word}»`}
-          disabled={isDeleting}
-          onClick={onAskDelete}
-          className="h-auto justify-center gap-0 rounded-xl border-0 px-2 py-2 hover:bg-(--tint-primary-soft)"
-        >
-          <Trash2 className="h-4 w-4" aria-hidden />
-        </Button>
-      </div>
-    </div>
-    <div className="flex flex-col justify-center gap-1 px-4 py-4">
-      <p className="text-lg leading-snug break-words">{entry.translation}</p>
-      <p className="text-base leading-snug break-words text-(--text-secondary)">
-        {entry.definition}
-      </p>
-    </div>
-    {confirmDelete ? (
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t-2 border-(--default-border) bg-(--bg-error) px-4 py-3">
-        <p className="text-base text-(--danger)">Удалить это слово?</p>
-        <div className="flex gap-2">
-          <Button
-            buttonType="button"
-            buttonName="Оставить"
-            variant="ghost"
-            disabled={isDeleting}
-            onClick={onCancelDelete}
-            className="h-auto px-3"
-          />
-          <Button
-            buttonType="button"
-            buttonName="Удалить"
-            isPending={isDeleting}
-            onClick={onConfirmDelete}
-          />
+}: DictionaryCardProps) => {
+  const faceClassName = isEditing
+    ? "bg-(--tint-primary-soft)"
+    : "bg-(--bg-canvas)";
+
+  return (
+    <article
+      className={`ui-card-inset overflow-hidden ${
+        isEditing ? "border-(--bg-primary) bg-(--tint-primary-soft)" : ""
+      }`}
+    >
+      <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,17fr)_minmax(0,33fr)]">
+        <div className="flex items-center justify-between gap-3 border-b-2 border-(--default-border) px-4 py-4 sm:border-r-2 sm:border-b-0">
+          <h3 className="min-w-0 text-xl leading-tight font-bold wrap-break-word">
+            {entry.word}
+          </h3>
+          <div className="flex shrink-0 gap-1">
+            <Button
+              variant="ghost"
+              aria-label={`Изменить «${entry.word}»`}
+              disabled={isDeleting}
+              onClick={onEdit}
+              className="h-auto justify-center gap-0 rounded-xl border-0 px-2 py-2 hover:bg-(--tint-primary-soft)"
+            >
+              <Pencil className="h-4 w-4" aria-hidden />
+            </Button>
+            <Button
+              variant="ghost"
+              aria-label={`Удалить «${entry.word}»`}
+              disabled={isDeleting}
+              onClick={onAskDelete}
+              className="h-auto justify-center gap-0 rounded-xl border-0 px-2 py-2 hover:bg-(--tint-primary-soft)"
+            >
+              <Trash2 className="h-4 w-4" aria-hidden />
+            </Button>
+          </div>
         </div>
+        <MeaningFlip
+          translation={entry.translation}
+          definition={entry.definition}
+          faceClassName={faceClassName}
+        />
       </div>
-    ) : null}
-  </article>
-);
+      {confirmDelete ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t-2 border-(--default-border) bg-(--bg-error) px-4 py-3">
+          <p className="text-base text-(--danger)">Удалить это слово?</p>
+          <div className="flex gap-2">
+            <Button
+              buttonType="button"
+              buttonName="Оставить"
+              variant="ghost"
+              disabled={isDeleting}
+              onClick={onCancelDelete}
+              className="h-auto px-3"
+            />
+            <Button
+              buttonType="button"
+              buttonName="Удалить"
+              isPending={isDeleting}
+              onClick={onConfirmDelete}
+            />
+          </div>
+        </div>
+      ) : null}
+    </article>
+  );
+};
 
 export const DictionaryPage = () => {
   const { data, isPending, error, refetch, isFetching } =
