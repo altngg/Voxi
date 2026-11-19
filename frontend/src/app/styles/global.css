@@ -409,4 +409,160 @@
     background: var(--bg-primary);
     color: var(--bg-canvas);
   }
+
+  .borzoi-track {
+    position: fixed;
+    z-index: 40;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 132px;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .borzoi-track::after {
+    content: "";
+    position: absolute;
+    right: 1.5rem;
+    bottom: 0;
+    left: 1.5rem;
+    height: 2px;
+    border-radius: var(--radius-pill);
+    background: rgba(112, 102, 204, 0.28);
+  }
+
+  .borzoi-runner {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 280px;
+    height: 124px;
+    animation: borzoi-dash 2.35s linear forwards;
+  }
+
+  .borzoi-bob {
+    animation: borzoi-bob 0.36s ease-in-out infinite;
+  }
+
+  .borzoi-shadow {
+    position: absolute;
+    right: 22%;
+    bottom: 2px;
+    left: 16%;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(112, 102, 204, 0.22);
+    animation: borzoi-shadow 0.36s ease-in-out infinite;
+  }
+
+  .borzoi-svg {
+    display: block;
+    width: 100%;
+    height: 112px;
+  }
+
+  .borzoi-leg,
+  .borzoi-tail {
+    transform-box: fill-box;
+  }
+
+  .borzoi-leg {
+    transform-origin: 50% 0%;
+    animation-duration: 0.36s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+
+  .borzoi-hind {
+    animation-name: borzoi-stride-hind;
+  }
+
+  .borzoi-fore {
+    animation-name: borzoi-stride-fore;
+  }
+
+  .borzoi-near {
+    animation-delay: -0.05s;
+  }
+
+  .borzoi-tail {
+    transform-origin: 100% 20%;
+    animation: borzoi-tail 0.36s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes borzoi-dash {
+  from {
+    transform: translate3d(-120%, 0, 0);
+  }
+  to {
+    transform: translate3d(calc(100vw + 40%), 0, 0);
+  }
+}
+
+@keyframes borzoi-bob {
+  0%,
+  100% {
+    transform: translateY(-8px);
+  }
+  50% {
+    transform: translateY(2px);
+  }
+}
+
+@keyframes borzoi-shadow {
+  0%,
+  100% {
+    transform: scaleX(0.72);
+    opacity: 0.28;
+  }
+  50% {
+    transform: scaleX(1);
+    opacity: 0.5;
+  }
+}
+
+@keyframes borzoi-stride-hind {
+  0%,
+  100% {
+    transform: rotate(14deg);
+  }
+  50% {
+    transform: rotate(-16deg);
+  }
+}
+
+@keyframes borzoi-stride-fore {
+  0%,
+  100% {
+    transform: rotate(-14deg);
+  }
+  50% {
+    transform: rotate(16deg);
+  }
+}
+
+@keyframes borzoi-tail {
+  from {
+    transform: rotate(-8deg);
+  }
+  to {
+    transform: rotate(10deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .borzoi-runner {
+    left: 50%;
+    animation: none;
+    transform: translateX(-50%);
+  }
+
+  .borzoi-bob,
+  .borzoi-shadow,
+  .borzoi-leg,
+  .borzoi-tail {
+    animation: none;
+  }
 }
