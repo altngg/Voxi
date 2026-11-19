@@ -381,10 +381,14 @@ export const DictionaryPage = () => {
 
   const entries = data ?? [];
   const languageOptions = useMemo(() => {
-    const names = DICTIONARY_LANGUAGES.map((language) => language.name);
+    const names: string[] = DICTIONARY_LANGUAGES.map(
+      (language) => language.name,
+    );
+
     const extraNames = entries
       .map((entry) => dictionaryLanguageName(entry.languageId))
       .filter((name) => !names.includes(name));
+
     return [ALL_LANGUAGES, ...names, ...extraNames];
   }, [entries]);
   const visibleEntries = useMemo(() => {

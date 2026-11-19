@@ -6,7 +6,7 @@ import axios, {
 import { clearAuthUser } from "../auth";
 
 const api = axios.create({
-  baseURL: "http://localhost/api",
+  baseURL: "/api",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
