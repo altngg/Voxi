@@ -51,6 +51,6 @@ pnpm-debug.log*
 .agents/
 skills-lock.json
 nginx/logs/access.log
+nginx/logs/error.log
 
-### 
-access.log
+

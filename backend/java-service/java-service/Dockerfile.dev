@@ -1,0 +1,20 @@
+FROM eclipse-temurin:25-jdk-alpine
+
+RUN apk add --no-cache curl
+
+WORKDIR /app
+
+COPY gradlew .
+COPY gradle gradle
+COPY build.gradle .
+COPY settings.gradle .
+COPY dev-run.sh .
+
+RUN sed -i 's/\r$//' dev-run.sh \
+    && chmod +x gradlew dev-run.sh
+
+RUN ./gradlew dependencies --no-daemon
+
+EXPOSE 8080
+
+CMD ["sh", "./dev-run.sh"]

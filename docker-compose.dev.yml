@@ -1,0 +1,44 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile.dev
+    image: voxi-frontend-dev
+    container_name: voxi-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+    networks:
+      - voxi-network
+
+  voxi-backend:
+    build:
+      context: ./backend/java-service/java-service
+      dockerfile: Dockerfile.dev
+    image: voxi-backend-dev
+    volumes:
+      - ./backend/java-service/java-service:/app
+      - gradle_cache:/root/.gradle
+    environment:
+      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+      SPRING_DEVTOOLS_RESTART_POLL_INTERVAL: 1s
+      SPRING_DEVTOOLS_RESTART_QUIET_PERIOD: 400ms
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx384m -XX:+UseG1GC"
+
+  nginx:
+    image: nginx:alpine
+    build: !reset null
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/logs:/var/log/nginx
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      voxi-backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
